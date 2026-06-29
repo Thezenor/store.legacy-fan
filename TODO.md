@@ -9,9 +9,10 @@
 - [x] Layout mobile-first + home + /club
 - [x] SEO base (robots/sitemap) + redirección Early Collector
 - [x] Documentos de memoria
-- [ ] `npm install` + `prisma generate`
-- [ ] Conectar `DATABASE_URL` (Railway) + `prisma migrate dev` inicial + `db:seed`
-- [ ] Deploy inicial en Railway
+- [x] `npm install` + `prisma generate`
+- [x] Migración baseline `0_init` generada y validada offline (39 tablas)
+- [x] Conectar `DATABASE_URL` (Railway) + `prisma migrate deploy` + `db:seed` (verificado: 7 roles, 2 planes, 10 fases, 18 settings, 100 nº reservados, disclaimer x4)
+- [ ] Deploy inicial en Railway (app)
 
 ## Fase 1 — MVP comercial (siguiente, tras validar Fase 0)
 - [ ] Auth completo: registro, verificación email, reset, rate limiting

@@ -34,5 +34,8 @@ Memoria viva del proyecto. Resume estado, stack y reglas para no repetir anális
 - Trabajar por fases/módulos pequeños; no reescribir si solo hay que modificar.
 
 ## Estado actual
-- **Fase 0 (cimientos): EN CURSO.** Scaffolding, schema Prisma, seed, i18n, auth base, capas pago/email, layout, SEO.
-- Pendiente: validar con `DATABASE_URL` de Railway y `npm install` + migración inicial.
+- **Fase 0 (cimientos): COMPLETA Y VALIDADA.** Scaffolding, schema Prisma, seed, i18n, auth base, capas pago/email, layout, SEO. Next bumped a 15.5.19 (CVE-2025-66478).
+- **BD Railway conectada y migrada:** migración baseline `0_init` (39 tablas) aplicada con `prisma migrate deploy`; seed cargado y verificado (7 roles, 2 planes, 10 fases, 18 settings, 100 nº reservados, disclaimer x4).
+- **Conexión:** `.env` local usa la URL pública de Railway (`reseau.proxy.rlwy.net:39959`). La interna `postgres.railway.internal:5432` es para el runtime en Railway (deploy). `.env` está gitignored.
+- **Comandos clave:** `npx prisma migrate deploy`, `npx prisma db seed` (carga .env; `npm run db:seed` NO carga .env). Usar `NODE_OPTIONS=--use-system-ca` por el proxy SSL corporativo.
+- Pendiente: deploy de la app en Railway; planificar Fase 1 (MVP comercial).
