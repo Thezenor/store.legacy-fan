@@ -13,3 +13,6 @@
 - Layout base mobile-first, theme toggle, home + landing `/club` + Prime/Prestige.
 - SEO: robots.txt, sitemap con hreflang, redirección Early Collector → /club.
 - Documentos de memoria del proyecto.
+
+### Seguridad
+- Actualizado Next.js 15.1.4 → **15.5.19** (corrige CVE-2025-66478). Typecheck + build OK.
