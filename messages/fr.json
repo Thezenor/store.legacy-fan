@@ -106,12 +106,14 @@
     "amount": "Montant",
     "comingSoon": "Le paiement complet sera bientôt disponible. Pour l'instant, vous pouvez effectuer votre réservation.",
     "payReserve": "Payer la réservation avec PayPal",
+    "payFull": "Payer et rejoindre avec PayPal",
     "processing": "Redirection vers PayPal…",
     "back": "Retour aux offres",
     "errors": {
       "unauthenticated": "Connectez-vous pour continuer.",
       "unverified": "Vérifiez votre e-mail avant de réserver.",
       "already_active": "Vous avez déjà une réservation ou un abonnement actif. Consultez votre compte.",
+      "already_member": "Vous êtes déjà membre. Consultez votre compte.",
       "error": "Impossible de démarrer le paiement. Réessayez."
     }
   },

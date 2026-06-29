@@ -1,4 +1,4 @@
-import type { ClubType } from '@prisma/client';
+import type { ClubType, Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 import { getDate } from '../commerce/settings';
 import { assignMemberNumber } from './numbering';
@@ -12,48 +12,56 @@ function addYears(date: Date, years: number): Date {
 }
 
 /**
- * Activa la membresía de un usuario y le asigna número de socio, de forma
- * atómica. Idempotente: si ya es socio, conserva fechas y número (útil en
- * upgrade Prime→Prestige, que solo cambia el club). Lo usa el pago completo (M6).
+ * Núcleo de activación DENTRO de una transacción dada (la usa el pago completo,
+ * M6, para no anidar transacciones). Idempotente: conserva fechas y número si ya
+ * es socio (upgrade Prime→Prestige solo cambia el club).
  */
-export async function activateMembership(userId: string, club: ClubType) {
-  const launchDate = await getDate('launch.date');
+export async function activateMembershipTx(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  club: ClubType,
+  launchDate: Date | null,
+) {
   const now = new Date();
   const start = launchDate && launchDate.getTime() > now.getTime() ? launchDate : now;
   const end = addYears(start, 1);
 
-  return prisma.$transaction(async (tx) => {
-    const existing = await tx.membership.findUnique({ where: { userId } });
+  const existing = await tx.membership.findUnique({ where: { userId } });
+  const membership = existing
+    ? await tx.membership.update({
+        where: { userId },
+        data: {
+          club,
+          status: 'SOCIO_ACTIVO',
+          startsAt: existing.startsAt ?? start,
+          endsAt: existing.endsAt ?? end,
+          launchDate,
+        },
+      })
+    : await tx.membership.create({
+        data: { userId, club, status: 'SOCIO_ACTIVO', startsAt: start, endsAt: end, launchDate },
+      });
 
-    const membership = existing
-      ? await tx.membership.update({
-          where: { userId },
-          data: {
-            club,
-            status: 'SOCIO_ACTIVO',
-            startsAt: existing.startsAt ?? start,
-            endsAt: existing.endsAt ?? end,
-            launchDate,
-          },
-        })
-      : await tx.membership.create({
-          data: { userId, club, status: 'SOCIO_ACTIVO', startsAt: start, endsAt: end, launchDate },
-        });
+  const number = await assignMemberNumber(tx, membership.id);
 
-    const number = await assignMemberNumber(tx, membership.id);
+  await tx.auditLog.create({
+    data: {
+      actorId: userId,
+      action: existing ? 'membership.upgraded' : 'membership.activated',
+      entity: 'Membership',
+      entityId: membership.id,
+      newValue: { club, memberNumber: number.formatted },
+    },
+  });
 
-    await tx.auditLog.create({
-      data: {
-        actorId: userId,
-        action: existing ? 'membership.upgraded' : 'membership.activated',
-        entity: 'Membership',
-        entityId: membership.id,
-        newValue: { club, memberNumber: number.formatted },
-      },
-    });
+  return { membership, number };
+}
 
-    return { membership, number };
-    // Márgenes amplios: el advisory lock serializa la sección crítica y la
-    // latencia hacia Railway puede acercarse al maxWait por defecto (2s).
-  }, { maxWait: 10000, timeout: 20000 });
+/** Activa la membresía en su propia transacción (uso directo / admin). */
+export async function activateMembership(userId: string, club: ClubType) {
+  const launchDate = await getDate('launch.date');
+  return prisma.$transaction((tx) => activateMembershipTx(tx, userId, club, launchDate), {
+    maxWait: 10000,
+    timeout: 20000,
+  });
 }

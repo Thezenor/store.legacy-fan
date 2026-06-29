@@ -20,7 +20,7 @@
 - [x] **Módulo 3 — Páginas de conversión**: landing /club comparativa, selector divisa EUR/USD, beneficios, FAQ, SEO JSON-LD, stub /checkout con gating
 - [x] **Módulo 4** — Reserva 50 € + checkout PayPal + webhooks (CÓDIGO-COMPLETO; falta probar con credenciales sandbox)
 - [x] **Módulo 5** — Numeración de socios: servicio atómico LF-000101+ (advisory lock, idempotente, conserva nº en upgrade) + activación de membresía. Verificado sin duplicados bajo concurrencia.
-- [ ] **Módulo 6** — Pago completo: club, numeración, productos incluidos, factura
+- [x] **Módulo 6** — Pago completo (CÓDIGO-COMPLETO): club, numeración, productos incluidos, factura, puntos, referidos, emails. Falta probar pagos con sandbox.
 - [ ] Upsell segunda moneda (solo Prestige)
 - [ ] Puntos + referidos
 - [ ] Panel `/account`

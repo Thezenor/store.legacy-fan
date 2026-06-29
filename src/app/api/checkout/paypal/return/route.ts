@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { captureReservationByOrder } from '@/lib/checkout/reservation';
-import { sendReservationReceivedEmail } from '@/lib/email/checkout-emails';
+import { captureFullPaymentByOrder } from '@/lib/checkout/full-payment';
+import { sendReservationReceivedEmail, sendFullPaymentEmail } from '@/lib/email/checkout-emails';
 import { formatMoney } from '@/lib/commerce/money';
 
 const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
@@ -16,12 +17,29 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const orderId = searchParams.get('token'); // PayPal devuelve el order id como ?token=
   const locale = searchParams.get('locale') || 'es';
+  const intent = searchParams.get('intent') || 'reserve';
+  const loc = locale as 'es' | 'en' | 'fr' | 'it';
 
   if (!orderId) {
     return NextResponse.redirect(localizedPath(locale, '/club'));
   }
 
   try {
+    if (intent === 'full') {
+      const reservationId = await captureFullPaymentByOrder(orderId);
+      if (reservationId) {
+        const data = await prisma.reservation.findUnique({
+          where: { id: reservationId },
+          include: { user: { include: { membership: { include: { memberNumber: true } } } } },
+        });
+        const memberNo = data?.user?.membership?.memberNumber?.formatted;
+        if (data?.user?.email && memberNo) {
+          await sendFullPaymentEmail(data.user.email, loc, memberNo);
+        }
+      }
+      return NextResponse.redirect(localizedPath(locale, '/account?welcome=1'));
+    }
+
     const reservationId = await captureReservationByOrder(orderId);
     if (reservationId) {
       const reservation = await prisma.reservation.findUnique({
@@ -31,7 +49,7 @@ export async function GET(req: NextRequest) {
       if (reservation?.user?.email && reservation.amountPaidCents > 0) {
         await sendReservationReceivedEmail(
           reservation.user.email,
-          locale as 'es' | 'en' | 'fr' | 'it',
+          loc,
           formatMoney(reservation.amountPaidCents, reservation.currency, locale),
         );
       }

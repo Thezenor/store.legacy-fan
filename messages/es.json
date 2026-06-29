@@ -106,12 +106,14 @@
     "amount": "Importe",
     "comingSoon": "El pago completo se habilitará en breve. De momento puedes dejar tu reserva.",
     "payReserve": "Pagar reserva con PayPal",
+    "payFull": "Pagar y unirme con PayPal",
     "processing": "Redirigiendo a PayPal…",
     "back": "Volver a los planes",
     "errors": {
       "unauthenticated": "Inicia sesión para continuar.",
       "unverified": "Verifica tu correo antes de reservar.",
       "already_active": "Ya tienes una reserva o membresía activa. Revisa tu cuenta.",
+      "already_member": "Ya eres socio. Revisa tu cuenta.",
       "error": "No se pudo iniciar el pago. Inténtalo de nuevo."
     }
   },

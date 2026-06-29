@@ -3,6 +3,7 @@ import { requireUser, isEmailVerified } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { formatMoney } from '@/lib/commerce/money';
 import { DigitalMemberCard } from '@/components/brand/member-card';
+import { FullPaymentButton } from '@/components/checkout/full-payment-button';
 import { Link } from '@/i18n/navigation';
 
 // Panel de usuario (Módulo 1 + reserva del Módulo 4). Secciones completas: Módulo 9.
@@ -16,6 +17,13 @@ export default async function AccountPage({
   const session = await requireUser(locale);
   const t = await getTranslations({ locale, namespace: 'auth' });
   const a = await getTranslations({ locale, namespace: 'account' });
+  const co = await getTranslations({ locale, namespace: 'checkout' });
+  const checkoutErrors = {
+    unauthenticated: co('errors.unauthenticated'),
+    unverified: co('errors.unverified'),
+    already_member: co('errors.already_member'),
+    error: co('errors.error'),
+  };
 
   const [profile, reservation, membership] = await Promise.all([
     prisma.userProfile.findUnique({
@@ -94,7 +102,21 @@ export default async function AccountPage({
             ) : null}
           </div>
           <p className="mt-3 text-xs text-muted">{a('noMemberNumberYet')}</p>
-          <p className="mt-1 text-xs text-muted">{a('completeSoon')}</p>
+          {/* Pagar el restante para completar la membresía (M6) */}
+          <div className="mt-4">
+            {reservation.club ? (
+              <FullPaymentButton
+                club={reservation.club}
+                label={co('payFull')}
+                pendingLabel={co('processing')}
+                errors={checkoutErrors}
+              />
+            ) : (
+              <Link href="/club" className="text-sm text-gold hover:underline">
+                {co('back')}
+              </Link>
+            )}
+          </div>
         </div>
       ) : (
         <div className="mt-6 rounded-card border border-border bg-surface p-5 text-sm text-muted">

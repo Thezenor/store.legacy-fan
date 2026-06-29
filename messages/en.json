@@ -106,12 +106,14 @@
     "amount": "Amount",
     "comingSoon": "Full payment will be enabled shortly. For now you can place your reservation.",
     "payReserve": "Pay reservation with PayPal",
+    "payFull": "Pay and join with PayPal",
     "processing": "Redirecting to PayPal…",
     "back": "Back to plans",
     "errors": {
       "unauthenticated": "Log in to continue.",
       "unverified": "Verify your email before reserving.",
       "already_active": "You already have an active reservation or membership. Check your account.",
+      "already_member": "You are already a member. Check your account.",
       "error": "Could not start the payment. Please try again."
     }
   },

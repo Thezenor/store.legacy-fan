@@ -45,6 +45,27 @@ const T = {
   },
 } as const;
 
+const TF = {
+  es: { subject: 'Bienvenido al Legacy Fan Club', title: 'Pago confirmado · Eres socio', intro: (n: string) => `Tu pago se ha confirmado y tu membresía está activa. Tu número de socio es <strong>${n}</strong>. Encontrarás tu carnet, productos incluidos y factura en tu cuenta.`, cta: 'Ir a mi cuenta' },
+  en: { subject: 'Welcome to the Legacy Fan Club', title: 'Payment confirmed · You are a member', intro: (n: string) => `Your payment is confirmed and your membership is active. Your member number is <strong>${n}</strong>. Your card, included products and invoice are in your account.`, cta: 'Go to my account' },
+  fr: { subject: 'Bienvenue au Legacy Fan Club', title: 'Paiement confirmé · Vous êtes membre', intro: (n: string) => `Votre paiement est confirmé et votre abonnement est actif. Votre numéro de membre est <strong>${n}</strong>. Votre carte, produits inclus et facture sont dans votre compte.`, cta: 'Accéder à mon compte' },
+  it: { subject: 'Benvenuto nel Legacy Fan Club', title: 'Pagamento confermato · Sei socio', intro: (n: string) => `Il tuo pagamento è confermato e il tuo abbonamento è attivo. Il tuo numero di socio è <strong>${n}</strong>. La tua tessera, i prodotti inclusi e la fattura sono nel tuo account.`, cta: 'Vai al mio account' },
+} as const;
+
+export async function sendFullPaymentEmail(to: string, locale: Locale, memberNumber: string) {
+  const t = TF[locale] ?? TF.es;
+  const href = `${appUrl()}/${locale === 'es' ? '' : `${locale}/`}account`;
+  return getEmailProvider().send({
+    to,
+    subject: t.subject,
+    locale,
+    html: shell(
+      t.title,
+      `<p>${t.intro(memberNumber)}</p><p><a href="${href}" style="display:inline-block;background:#C9A227;color:#0d0d0f;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">${t.cta}</a></p>`,
+    ),
+  });
+}
+
 export async function sendReservationReceivedEmail(to: string, locale: Locale, amountFormatted: string) {
   const t = T[locale] ?? T.es;
   const href = `${appUrl()}/${locale === 'es' ? '' : `${locale}/`}account`;

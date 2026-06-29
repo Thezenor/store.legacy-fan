@@ -6,6 +6,7 @@ import { getClubPricing, getReservationTerms } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { hasActiveReservationOrMembership } from '@/lib/checkout/reservation';
 import { ReserveButton } from '@/components/checkout/reserve-button';
+import { FullPaymentButton } from '@/components/checkout/full-payment-button';
 import { Link } from '@/i18n/navigation';
 
 /**
@@ -46,6 +47,7 @@ export default async function CheckoutPage({
     unauthenticated: t('errors.unauthenticated'),
     unverified: t('errors.unverified'),
     already_active: t('errors.already_active'),
+    already_member: t('errors.already_member'),
     error: t('errors.error'),
   };
 
@@ -74,9 +76,13 @@ export default async function CheckoutPage({
             />
           )
         ) : (
-          <p className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-foreground">
-            {t('comingSoon')}
-          </p>
+          // Pago completo (join): asigna club, número de socio, productos, factura, puntos.
+          <FullPaymentButton
+            club={clubKey}
+            label={t('payFull')}
+            pendingLabel={t('processing')}
+            errors={errors}
+          />
         )}
       </div>
 
