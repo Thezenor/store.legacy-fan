@@ -186,6 +186,62 @@ async function seedLegalPages() {
   }
 }
 
+// Plantillas de email esenciales (doc 10), editables desde superadmin.
+const EMAIL_TEMPLATES: {
+  key: string;
+  es: { subject: string; body: string };
+  en: { subject: string; body: string };
+}[] = [
+  {
+    key: 'account.welcome',
+    es: { subject: 'Bienvenido a Legacy Fan', body: 'Hola {{firstName}}, gracias por crear tu cuenta en Legacy Fan.' },
+    en: { subject: 'Welcome to Legacy Fan', body: 'Hi {{firstName}}, thanks for creating your Legacy Fan account.' },
+  },
+  {
+    key: 'reservation.received',
+    es: { subject: 'Reserva recibida', body: 'Tu reserva de {{amount}} está confirmada. Se descontará del pago completo.' },
+    en: { subject: 'Reservation received', body: 'Your reservation of {{amount}} is confirmed. It will be deducted from the full payment.' },
+  },
+  {
+    key: 'reservation.reminder',
+    es: { subject: 'Recordatorio: completa tu reserva', body: 'Hola {{firstName}}, recuerda completar el pago de tu reserva antes de {{deadline}}.' },
+    en: { subject: 'Reminder: complete your reservation', body: 'Hi {{firstName}}, remember to complete your reservation payment before {{deadline}}.' },
+  },
+  {
+    key: 'payment.confirmed',
+    es: { subject: 'Pago confirmado · Eres socio', body: 'Tu membresía está activa. Tu número de socio es {{memberNumber}}.' },
+    en: { subject: 'Payment confirmed · You are a member', body: 'Your membership is active. Your member number is {{memberNumber}}.' },
+  },
+  {
+    key: 'community.welcome',
+    es: { subject: 'Bienvenido a la comunidad', body: 'Tus accesos a Telegram y Discord ya están disponibles en tu cuenta.' },
+    en: { subject: 'Welcome to the community', body: 'Your Telegram and Discord access is now available in your account.' },
+  },
+  {
+    key: 'points.added',
+    es: { subject: 'Has ganado saldo', body: 'Se ha añadido {{amount}} de saldo a tu cuenta.' },
+    en: { subject: 'You earned balance', body: '{{amount}} of balance has been added to your account.' },
+  },
+];
+
+async function seedEmailTemplates() {
+  for (const tpl of EMAIL_TEMPLATES) {
+    const template = await prisma.emailTemplate.upsert({
+      where: { key: tpl.key },
+      update: {},
+      create: { key: tpl.key },
+    });
+    for (const locale of [Locale.es, Locale.en] as const) {
+      const t = tpl[locale];
+      await prisma.emailTemplateTranslation.upsert({
+        where: { templateId_locale: { templateId: template.id, locale } },
+        update: {},
+        create: { templateId: template.id, locale, subject: t.subject, body: t.body },
+      });
+    }
+  }
+}
+
 async function main() {
   await seedRoles();
   await seedPlan(ClubType.PRIME, 'prime-club', 'Legacy Prime Club', PRIME_PHASES);
@@ -194,6 +250,7 @@ async function main() {
   await seedReservedMemberNumbers();
   await seedLegalDisclaimer();
   await seedLegalPages();
+  await seedEmailTemplates();
   // Silencio en producción; útil en local.
   void ReferralRewardMode;
 }

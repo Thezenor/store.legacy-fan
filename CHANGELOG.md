@@ -56,6 +56,11 @@
 - Pulido: marquesina infinita animada (CSS, respeta reduce-motion), 3 pilares de valor en home, **carnet digital Art Deco** en /account (réplica del carnet físico con nº de socio; vista previa atenuada para reservas), hover dorado en tarjetas de plan.
 - **Fidelidad al prototipo** (spec extraído con subagente del handoff): logo recreado "LEGACY FAN + filete dorado + PRECIOUS METALS"; header 74px con nav centrado title-case (13px, tracking 0.04em, oro activo); Hero A·Split con **moneda metálica** (radial plata + doble sombra), eyebrow 0.34em, titular Cormorant 76px con acento dorado en italic, CTAs exactos (gradiente 135deg, radius 4px); marquesina Cormorant 17px sobre #0b0b0d. Verificado por render. Early Collector excluido (regla maestra).
 
+### Fase 1 · Módulo 11 — Emails gestionables + máquina de estados
+- Plantillas de email en BD (seed de 6 esenciales ES/EN), editables desde `/lf-admin/emails` (asunto/cuerpo por idioma, activar/desactivar, **envío de prueba**).
+- `renderTemplate`/`sendTemplatedEmail` con interpolación de variables ({{firstName}}, {{amount}}, {{memberNumber}}, {{deadline}}) y registro en EmailLog.
+- Máquina de estados centralizada (`src/lib/states.ts`): transiciones permitidas para pagos, socios y items de pedido (doc 07).
+
 ### Fase 1 · Módulo 10 (base) — Superadmin /lf-admin
 - Gate RBAC (`requireAdmin`) por roles con bootstrap por `SUPERADMIN_EMAILS` (acceso inicial antes de asignar roles).
 - Layout admin propio (sidebar 248px, no localizado, noindex) + dashboard con KPIs (socios activos, reservas, pagos, ingresos).

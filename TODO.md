@@ -25,7 +25,7 @@
 - [x] **Módulo 8** — Puntos + referidos (código por socio, captura en registro, recompensa al pago, resúmenes)
 - [x] **Módulo 9** — Panel `/account` completo (resumen, membresía, productos, puntos, referidos, pedidos/facturas, perfil)
 - [~] **Módulo 10** — Superadmin `/lf-admin` (RBAC + dashboard + listados + edición de fases/precios, ajustes y legal; faltan CRUD de productos/colecciones, emails, socios, reembolsos)
-- [~] **Módulo 11** — Emails (transaccionales inline funcionando; faltan plantillas en BD editables + máquina de estados centralizada)
+- [x] **Módulo 11** — Emails gestionables (plantillas en BD editables desde admin + envío de prueba) + máquina de estados centralizada
 - [x] **Módulo 12** — SEO + páginas legales editables (GEO por región preparado)
 - [ ] **Módulo 7** — Upsell segunda moneda (solo Prestige) — requiere productos (Fase 2)
 - [ ] QA (doc 17)

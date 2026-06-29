@@ -5,6 +5,7 @@ import type { ClubType, CollectionStatus, Locale } from '@prisma/client';
 import { prisma } from './prisma';
 import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
+import { sendTemplatedEmail } from './email/templates';
 
 function slugify(input: string): string {
   return input
@@ -233,6 +234,39 @@ export async function createManualMemberAction(
   } catch {
     return { ok: false, error: 'No se pudo crear el socio.' };
   }
+}
+
+/** Edita una traducción de plantilla de email + estado activo del template. */
+export async function updateEmailTemplateAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const templateId = String(formData.get('templateId'));
+  const locale = String(formData.get('locale')) as Locale;
+  const subject = String(formData.get('subject') ?? '');
+  const body = String(formData.get('body') ?? '');
+  const active = formData.get('active') === 'on';
+
+  await prisma.emailTemplateTranslation.update({
+    where: { templateId_locale: { templateId, locale } },
+    data: { subject, body },
+  });
+  await prisma.emailTemplate.update({ where: { id: templateId }, data: { active } });
+  await audit(admin.id, admin.email, 'email_template.update', 'EmailTemplate', `${templateId}/${locale}`, null, { subject, active });
+  revalidatePath('/lf-admin/emails');
+}
+
+/** Envía un email de prueba de una plantilla al email del admin. */
+export async function sendTestEmailAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const key = String(formData.get('key'));
+  const locale = (String(formData.get('locale')) || 'es') as Locale;
+  await sendTemplatedEmail(key, admin.email ?? 'admin@example.com', locale, {
+    firstName: 'Demo',
+    amount: '50,00 €',
+    memberNumber: 'LF-000123',
+    deadline: '31/12/2026',
+  });
+  await audit(admin.id, admin.email, 'email_template.test_send', 'EmailTemplate', key, null, { to: admin.email });
+  revalidatePath('/lf-admin/emails');
 }
 
 /** Bloquea o desbloquea un usuario (doc 09). */

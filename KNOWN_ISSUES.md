@@ -13,5 +13,7 @@
 
 - **KI-008 (M4) Checkout de reserva sin probar:** la integración PayPal (crear/capturar orden, webhook) está implementada pero NO se ha probado con pagos reales. Falta configurar `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` (sandbox) y `PAYPAL_WEBHOOK_ID`. Sin ellas, el botón "Pagar reserva" devuelve error controlado. Nota: el proxy SSL corporativo también afectaría las llamadas a `api-m.sandbox.paypal.com` en local (usar `--use-system-ca` o probar en Railway).
 
+- **KI-009 (build) prisma:error transitorios en prerender:** al generar estáticamente las páginas que consultan la BD (club Prime/Prestige × 4 idiomas) contra la BD pública de Railway, ocasionalmente aparecen 1–3 `prisma:error` por latencia/concurrencia. No son fatales (el build completa). En Railway (BD interna, baja latencia) no se reproducen. Si molesta, marcar esas páginas con `revalidate` o `dynamic` o limitar la concurrencia de build.
+
 ## Notas
 - Modo oscuro por defecto: el render inicial no añade `.light`; el toggle persiste en localStorage (posible flash en modo claro al recargar; se resolverá con script inline en Fase 1 si molesta).
