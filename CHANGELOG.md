@@ -62,6 +62,7 @@
 - Listados (solo lectura): socios, reservas y pagos, auditoría.
 - **Edición**: fases y precios (EUR/USD + activar/forzar estado), ajustes del sistema (valor JSON) y páginas legales (ES/EN), con auditoría y revalidación. Server actions protegidas por gate admin.
 - **Productos y colecciones**: crear/editar colecciones (estado) y productos (precios, premium, incluido en Prime/Prestige, moneda inaugural, disponible/visible). Habilita productos incluidos en pedidos (M6) y el upsell inaugural (M7).
+- **Gestión de socios**: crear socio manualmente (doc 04: usuario existente + club + número reservado 1–100, con código de referido y auditoría) y bloquear/desbloquear usuarios. Verificado contra BD.
 
 ### Fase 1 · Módulo 12 (parcial) — SEO y legal
 - Páginas legales editables (ruta `/legal/[slug]` con fallback de idioma) + seed de términos, privacidad, cookies, envíos, devoluciones, membresía, puntos, referidos.

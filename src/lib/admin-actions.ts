@@ -1,9 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { CollectionStatus, Locale } from '@prisma/client';
+import type { ClubType, CollectionStatus, Locale } from '@prisma/client';
 import { prisma } from './prisma';
 import { getAdminSession } from './admin';
+import { ensureReferralCode } from './referrals/code';
 
 function slugify(input: string): string {
   return input
@@ -169,4 +170,78 @@ export async function updateProductAction(formData: FormData): Promise<void> {
   });
   await audit(admin.id, admin.email, 'product.update', 'Product', id, null, { id });
   revalidatePath('/lf-admin/productos');
+}
+
+export type ManualMemberResult =
+  | { ok: true; number: string }
+  | { ok: false; error: string };
+
+/**
+ * Crea un socio manualmente (doc 04/09) asignando un número reservado 1–100 a
+ * un usuario ya registrado. Atómico y auditado.
+ */
+export async function createManualMemberAction(
+  _prev: ManualMemberResult | null,
+  formData: FormData,
+): Promise<ManualMemberResult> {
+  const admin = await ensureAdmin();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const club = String(formData.get('club') ?? 'PRIME') as ClubType;
+  const num = parseInt(String(formData.get('number') ?? ''), 10);
+
+  if (!email || !Number.isInteger(num) || num < 1 || num > 100) {
+    return { ok: false, error: 'Datos inválidos (email y número 1–100).' };
+  }
+
+  const user = await prisma.user.findUnique({ where: { email }, include: { membership: true } });
+  if (!user) return { ok: false, error: 'No existe un usuario con ese email.' };
+  if (user.membership) return { ok: false, error: 'El usuario ya tiene membresía.' };
+
+  const memberNumber = await prisma.memberNumber.findUnique({ where: { number: num } });
+  if (!memberNumber) return { ok: false, error: 'Número no encontrado.' };
+  if (memberNumber.membershipId) return { ok: false, error: 'Ese número ya está asignado.' };
+  if (memberNumber.isBlocked) return { ok: false, error: 'Ese número está bloqueado.' };
+
+  const now = new Date();
+  const end = new Date(now);
+  end.setFullYear(end.getFullYear() + 1);
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const membership = await tx.membership.create({
+        data: { userId: user.id, club, status: 'SOCIO_ACTIVO', startsAt: now, endsAt: end },
+      });
+      await tx.memberNumber.update({
+        where: { number: num },
+        data: { membershipId: membership.id, assignedAt: now },
+      });
+      await ensureReferralCode(tx, user.id);
+      await tx.auditLog.create({
+        data: {
+          actorId: admin.id,
+          actorEmail: admin.email,
+          action: 'member.manual_create',
+          entity: 'Membership',
+          entityId: membership.id,
+          newValue: { email, club, number: memberNumber.formatted },
+        },
+      });
+      return memberNumber.formatted;
+    });
+    revalidatePath('/lf-admin/socios');
+    return { ok: true, number: result };
+  } catch {
+    return { ok: false, error: 'No se pudo crear el socio.' };
+  }
+}
+
+/** Bloquea o desbloquea un usuario (doc 09). */
+export async function toggleUserBlockAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId'));
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+  await prisma.user.update({ where: { id: userId }, data: { isBlocked: !user.isBlocked } });
+  await audit(admin.id, admin.email, 'user.block_toggle', 'User', userId, { isBlocked: user.isBlocked }, { isBlocked: !user.isBlocked });
+  revalidatePath('/lf-admin/socios');
 }
