@@ -16,8 +16,8 @@
 
 ## Fase 1 — MVP comercial (siguiente, tras validar Fase 0)
 - [x] **Módulo 1 — Auth completo**: registro, verificación email (obligatoria pre-compra), reset, rate limiting, logout, /account mínimo, header con sesión
-- [ ] Páginas Prime/Prestige con precios por fase + comparativa
-- [ ] Motor de fases/precios leído desde admin
+- [x] **Módulo 2 — Motor comercial**: fases/precios/reserva desde BD (fuente única), pricing por club/divisa, precio mostrado en Prime/Prestige
+- [ ] Páginas Prime/Prestige con comparativa completa + selector divisa (Módulo 3)
 - [ ] Reserva 50 € + checkout PayPal + webhooks
 - [ ] Pago completo: club, numeración, productos incluidos, factura
 - [ ] Upsell segunda moneda (solo Prestige)

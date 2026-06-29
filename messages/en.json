@@ -30,6 +30,14 @@
     "ctaReserve": "Reserve Prestige Club",
     "ctaJoin": "Join Prestige Club"
   },
+  "pricing": {
+    "from": "From",
+    "currentPhase": "Current phase",
+    "reservation": "Reservation",
+    "reservationNote": "The reservation does not assign a member number and is deducted from the full payment.",
+    "freeShippingEs": "Free shipping in Spain",
+    "includes": "What's included"
+  },
   "legal": {
     "disclaimer": "Legacy Fan products are collectible items. They do not constitute a financial product or any promise of future returns."
   },

@@ -30,3 +30,11 @@
 - UI mobile-first i18n (ES/EN/FR/IT): /login /register /forgot-password /reset-password
   /verify-email, header consciente de sesión, panel /account mínimo.
 - Typecheck + build OK (45 páginas).
+
+### Fase 1 · Módulo 2 — Motor comercial
+- `src/lib/commerce`: fuente única de configuración comercial (nada hardcodeado, doc 18).
+- Acceso tipado a `SystemSetting` memoizado por request (con defaults de resiliencia).
+- Resolución de **fase activa** por club: override forzado del admin → ventana de fechas → isActive → fallback.
+- Pricing por club/divisa (`getClubPricing`) y términos de reserva con caducidad/reembolso (`getReservationTerms`).
+- Formato de dinero en céntimos → EUR/USD por locale (`Intl.NumberFormat`).
+- Precio de fase activa + reserva mostrados en páginas Prime/Prestige. Verificado contra BD: Prime 149 €/$179, Prestige 599 €/$699, reserva 50 €.

@@ -30,6 +30,14 @@
     "ctaReserve": "Réserver Prestige Club",
     "ctaJoin": "Rejoindre Prestige Club"
   },
+  "pricing": {
+    "from": "À partir de",
+    "currentPhase": "Phase actuelle",
+    "reservation": "Réservation",
+    "reservationNote": "La réservation n'attribue pas de numéro de membre et est déduite du paiement complet.",
+    "freeShippingEs": "Livraison gratuite en Espagne",
+    "includes": "Ce qui est inclus"
+  },
   "legal": {
     "disclaimer": "Les produits Legacy Fan sont des articles de collection. Ils ne constituent pas un produit financier ni une promesse de rentabilité future."
   },

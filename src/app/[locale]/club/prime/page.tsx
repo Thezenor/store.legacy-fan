@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { PriceBlock } from '@/components/commerce/price-block';
+import { resolveCurrency } from '@/lib/commerce';
 
 export async function generateMetadata({
   params,
@@ -25,7 +27,8 @@ export default async function PrimePage({
       <h1 className="font-display text-3xl font-bold text-silver sm:text-4xl">{t('title')}</h1>
       <p className="mt-3 text-lg text-foreground">{t('tagline')}</p>
       <p className="mt-4 text-sm text-muted">{t('body')}</p>
-      {/* Precios por fase, reserva 50€ y checkout: Fase 1. */}
+      <PriceBlock club="PRIME" currency={resolveCurrency()} locale={locale} />
+      {/* Checkout (reserva/pago completo): Módulos 4 y 6. */}
     </section>
   );
 }
