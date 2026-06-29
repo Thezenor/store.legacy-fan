@@ -56,6 +56,11 @@
 - Pulido: marquesina infinita animada (CSS, respeta reduce-motion), 3 pilares de valor en home, **carnet digital Art Deco** en /account (réplica del carnet físico con nº de socio; vista previa atenuada para reservas), hover dorado en tarjetas de plan.
 - **Fidelidad al prototipo** (spec extraído con subagente del handoff): logo recreado "LEGACY FAN + filete dorado + PRECIOUS METALS"; header 74px con nav centrado title-case (13px, tracking 0.04em, oro activo); Hero A·Split con **moneda metálica** (radial plata + doble sombra), eyebrow 0.34em, titular Cormorant 76px con acento dorado en italic, CTAs exactos (gradiente 135deg, radius 4px); marquesina Cormorant 17px sobre #0b0b0d. Verificado por render. Early Collector excluido (regla maestra).
 
+### Fase 1 · Módulo 5 — Numeración de socios
+- Servicio atómico de número de socio `LF-000101+` con advisory lock de Postgres (sin duplicados ni condiciones de carrera), idempotente y conservando el número en upgrade Prime→Prestige; respeta los 1–100 reservados.
+- `activateMembership` (transaccional, márgenes amplios) que crea/activa la membresía, calcula duración 12 meses (lanzamiento o pago) y asigna número; con auditoría. Lo usará el pago completo (M6).
+- Verificado contra BD: 6 asignaciones concurrentes → 101–106 únicas y contiguas, reservados intactos.
+
 ### Fase 1 · Módulo 4 — Checkout de reserva + PayPal (código-completo, sin probar)
 - `PayPalProvider` real: OAuth client_credentials, crear/capturar orden (Orders v2), verificación de webhook. Sandbox/live por `PAYPAL_MODE`.
 - Servicio de reserva: crea `Reservation` (50 €/$ genérica, club preseleccionado no vinculante) + `Payment` PayPal; captura idempotente; regla 1 email = 1 reserva/membresía activa (doc 03).
