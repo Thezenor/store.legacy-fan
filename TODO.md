@@ -15,7 +15,7 @@
 - [ ] Deploy inicial en Railway (app)
 
 ## Fase 1 — MVP comercial (siguiente, tras validar Fase 0)
-- [ ] Auth completo: registro, verificación email, reset, rate limiting
+- [x] **Módulo 1 — Auth completo**: registro, verificación email (obligatoria pre-compra), reset, rate limiting, logout, /account mínimo, header con sesión
 - [ ] Páginas Prime/Prestige con precios por fase + comparativa
 - [ ] Motor de fases/precios leído desde admin
 - [ ] Reserva 50 € + checkout PayPal + webhooks

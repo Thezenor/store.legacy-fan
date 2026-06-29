@@ -7,6 +7,7 @@
     "login": "Accedi",
     "register": "Crea account",
     "account": "Il mio account",
+    "logout": "Esci",
     "toggleTheme": "Cambia tema",
     "comparePlans": "Confronta i piani"
   },
@@ -31,5 +32,64 @@
   },
   "legal": {
     "disclaimer": "I prodotti Legacy Fan sono articoli da collezione. Non costituiscono un prodotto finanziario né una promessa di rendimento futuro."
+  },
+  "auth": {
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Ripeti la password",
+    "firstNameLabel": "Nome",
+    "lastNameLabel": "Cognome",
+    "phoneLabel": "Telefono (facoltativo)",
+    "countryLabel": "Paese",
+    "currencyLabel": "Valuta preferita",
+    "termsLabel": "Accetto i termini e le condizioni",
+    "processing": "Elaborazione…",
+    "login": {
+      "title": "Accedi",
+      "submit": "Entra",
+      "forgot": "Password dimenticata?",
+      "noAccount": "Non hai un account?",
+      "registerCta": "Crea account"
+    },
+    "register": {
+      "title": "Crea account",
+      "submit": "Crea account",
+      "haveAccount": "Hai già un account?",
+      "loginCta": "Accedi",
+      "success": "Account creato. Ti abbiamo inviato un'email per verificare il tuo indirizzo."
+    },
+    "forgot": {
+      "title": "Reimposta la password",
+      "intro": "Inserisci la tua email e ti invieremo un link per reimpostare la password.",
+      "submit": "Invia link",
+      "success": "Se quell'email ha un account, riceverai un link a breve.",
+      "back": "Torna all'accesso"
+    },
+    "reset": {
+      "title": "Nuova password",
+      "submit": "Salva password",
+      "success": "Password aggiornata. Ora puoi accedere.",
+      "goLogin": "Vai all'accesso"
+    },
+    "verify": {
+      "title": "Verifica email",
+      "verifying": "Verifica in corso…",
+      "success": "Email verificata! Ora puoi prenotare e acquistare.",
+      "continue": "Continua",
+      "resend": "Invia di nuovo l'email di verifica",
+      "resent": "Email inviata di nuovo se l'account lo richiedeva."
+    },
+    "errors": {
+      "validation": "Controlla i campi del modulo.",
+      "invalid_credentials": "Email o password errati.",
+      "email_taken": "Esiste già un account con questa email.",
+      "rate_limited": "Troppi tentativi. Riprova più tardi.",
+      "token_invalid": "Il link non è valido o è scaduto.",
+      "password_min": "La password deve contenere almeno 8 caratteri.",
+      "password_weak": "Usa maiuscole, minuscole e numeri.",
+      "password_mismatch": "Le password non coincidono.",
+      "terms_required": "Devi accettare i termini.",
+      "generic": "Qualcosa è andato storto. Riprova."
+    }
   }
 }

@@ -7,6 +7,7 @@
     "login": "Log in",
     "register": "Create account",
     "account": "My account",
+    "logout": "Log out",
     "toggleTheme": "Toggle theme",
     "comparePlans": "Compare plans"
   },
@@ -31,5 +32,64 @@
   },
   "legal": {
     "disclaimer": "Legacy Fan products are collectible items. They do not constitute a financial product or any promise of future returns."
+  },
+  "auth": {
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Repeat password",
+    "firstNameLabel": "First name",
+    "lastNameLabel": "Last name",
+    "phoneLabel": "Phone (optional)",
+    "countryLabel": "Country",
+    "currencyLabel": "Preferred currency",
+    "termsLabel": "I accept the terms and conditions",
+    "processing": "Processing…",
+    "login": {
+      "title": "Log in",
+      "submit": "Sign in",
+      "forgot": "Forgot your password?",
+      "noAccount": "No account yet?",
+      "registerCta": "Create account"
+    },
+    "register": {
+      "title": "Create account",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "loginCta": "Log in",
+      "success": "Account created. We've sent you an email to verify your address."
+    },
+    "forgot": {
+      "title": "Reset password",
+      "intro": "Enter your email and we'll send you a link to reset your password.",
+      "submit": "Send link",
+      "success": "If that email has an account, you'll get a link shortly.",
+      "back": "Back to log in"
+    },
+    "reset": {
+      "title": "New password",
+      "submit": "Save password",
+      "success": "Password updated. You can now log in.",
+      "goLogin": "Go to log in"
+    },
+    "verify": {
+      "title": "Email verification",
+      "verifying": "Verifying…",
+      "success": "Email verified! You can now reserve and buy.",
+      "continue": "Continue",
+      "resend": "Resend verification email",
+      "resent": "Email resent if the account required it."
+    },
+    "errors": {
+      "validation": "Please check the form fields.",
+      "invalid_credentials": "Incorrect email or password.",
+      "email_taken": "An account with this email already exists.",
+      "rate_limited": "Too many attempts. Try again later.",
+      "token_invalid": "The link is invalid or has expired.",
+      "password_min": "Password must be at least 8 characters.",
+      "password_weak": "Use uppercase, lowercase and numbers.",
+      "password_mismatch": "Passwords do not match.",
+      "terms_required": "You must accept the terms.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

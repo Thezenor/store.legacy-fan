@@ -1,0 +1,58 @@
+/**
+ * Rate limiting en memoria (ventana fija) para el MVP (decisión D-010).
+ * Suficiente para una instancia; migrable a Redis/Upstash al escalar.
+ * No persiste entre reinicios ni se comparte entre procesos.
+ */
+type Bucket = { count: number; resetAt: number };
+
+const store = new Map<string, Bucket>();
+
+export interface RateLimitResult {
+  success: boolean;
+  remaining: number;
+  resetAt: number;
+}
+
+/**
+ * @param key  identificador (p.ej. `login:${ip}` o `register:${email}`)
+ * @param limit  máximo de intentos en la ventana
+ * @param windowMs  duración de la ventana en ms
+ */
+export function rateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
+  const now = Date.now();
+  const bucket = store.get(key);
+
+  if (!bucket || now >= bucket.resetAt) {
+    const resetAt = now + windowMs;
+    store.set(key, { count: 1, resetAt });
+    return { success: true, remaining: limit - 1, resetAt };
+  }
+
+  if (bucket.count >= limit) {
+    return { success: false, remaining: 0, resetAt: bucket.resetAt };
+  }
+
+  bucket.count += 1;
+  return { success: true, remaining: limit - bucket.count, resetAt: bucket.resetAt };
+}
+
+// Limpieza periódica para evitar crecimiento ilimitado del Map.
+const CLEANUP_INTERVAL = 10 * 60 * 1000;
+if (typeof setInterval !== 'undefined') {
+  const timer = setInterval(() => {
+    const now = Date.now();
+    for (const [key, bucket] of store) {
+      if (now >= bucket.resetAt) store.delete(key);
+    }
+  }, CLEANUP_INTERVAL);
+  // No bloquear el cierre del proceso por este timer.
+  if (typeof timer.unref === 'function') timer.unref();
+}
+
+/** Presets comunes. */
+export const RL = {
+  login: (id: string) => rateLimit(`login:${id}`, 5, 15 * 60 * 1000), // 5 / 15 min
+  register: (id: string) => rateLimit(`register:${id}`, 3, 60 * 60 * 1000), // 3 / h
+  forgot: (id: string) => rateLimit(`forgot:${id}`, 3, 60 * 60 * 1000), // 3 / h
+  verifyResend: (id: string) => rateLimit(`verify:${id}`, 3, 60 * 60 * 1000),
+};

@@ -7,6 +7,7 @@
     "login": "Se connecter",
     "register": "Créer un compte",
     "account": "Mon compte",
+    "logout": "Se déconnecter",
     "toggleTheme": "Changer de thème",
     "comparePlans": "Comparer les offres"
   },
@@ -31,5 +32,64 @@
   },
   "legal": {
     "disclaimer": "Les produits Legacy Fan sont des articles de collection. Ils ne constituent pas un produit financier ni une promesse de rentabilité future."
+  },
+  "auth": {
+    "emailLabel": "E-mail",
+    "passwordLabel": "Mot de passe",
+    "confirmPasswordLabel": "Répétez le mot de passe",
+    "firstNameLabel": "Prénom",
+    "lastNameLabel": "Nom",
+    "phoneLabel": "Téléphone (facultatif)",
+    "countryLabel": "Pays",
+    "currencyLabel": "Devise préférée",
+    "termsLabel": "J'accepte les conditions générales",
+    "processing": "Traitement…",
+    "login": {
+      "title": "Se connecter",
+      "submit": "Connexion",
+      "forgot": "Mot de passe oublié ?",
+      "noAccount": "Pas encore de compte ?",
+      "registerCta": "Créer un compte"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "submit": "Créer un compte",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "loginCta": "Se connecter",
+      "success": "Compte créé. Nous vous avons envoyé un e-mail pour vérifier votre adresse."
+    },
+    "forgot": {
+      "title": "Réinitialiser le mot de passe",
+      "intro": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
+      "submit": "Envoyer le lien",
+      "success": "Si cet e-mail a un compte, vous recevrez un lien sous peu.",
+      "back": "Retour à la connexion"
+    },
+    "reset": {
+      "title": "Nouveau mot de passe",
+      "submit": "Enregistrer le mot de passe",
+      "success": "Mot de passe mis à jour. Vous pouvez vous connecter.",
+      "goLogin": "Aller à la connexion"
+    },
+    "verify": {
+      "title": "Vérification de l'e-mail",
+      "verifying": "Vérification…",
+      "success": "E-mail vérifié ! Vous pouvez réserver et acheter.",
+      "continue": "Continuer",
+      "resend": "Renvoyer l'e-mail de vérification",
+      "resent": "E-mail renvoyé si le compte le nécessitait."
+    },
+    "errors": {
+      "validation": "Vérifiez les champs du formulaire.",
+      "invalid_credentials": "E-mail ou mot de passe incorrect.",
+      "email_taken": "Un compte avec cet e-mail existe déjà.",
+      "rate_limited": "Trop de tentatives. Réessayez plus tard.",
+      "token_invalid": "Le lien est invalide ou a expiré.",
+      "password_min": "Le mot de passe doit comporter au moins 8 caractères.",
+      "password_weak": "Utilisez majuscules, minuscules et chiffres.",
+      "password_mismatch": "Les mots de passe ne correspondent pas.",
+      "terms_required": "Vous devez accepter les conditions.",
+      "generic": "Une erreur est survenue. Réessayez."
+    }
   }
 }

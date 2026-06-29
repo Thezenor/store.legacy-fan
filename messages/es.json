@@ -7,6 +7,7 @@
     "login": "Iniciar sesión",
     "register": "Crear cuenta",
     "account": "Mi cuenta",
+    "logout": "Salir",
     "toggleTheme": "Cambiar tema",
     "comparePlans": "Comparar planes"
   },
@@ -31,5 +32,64 @@
   },
   "legal": {
     "disclaimer": "Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura."
+  },
+  "auth": {
+    "emailLabel": "Correo electrónico",
+    "passwordLabel": "Contraseña",
+    "confirmPasswordLabel": "Repite la contraseña",
+    "firstNameLabel": "Nombre",
+    "lastNameLabel": "Apellidos",
+    "phoneLabel": "Teléfono (opcional)",
+    "countryLabel": "País",
+    "currencyLabel": "Moneda preferida",
+    "termsLabel": "Acepto los términos y condiciones",
+    "processing": "Procesando…",
+    "login": {
+      "title": "Iniciar sesión",
+      "submit": "Entrar",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿No tienes cuenta?",
+      "registerCta": "Crear cuenta"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "submit": "Crear cuenta",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "loginCta": "Iniciar sesión",
+      "success": "Cuenta creada. Te hemos enviado un correo para verificar tu dirección."
+    },
+    "forgot": {
+      "title": "Recuperar contraseña",
+      "intro": "Introduce tu correo y te enviaremos un enlace para restablecer la contraseña.",
+      "submit": "Enviar enlace",
+      "success": "Si ese correo tiene cuenta, recibirás un enlace en breve.",
+      "back": "Volver a iniciar sesión"
+    },
+    "reset": {
+      "title": "Nueva contraseña",
+      "submit": "Guardar contraseña",
+      "success": "Contraseña actualizada. Ya puedes iniciar sesión.",
+      "goLogin": "Ir a iniciar sesión"
+    },
+    "verify": {
+      "title": "Verificación de correo",
+      "verifying": "Verificando…",
+      "success": "¡Correo verificado! Ya puedes reservar y comprar.",
+      "continue": "Continuar",
+      "resend": "Reenviar correo de verificación",
+      "resent": "Correo reenviado si la cuenta lo requería."
+    },
+    "errors": {
+      "validation": "Revisa los datos del formulario.",
+      "invalid_credentials": "Correo o contraseña incorrectos.",
+      "email_taken": "Ya existe una cuenta con este correo.",
+      "rate_limited": "Demasiados intentos. Inténtalo más tarde.",
+      "token_invalid": "El enlace no es válido o ha caducado.",
+      "password_min": "La contraseña debe tener al menos 8 caracteres.",
+      "password_weak": "Usa mayúsculas, minúsculas y números.",
+      "password_mismatch": "Las contraseñas no coinciden.",
+      "terms_required": "Debes aceptar los términos.",
+      "generic": "Algo ha salido mal. Inténtalo de nuevo."
+    }
   }
 }

@@ -4,7 +4,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing, type AppLocale } from '@/i18n/routing';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AuthNav } from '@/components/auth/auth-nav';
 import { Link } from '@/i18n/navigation';
+import { auth } from '@/lib/auth';
 import '../globals.css';
 
 // Fuentes: stack del sistema vía variables CSS (definidas en globals.css).
@@ -41,6 +43,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: 'common' });
+  const session = await auth();
 
   return (
     // Modo oscuro por defecto: sin clase `.light` en el render inicial.
@@ -52,13 +55,13 @@ export default async function LocaleLayout({
               <Link href="/" className="font-display text-xl font-bold text-metal-gold">
                 {t('siteName')}
               </Link>
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="hidden text-sm text-muted hover:text-foreground sm:inline"
-                >
-                  {t('login')}
-                </Link>
+              <div className="flex items-center gap-3">
+                <AuthNav
+                  isLoggedIn={!!session?.user?.id}
+                  accountLabel={t('account')}
+                  loginLabel={t('login')}
+                  logoutLabel={t('logout')}
+                />
                 <ThemeToggle label={t('toggleTheme')} />
               </div>
             </nav>

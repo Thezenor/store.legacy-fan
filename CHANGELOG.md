@@ -16,3 +16,17 @@
 
 ### Seguridad
 - Actualizado Next.js 15.1.4 → **15.5.19** (corrige CVE-2025-66478). Typecheck + build OK.
+
+### Base de datos
+- Migración baseline `0_init` (39 tablas) aplicada a Railway + seed verificado.
+
+### Fase 1 · Módulo 1 — Auth completo
+- Registro (nombre, apellidos, teléfono, país, email, contraseña, términos, divisa preferida),
+  login, logout, recuperación y reset de contraseña.
+- Verificación de email **obligatoria antes de comprar** (D-009): tokens de un solo uso,
+  reenvío, gating `requireVerifiedUser`.
+- Rate limiting en memoria (D-010) en login/registro/forgot/reenvío.
+- Emails transaccionales (verificación, reset) multiidioma vía capa EmailProvider.
+- UI mobile-first i18n (ES/EN/FR/IT): /login /register /forgot-password /reset-password
+  /verify-email, header consciente de sesión, panel /account mínimo.
+- Typecheck + build OK (45 páginas).

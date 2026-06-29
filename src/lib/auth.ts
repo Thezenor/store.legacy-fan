@@ -43,18 +43,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
 
-        return { id: user.id, email: user.email };
+        return {
+          id: user.id,
+          email: user.email,
+          emailVerified: user.emailVerified,
+        };
       },
     }),
   ],
   callbacks: {
     jwt({ token, user }) {
-      if (user) token.uid = user.id;
+      if (user) {
+        token.uid = user.id;
+        token.emailVerified = (user as { emailVerified?: Date | null }).emailVerified ?? null;
+      }
       return token;
     },
     session({ session, token }) {
-      if (token.uid && session.user) {
-        session.user.id = token.uid as string;
+      if (session.user) {
+        if (token.uid) session.user.id = token.uid as string;
+        session.user.emailVerified = (token.emailVerified as Date | null) ?? null;
       }
       return session;
     },
