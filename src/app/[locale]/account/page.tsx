@@ -94,7 +94,7 @@ export default async function AccountPage({
       {isMember ? (
         <>
           <Section title={a('summaryTitle')}>
-            <dl className="grid grid-cols-2 gap-y-2 text-sm">
+            <dl className="grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
               <dt className="text-muted">{a('club')}</dt>
               <dd className="text-foreground">{membership!.club}</dd>
               <dt className="text-muted">{a('memberNumber')}</dt>
@@ -112,9 +112,9 @@ export default async function AccountPage({
             ) : (
               <ul className="space-y-2 text-sm">
                 {orders.flatMap((o) => o.items).map((it) => (
-                  <li key={it.id} className="flex justify-between border-b border-border/60 pb-2">
-                    <span className="text-foreground">{it.name}</span>
-                    <span className="text-xs text-muted">{it.status.replaceAll('_', ' ').toLowerCase()}</span>
+                  <li key={it.id} className="flex justify-between gap-3 border-b border-border/60 pb-2">
+                    <span className="min-w-0 truncate text-foreground">{it.name}</span>
+                    <span className="shrink-0 text-xs text-muted">{it.status.replaceAll('_', ' ').toLowerCase()}</span>
                   </li>
                 ))}
               </ul>
@@ -177,9 +177,9 @@ export default async function AccountPage({
         {points.transactions.length > 0 ? (
           <ul className="mt-3 space-y-1 text-xs text-muted">
             {points.transactions.map((tx) => (
-              <li key={tx.id} className="flex justify-between">
-                <span>{tx.reason ?? tx.type}</span>
-                <span className={tx.amountCents >= 0 ? 'text-state-green' : 'text-red-400'}>
+              <li key={tx.id} className="flex justify-between gap-3">
+                <span className="min-w-0 truncate">{tx.reason ?? tx.type}</span>
+                <span className={`shrink-0 ${tx.amountCents >= 0 ? 'text-state-green' : 'text-red-400'}`}>
                   {tx.amountCents >= 0 ? '+' : ''}
                   {formatMoney(tx.amountCents, currency, locale)}
                 </span>
@@ -197,10 +197,10 @@ export default async function AccountPage({
           <p className="text-sm text-muted">
             {a('yourCode')}: <span className="font-mono text-gold-light">{referral.code}</span>
           </p>
-          <p className="mt-1 break-all text-xs text-muted">
-            {a('yourLink')}: <span className="text-foreground">{referral.link}</span>
+          <p className="mt-1 text-xs text-muted">
+            {a('yourLink')}: <span className="block break-all text-foreground">{referral.link}</span>
           </p>
-          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
+          <div className="mt-3 grid grid-cols-1 gap-2 text-center text-sm sm:grid-cols-3">
             <div className="rounded border border-border p-2">
               <div className="text-lg text-foreground">{referral.registered}</div>
               <div className="text-[11px] text-muted">{a('registered')}</div>
@@ -226,11 +226,11 @@ export default async function AccountPage({
         ) : (
           <ul className="space-y-2 text-sm">
             {invoices.map((p) => (
-              <li key={p.id} className="flex justify-between">
-                <span className="text-foreground">
+              <li key={p.id} className="flex justify-between gap-3">
+                <span className="min-w-0 truncate text-foreground">
                   {a('invoice')} {p.invoice!.number}
                 </span>
-                <span className="text-gold-light">
+                <span className="shrink-0 text-gold-light">
                   {formatMoney(p.invoice!.totalCents, p.invoice!.currency, locale)}
                 </span>
               </li>
@@ -241,7 +241,7 @@ export default async function AccountPage({
 
       {/* Perfil */}
       <Section title={a('profileTitle')}>
-        <dl className="grid grid-cols-2 gap-y-2 text-sm">
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
           <dt className="text-muted">{t('emailLabel')}</dt>
           <dd className="text-foreground">{session.user.email}</dd>
           <dt className="text-muted">{a('currency')}</dt>

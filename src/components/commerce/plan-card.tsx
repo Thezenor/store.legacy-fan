@@ -47,7 +47,7 @@ export function PlanCard({
         </p>
         <p className="mt-2">
           <span className="text-sm text-muted">{labels.from} </span>
-          <span className="font-display text-4xl font-semibold text-metal-gold">
+          <span className="font-display text-3xl font-semibold text-metal-gold sm:text-4xl">
             {pricing.priceFormatted}
           </span>
         </p>

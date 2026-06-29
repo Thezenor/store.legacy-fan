@@ -27,7 +27,7 @@ export default async function AdminProductos() {
       <form action={createProductAction} className="mt-4 space-y-3 rounded-card border border-border bg-surface p-4">
         <div className="flex flex-wrap gap-3">
           <label className="block"><span className="text-xs text-muted">Nombre</span>
-            <input name="name" required className="mt-1 w-56 rounded border border-border bg-background px-2 py-1.5 text-foreground" /></label>
+            <input name="name" required className="mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground sm:w-56" /></label>
           <label className="block"><span className="text-xs text-muted">Slug (opcional)</span>
             <input name="slug" className="mt-1 w-40 rounded border border-border bg-background px-2 py-1.5 text-foreground" /></label>
           <label className="block"><span className="text-xs text-muted">Colección</span>

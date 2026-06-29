@@ -44,14 +44,14 @@ export function MainNav({
         aria-label={menuLabel}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground md:hidden"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground md:hidden"
       >
         <span className="text-lg leading-none">{open ? '✕' : '☰'}</span>
       </button>
 
       {/* Mobile: panel desplegable */}
       {open ? (
-        <div className="absolute inset-x-0 top-[68px] z-40 border-b border-border bg-background/95 backdrop-blur-md md:hidden">
+        <div className="absolute inset-x-0 top-full z-40 border-b border-border bg-background/95 backdrop-blur-md md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col px-4 py-3">
             {items.map((it) => (
               <Link

@@ -20,7 +20,10 @@ export function AuthNav({
 
   if (!isLoggedIn) {
     return (
-      <Link href="/login" className="text-sm text-muted hover:text-foreground">
+      <Link
+        href="/login"
+        className="inline-flex min-h-[40px] items-center text-sm text-muted hover:text-foreground"
+      >
         {loginLabel}
       </Link>
     );
@@ -28,7 +31,10 @@ export function AuthNav({
 
   return (
     <div className="flex items-center gap-3">
-      <Link href="/account" className="text-sm text-muted hover:text-foreground">
+      <Link
+        href="/account"
+        className="inline-flex min-h-[40px] items-center text-sm text-muted hover:text-foreground"
+      >
         {accountLabel}
       </Link>
       <button
@@ -41,7 +47,7 @@ export function AuthNav({
             router.refresh();
           })
         }
-        className="text-sm text-muted hover:text-foreground disabled:opacity-60"
+        className="hidden min-h-[40px] items-center text-sm text-muted hover:text-foreground disabled:opacity-60 sm:inline-flex"
       >
         {logoutLabel}
       </button>

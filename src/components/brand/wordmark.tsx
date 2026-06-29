@@ -3,10 +3,7 @@
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span className={`inline-flex flex-col items-center leading-none ${className ?? ''}`}>
-      <span
-        className="font-display font-semibold text-foreground"
-        style={{ fontSize: '21px', letterSpacing: '0.18em' }}
-      >
+      <span className="font-display font-semibold tracking-[0.12em] text-foreground text-[17px] sm:text-[21px] sm:tracking-[0.18em]">
         LEGACY FAN
       </span>
       <span

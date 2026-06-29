@@ -13,7 +13,7 @@ export function ManualMemberForm() {
     <form action={action} className="mt-4 flex flex-wrap items-end gap-3 rounded-card border border-border bg-surface p-4">
       <label className="block">
         <span className="text-xs text-muted">Email del usuario</span>
-        <input name="email" type="email" required className="mt-1 w-56 rounded border border-border bg-background px-2 py-1.5 text-foreground" />
+        <input name="email" type="email" required className="mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground sm:w-56" />
       </label>
       <label className="block">
         <span className="text-xs text-muted">Club</span>

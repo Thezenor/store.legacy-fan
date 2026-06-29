@@ -27,13 +27,13 @@ export function DigitalMemberCard({
 
       <div className={`relative flex h-full flex-col justify-between p-5 sm:p-7 ${active ? '' : 'opacity-60'}`}>
         <p className="eyebrow">Legacy Fan Club · Member Card</p>
-        <div className="text-right">
-          <p className="font-display text-lg text-foreground sm:text-2xl">{name}</p>
+        <div className="ml-auto max-w-[75%] text-right">
+          <p className="truncate font-display text-base text-foreground sm:text-2xl">{name}</p>
           <p className="font-display text-2xl font-semibold text-metal-gold sm:text-4xl">
             Nº {number}
           </p>
         </div>
-        <p className="text-[10px] tracking-wide text-faint">
+        <p className="truncate whitespace-nowrap text-[9px] tracking-wide text-faint sm:text-[10px]">
           legacyfan.es © Legacy Fan Precious Metals LLC
         </p>
       </div>

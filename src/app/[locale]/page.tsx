@@ -26,7 +26,7 @@ export default async function HomePage({
           <p style={{ letterSpacing: '0.34em' }} className="text-xs uppercase text-gold">
             {t('heroEyebrow')}
           </p>
-          <h1 className="mt-6 font-display font-medium leading-[1.02] text-[clamp(2.75rem,7vw,4.75rem)]">
+          <h1 className="mt-6 font-display font-medium leading-[1.02] text-[clamp(2.25rem,8vw,4.75rem)] [text-wrap:balance]">
             <span className="block text-foreground">{t('heroL1')}</span>
             <span className="block text-foreground">{t('heroL2')}</span>
             <span className="block italic text-metal-gold">{t('heroAccent')}</span>

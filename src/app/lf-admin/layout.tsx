@@ -38,7 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               LEGACY FAN
             </div>
             <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-faint">Superadmin</p>
-            <nav className="mt-6 flex flex-wrap gap-2 md:flex-col md:gap-1">
+            <nav className="mt-6 flex max-h-40 flex-wrap gap-2 overflow-y-auto md:max-h-none md:flex-col md:gap-1 md:overflow-visible">
               {NAV.map((n) => (
                 <Link
                   key={n.href}
@@ -53,8 +53,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
           {/* Contenido */}
           <div className="flex flex-col">
-            <header className="flex h-16 items-center justify-between border-b border-border px-6">
-              <span className="text-sm text-muted">{session.user.email}</span>
+            <header className="flex h-16 items-center justify-between gap-3 border-b border-border px-6">
+              <span className="min-w-0 truncate text-sm text-muted">{session.user.email}</span>
               <span className="rounded-full border border-gold/40 px-3 py-1 text-[11px] uppercase tracking-wider text-gold-light">
                 {roles[0]}
               </span>

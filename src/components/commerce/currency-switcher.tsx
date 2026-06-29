@@ -31,7 +31,7 @@ export function CurrencySwitcher({ current }: { current: Currency }) {
           disabled={pending}
           onClick={() => choose(c)}
           aria-pressed={c === current}
-          className={`px-3 py-1 transition ${
+          className={`px-3 py-2 transition sm:py-1.5 ${
             c === current ? 'bg-gold text-background' : 'bg-surface text-muted hover:text-foreground'
           }`}
         >

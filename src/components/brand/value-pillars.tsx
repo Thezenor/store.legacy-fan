@@ -9,7 +9,7 @@ export function ValuePillars({
   return (
     <section className="mt-16">
       <p className="eyebrow text-center">{eyebrow}</p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {pillars.map((p) => (
           <article
             key={p.n}

@@ -47,6 +47,15 @@
 - Stub `/checkout` con gating de compra (M1: requiere email verificado) + resumen de precio (M2).
 - Build OK (49 páginas).
 
+### Diseño — Auditoría y correcciones responsive (escritorio + móvil)
+- Auditoría con 4 agentes en paralelo (chrome, home/club, auth/checkout/account, admin).
+- Global: `overflow-x-hidden` en body (elimina scroll horizontal de los márgenes negativos).
+- Chrome: bug del panel de menú móvil (`top-[68px]`→`top-full`), logo responsive (17→21px), header con gaps/padding adaptados, targets táctiles ≥40px (hamburguesa, toggle, auth-nav).
+- Home/club: titular `clamp` con balance, pilares 1→2→3 col, comparativa apila hasta `lg`, precios `text-3xl sm:text-4xl`, cabeceras Prime/Prestige apilan en móvil, switcher táctil.
+- Account/checkout: grids `grid-cols-1 sm:grid-cols-2/3`, listas con truncado (`min-w-0 truncate`/`shrink-0`), carnet con nombre truncado sin solape.
+- Admin: nav móvil con scroll contenido, email truncado, inputs `w-full sm:w-*`.
+- Verificado: build OK (62 págs) y rutas sirviendo 200.
+
 ### Diseño — Sistema visual de marca (handoff hi-fi + carnet Art Deco)
 - Fuentes reales auto-alojadas: Cormorant Garamond (display) + Hanken Grotesk (UI) vía @fontsource.
 - Tokens hi-fi: negro mate #08080a, texto #f2f0ea/#9a978f, oro label #c8a24b / texto #e6c878 / gradiente, metales plata/cobre, colores de estado.

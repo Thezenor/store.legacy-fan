@@ -96,8 +96,8 @@ export default async function CheckoutPage({
 function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="text-sm text-muted">{label}</span>
-      <span className={highlight ? 'font-display text-2xl font-bold text-metal-gold' : 'text-foreground'}>
+      <span className="min-w-0 text-sm text-muted">{label}</span>
+      <span className={`shrink-0 text-right ${highlight ? 'font-display text-2xl font-bold text-metal-gold' : 'text-foreground'}`}>
         {value}
       </span>
     </div>
