@@ -18,8 +18,9 @@
 - [x] **Módulo 1 — Auth completo**: registro, verificación email (obligatoria pre-compra), reset, rate limiting, logout, /account mínimo, header con sesión
 - [x] **Módulo 2 — Motor comercial**: fases/precios/reserva desde BD (fuente única), pricing por club/divisa, precio mostrado en Prime/Prestige
 - [x] **Módulo 3 — Páginas de conversión**: landing /club comparativa, selector divisa EUR/USD, beneficios, FAQ, SEO JSON-LD, stub /checkout con gating
-- [ ] **Módulo 4** — Reserva 50 € + checkout PayPal + webhooks (requiere credenciales sandbox)
-- [ ] Pago completo: club, numeración, productos incluidos, factura
+- [x] **Módulo 4** — Reserva 50 € + checkout PayPal + webhooks (CÓDIGO-COMPLETO; falta probar con credenciales sandbox)
+- [ ] **Módulo 5** — Numeración de socios (servicio atómico LF-000101+)
+- [ ] **Módulo 6** — Pago completo: club, numeración, productos incluidos, factura
 - [ ] Upsell segunda moneda (solo Prestige)
 - [ ] Puntos + referidos
 - [ ] Panel `/account`

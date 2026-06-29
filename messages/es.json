@@ -76,14 +76,31 @@
     "freeShippingEs": "Envío gratis en España",
     "includes": "Qué incluye"
   },
+  "account": {
+    "reservationTitle": "Tu reserva",
+    "statusReservaPendiente": "Reserva pendiente de pago completo",
+    "paid": "Pagado",
+    "remaining": "Restante",
+    "noMemberNumberYet": "Aún no tienes número de socio (se asigna con el pago completo).",
+    "completeSoon": "El pago completo estará disponible en breve.",
+    "currency": "Moneda preferida"
+  },
   "checkout": {
     "title": "Finalizar tu acceso",
     "plan": "Plan elegido",
     "typeReserve": "Reserva",
     "typeJoin": "Pago completo",
     "amount": "Importe",
-    "comingSoon": "El pago se habilitará en breve (integración PayPal en curso). Hemos guardado tu selección.",
-    "back": "Volver a los planes"
+    "comingSoon": "El pago completo se habilitará en breve. De momento puedes dejar tu reserva.",
+    "payReserve": "Pagar reserva con PayPal",
+    "processing": "Redirigiendo a PayPal…",
+    "back": "Volver a los planes",
+    "errors": {
+      "unauthenticated": "Inicia sesión para continuar.",
+      "unverified": "Verifica tu correo antes de reservar.",
+      "already_active": "Ya tienes una reserva o membresía activa. Revisa tu cuenta.",
+      "error": "No se pudo iniciar el pago. Inténtalo de nuevo."
+    }
   },
   "legal": {
     "disclaimer": "Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura."

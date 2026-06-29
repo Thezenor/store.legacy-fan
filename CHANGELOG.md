@@ -46,3 +46,10 @@
 - SEO estructurado JSON-LD: Product/Offer, FAQPage, BreadcrumbList. FAQ multiidioma.
 - Stub `/checkout` con gating de compra (M1: requiere email verificado) + resumen de precio (M2).
 - Build OK (49 páginas).
+
+### Fase 1 · Módulo 4 — Checkout de reserva + PayPal (código-completo, sin probar)
+- `PayPalProvider` real: OAuth client_credentials, crear/capturar orden (Orders v2), verificación de webhook. Sandbox/live por `PAYPAL_MODE`.
+- Servicio de reserva: crea `Reservation` (50 €/$ genérica, club preseleccionado no vinculante) + `Payment` PayPal; captura idempotente; regla 1 email = 1 reserva/membresía activa (doc 03).
+- Rutas: `/api/checkout/paypal/return` (captura + email), `/cancel`, `/api/webhooks/paypal` (verifica firma + reconcilia, idempotente).
+- Email "reserva recibida" multiidioma. Botón de pago en `/checkout` (tipo reserva) con gating D-009. Panel de reserva en `/account` (pagado/restante, sin número de socio).
+- Auditoría de captura/reconciliación. Build OK (52 páginas). **Pendiente de credenciales sandbox para probar pagos reales.**

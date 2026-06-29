@@ -76,14 +76,31 @@
     "freeShippingEs": "Free shipping in Spain",
     "includes": "What's included"
   },
+  "account": {
+    "reservationTitle": "Your reservation",
+    "statusReservaPendiente": "Reservation pending full payment",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "noMemberNumberYet": "You don't have a member number yet (assigned on full payment).",
+    "completeSoon": "Full payment will be available shortly.",
+    "currency": "Preferred currency"
+  },
   "checkout": {
     "title": "Complete your access",
     "plan": "Chosen plan",
     "typeReserve": "Reservation",
     "typeJoin": "Full payment",
     "amount": "Amount",
-    "comingSoon": "Payment will be enabled shortly (PayPal integration in progress). We've saved your selection.",
-    "back": "Back to plans"
+    "comingSoon": "Full payment will be enabled shortly. For now you can place your reservation.",
+    "payReserve": "Pay reservation with PayPal",
+    "processing": "Redirecting to PayPal…",
+    "back": "Back to plans",
+    "errors": {
+      "unauthenticated": "Log in to continue.",
+      "unverified": "Verify your email before reserving.",
+      "already_active": "You already have an active reservation or membership. Check your account.",
+      "error": "Could not start the payment. Please try again."
+    }
   },
   "legal": {
     "disclaimer": "Legacy Fan products are collectible items. They do not constitute a financial product or any promise of future returns."

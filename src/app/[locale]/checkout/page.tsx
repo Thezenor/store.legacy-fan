@@ -4,6 +4,8 @@ import type { ClubType } from '@prisma/client';
 import { requireVerifiedUser } from '@/lib/session';
 import { getClubPricing, getReservationTerms } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
+import { hasActiveReservationOrMembership } from '@/lib/checkout/reservation';
+import { ReserveButton } from '@/components/checkout/reserve-button';
 import { Link } from '@/i18n/navigation';
 
 /**
@@ -27,7 +29,7 @@ export default async function CheckoutPage({
   }
 
   // Gating de compra (D-009): sin sesión → /login; sin verificar → /verify-email.
-  await requireVerifiedUser(locale);
+  const session = await requireVerifiedUser(locale);
 
   const currency = await getDisplayCurrency();
   const t = await getTranslations({ locale, namespace: 'checkout' });
@@ -38,6 +40,14 @@ export default async function CheckoutPage({
 
   const amount = type === 'reserve' ? reservation.amountFormatted : pricing.priceFormatted;
   const clubName = clubKey === 'PRIME' ? 'Legacy Prime Club' : 'Legacy Prestige Club';
+  const alreadyActive = await hasActiveReservationOrMembership(session.user.id);
+
+  const errors = {
+    unauthenticated: t('errors.unauthenticated'),
+    unverified: t('errors.unverified'),
+    already_active: t('errors.already_active'),
+    error: t('errors.error'),
+  };
 
   return (
     <section className="mx-auto max-w-lg animate-fade-in">
@@ -47,9 +57,29 @@ export default async function CheckoutPage({
         <Row label="" value={type === 'reserve' ? t('typeReserve') : t('typeJoin')} />
         <Row label={t('amount')} value={amount} highlight />
       </div>
-      <p className="mt-4 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-foreground">
-        {t('comingSoon')}
-      </p>
+
+      <div className="mt-6">
+        {type === 'reserve' ? (
+          alreadyActive ? (
+            <p className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-foreground">
+              {t('errors.already_active')}
+            </p>
+          ) : (
+            // Pago completo (join) llega en el Módulo 6; aquí va la reserva (50 €/$).
+            <ReserveButton
+              club={clubKey}
+              label={t('payReserve')}
+              pendingLabel={t('processing')}
+              errors={errors}
+            />
+          )
+        ) : (
+          <p className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-foreground">
+            {t('comingSoon')}
+          </p>
+        )}
+      </div>
+
       <Link href="/club" className="mt-4 inline-block text-sm text-gold hover:underline">
         ← {t('back')}
       </Link>

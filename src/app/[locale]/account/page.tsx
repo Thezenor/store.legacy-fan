@@ -1,9 +1,10 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { requireUser, isEmailVerified } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
+import { formatMoney } from '@/lib/commerce/money';
 import { Link } from '@/i18n/navigation';
 
-// Panel de usuario mínimo (Módulo 1). Las secciones completas del doc 08 llegan en el Módulo 9.
+// Panel de usuario (Módulo 1 + reserva del Módulo 4). Secciones completas: Módulo 9.
 export default async function AccountPage({
   params,
 }: {
@@ -13,11 +14,18 @@ export default async function AccountPage({
   setRequestLocale(locale);
   const session = await requireUser(locale);
   const t = await getTranslations({ locale, namespace: 'auth' });
+  const a = await getTranslations({ locale, namespace: 'account' });
 
-  const profile = await prisma.userProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { firstName: true, lastName: true, preferredCurrency: true },
-  });
+  const [profile, reservation] = await Promise.all([
+    prisma.userProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { firstName: true, lastName: true, preferredCurrency: true },
+    }),
+    prisma.reservation.findFirst({
+      where: { userId: session.user.id, status: { in: ['RESERVA_PENDIENTE', 'PAGO_COMPLETO'] } },
+      orderBy: { createdAt: 'desc' },
+    }),
+  ]);
 
   const verified = isEmailVerified(session);
 
@@ -30,7 +38,6 @@ export default async function AccountPage({
 
       {!verified ? (
         <div className="mt-4 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm">
-          {/* Aviso de verificación pendiente (gating de checkout, D-009) */}
           <p className="text-foreground">
             {t('verify.title')}: <span className="text-gold">pendiente</span>
           </p>
@@ -40,10 +47,41 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      <div className="mt-6 rounded-card border border-border bg-surface p-5 text-sm text-muted">
-        <p>Moneda preferida: {profile?.preferredCurrency ?? 'EUR'}</p>
-        <p className="mt-2">Las secciones de membresía, productos, puntos y referidos llegarán pronto.</p>
-      </div>
+      {reservation ? (
+        <div className="mt-6 rounded-card border border-border bg-surface p-5">
+          <h2 className="font-display text-xl font-bold text-foreground">{a('reservationTitle')}</h2>
+          <p className="mt-1 text-sm text-gold">{a('statusReservaPendiente')}</p>
+          <div className="mt-3 space-y-1 text-sm text-muted">
+            <p>
+              {a('paid')}:{' '}
+              <span className="text-foreground">
+                {formatMoney(reservation.amountPaidCents, reservation.currency, locale)}
+              </span>
+            </p>
+            {reservation.totalDueCents > 0 ? (
+              <p>
+                {a('remaining')}:{' '}
+                <span className="text-foreground">
+                  {formatMoney(
+                    Math.max(0, reservation.totalDueCents - reservation.amountPaidCents),
+                    reservation.currency,
+                    locale,
+                  )}
+                </span>
+              </p>
+            ) : null}
+          </div>
+          <p className="mt-3 text-xs text-muted">{a('noMemberNumberYet')}</p>
+          <p className="mt-1 text-xs text-muted">{a('completeSoon')}</p>
+        </div>
+      ) : (
+        <div className="mt-6 rounded-card border border-border bg-surface p-5 text-sm text-muted">
+          <p>
+            {a('currency')}: {profile?.preferredCurrency ?? 'EUR'}
+          </p>
+          <p className="mt-2">Las secciones de membresía, productos, puntos y referidos llegarán pronto.</p>
+        </div>
+      )}
     </section>
   );
 }
