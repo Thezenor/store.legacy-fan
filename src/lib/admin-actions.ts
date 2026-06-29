@@ -1,9 +1,19 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { Locale } from '@prisma/client';
+import type { CollectionStatus, Locale } from '@prisma/client';
 import { prisma } from './prisma';
 import { getAdminSession } from './admin';
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
 
 async function ensureAdmin() {
   const ok = await getAdminSession();
@@ -85,4 +95,78 @@ export async function updateLegalAction(formData: FormData): Promise<void> {
   await audit(admin.id, admin.email, 'legal.update', 'LegalPage', `${slug}/${locale}`, null, { title });
   revalidatePath('/lf-admin/legal');
   revalidatePath(`/legal/${slug}`);
+}
+
+/** Crea una colección (doc 05). */
+export async function createCollectionAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const name = String(formData.get('name') ?? '').trim();
+  if (!name) return;
+  const slug = (String(formData.get('slug') ?? '').trim() || slugify(name));
+  const status = (String(formData.get('status') ?? 'BORRADOR')) as CollectionStatus;
+  const created = await prisma.collection.create({ data: { name, slug, status } });
+  await audit(admin.id, admin.email, 'collection.create', 'Collection', created.id, null, { name, slug, status });
+  revalidatePath('/lf-admin/colecciones');
+}
+
+/** Actualiza el estado de una colección. */
+export async function updateCollectionAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  const status = String(formData.get('status')) as CollectionStatus;
+  await prisma.collection.update({ where: { id }, data: { status } });
+  await audit(admin.id, admin.email, 'collection.update', 'Collection', id, null, { status });
+  revalidatePath('/lf-admin/colecciones');
+}
+
+/** Crea un producto con los campos clave (doc 05). */
+export async function createProductAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const name = String(formData.get('name') ?? '').trim();
+  if (!name) return;
+  const slug = String(formData.get('slug') ?? '').trim() || slugify(name);
+  const collectionId = String(formData.get('collectionId') ?? '') || null;
+  const created = await prisma.product.create({
+    data: {
+      name,
+      slug,
+      collectionId,
+      description: String(formData.get('description') ?? '') || null,
+      priceEurCents: eurosToCents(formData.get('priceEur')),
+      priceUsdCents: eurosToCents(formData.get('priceUsd')),
+      premiumEurCents: eurosToCents(formData.get('premiumEur')),
+      premiumUsdCents: eurosToCents(formData.get('premiumUsd')),
+      includedInPrime: formData.get('includedInPrime') === 'on',
+      includedInPrestige: formData.get('includedInPrestige') === 'on',
+      isInauguralCoin: formData.get('isInauguralCoin') === 'on',
+      available: formData.get('available') === 'on',
+      visible: formData.get('visible') === 'on',
+    },
+  });
+  await audit(admin.id, admin.email, 'product.create', 'Product', created.id, null, { name, slug });
+  revalidatePath('/lf-admin/productos');
+}
+
+/** Actualiza un producto existente. */
+export async function updateProductAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  const before = await prisma.product.findUnique({ where: { id } });
+  if (!before) return;
+  await prisma.product.update({
+    where: { id },
+    data: {
+      priceEurCents: eurosToCents(formData.get('priceEur')),
+      priceUsdCents: eurosToCents(formData.get('priceUsd')),
+      premiumEurCents: eurosToCents(formData.get('premiumEur')),
+      premiumUsdCents: eurosToCents(formData.get('premiumUsd')),
+      includedInPrime: formData.get('includedInPrime') === 'on',
+      includedInPrestige: formData.get('includedInPrestige') === 'on',
+      isInauguralCoin: formData.get('isInauguralCoin') === 'on',
+      available: formData.get('available') === 'on',
+      visible: formData.get('visible') === 'on',
+    },
+  });
+  await audit(admin.id, admin.email, 'product.update', 'Product', id, null, { id });
+  revalidatePath('/lf-admin/productos');
 }
