@@ -6,6 +6,7 @@ import { routing, type AppLocale } from '@/i18n/routing';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthNav } from '@/components/auth/auth-nav';
 import { Wordmark } from '@/components/brand/wordmark';
+import { MainNav } from '@/components/brand/main-nav';
 import { Link } from '@/i18n/navigation';
 import { auth } from '@/lib/auth';
 import '../globals.css';
@@ -62,10 +63,18 @@ export default async function LocaleLayout({
       <body className="font-sans antialiased">
         <NextIntlClientProvider>
           <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-            <nav className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-4 sm:px-6">
+            <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
               <Link href="/" aria-label={t('siteName')}>
                 <Wordmark />
               </Link>
+              <MainNav
+                menuLabel={t('menu')}
+                items={[
+                  { href: '/club', label: t('navClub') },
+                  { href: '/club/prime', label: 'Prime' },
+                  { href: '/club/prestige', label: 'Prestige' },
+                ]}
+              />
               <div className="flex items-center gap-3 sm:gap-4">
                 <AuthNav
                   isLoggedIn={!!session?.user?.id}
@@ -75,7 +84,7 @@ export default async function LocaleLayout({
                 />
                 <ThemeToggle label={t('toggleTheme')} />
               </div>
-            </nav>
+            </div>
           </header>
           <main className="mx-auto min-h-[70vh] max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
             {children}

@@ -9,7 +9,9 @@
     "account": "Mon compte",
     "logout": "Se déconnecter",
     "toggleTheme": "Changer de thème",
-    "comparePlans": "Comparer les offres"
+    "comparePlans": "Comparer les offres",
+    "navClub": "Le Club",
+    "menu": "Menu"
   },
   "home": {
     "heroTitle": "Legacy Fan",
