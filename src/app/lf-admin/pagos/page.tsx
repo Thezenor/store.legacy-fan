@@ -1,0 +1,53 @@
+import { prisma } from '@/lib/prisma';
+import { formatMoney } from '@/lib/commerce/money';
+
+export default async function AdminPagos() {
+  const payments = await prisma.payment.findMany({
+    include: { user: true },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  });
+
+  return (
+    <div>
+      <h1 className="font-display text-3xl font-bold text-foreground">Reservas y pagos</h1>
+      <p className="mt-1 text-sm text-muted">{payments.length} transacciones recientes</p>
+      <div className="mt-6 overflow-x-auto rounded-card border border-border">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-surface text-xs uppercase tracking-wider text-faint">
+            <tr>
+              <th className="px-4 py-3">Fecha</th>
+              <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Pasarela</th>
+              <th className="px-4 py-3">Importe</th>
+              <th className="px-4 py-3">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-muted">
+                  Aún no hay transacciones.
+                </td>
+              </tr>
+            ) : (
+              payments.map((p) => (
+                <tr key={p.id} className="border-t border-border">
+                  <td className="px-4 py-3 text-muted">
+                    {new Intl.DateTimeFormat('es', { dateStyle: 'short', timeStyle: 'short' }).format(p.createdAt)}
+                  </td>
+                  <td className="px-4 py-3 text-foreground">{p.user.email}</td>
+                  <td className="px-4 py-3">
+                    {p.provider} <span className="text-xs text-faint">({p.mode})</span>
+                  </td>
+                  <td className="px-4 py-3 text-gold-light">{formatMoney(p.amountCents, p.currency, 'es')}</td>
+                  <td className="px-4 py-3 text-muted">{p.status.replaceAll('_', ' ').toLowerCase()}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
