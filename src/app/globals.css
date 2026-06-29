@@ -72,3 +72,17 @@ h1, h2, h3, .font-display {
   background: linear-gradient(90deg, transparent, rgba(200, 162, 75, 0.5), transparent);
   height: 1px;
 }
+
+/* Marquesina infinita (manual de marca, 28s linear) */
+.lf-marquee {
+  display: flex;
+  width: max-content;
+  animation: lf-marquee 28s linear infinite;
+}
+@keyframes lf-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lf-marquee { animation: none; }
+}

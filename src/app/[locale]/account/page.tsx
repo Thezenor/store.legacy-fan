@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { requireUser, isEmailVerified } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { formatMoney } from '@/lib/commerce/money';
+import { DigitalMemberCard } from '@/components/brand/member-card';
 import { Link } from '@/i18n/navigation';
 
 // Panel de usuario (Módulo 1 + reserva del Módulo 4). Secciones completas: Módulo 9.
@@ -16,7 +17,7 @@ export default async function AccountPage({
   const t = await getTranslations({ locale, namespace: 'auth' });
   const a = await getTranslations({ locale, namespace: 'account' });
 
-  const [profile, reservation] = await Promise.all([
+  const [profile, reservation, membership] = await Promise.all([
     prisma.userProfile.findUnique({
       where: { userId: session.user.id },
       select: { firstName: true, lastName: true, preferredCurrency: true },
@@ -25,9 +26,14 @@ export default async function AccountPage({
       where: { userId: session.user.id, status: { in: ['RESERVA_PENDIENTE', 'PAGO_COMPLETO'] } },
       orderBy: { createdAt: 'desc' },
     }),
+    prisma.membership.findUnique({
+      where: { userId: session.user.id },
+      include: { memberNumber: true },
+    }),
   ]);
 
   const verified = isEmailVerified(session);
+  const fullName = profile ? `${profile.firstName} ${profile.lastName}` : (session.user.email ?? '');
 
   return (
     <section className="mx-auto max-w-2xl animate-fade-in">
@@ -44,6 +50,22 @@ export default async function AccountPage({
           <Link href="/verify-email" className="mt-1 inline-block text-gold hover:underline">
             {t('verify.resend')}
           </Link>
+        </div>
+      ) : null}
+
+      {/* Carnet digital: activo si hay membresía con número; vista previa si solo hay reserva */}
+      {membership?.memberNumber ? (
+        <div className="mt-6 max-w-md">
+          <DigitalMemberCard name={fullName} number={membership.memberNumber.formatted} />
+        </div>
+      ) : reservation ? (
+        <div className="mt-6 max-w-md">
+          <DigitalMemberCard
+            name={fullName}
+            number="LF-——————"
+            active={false}
+            pendingLabel={a('statusReservaPendiente')}
+          />
         </div>
       ) : null}
 

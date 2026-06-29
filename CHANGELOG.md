@@ -53,6 +53,7 @@
 - Componentes de marca: `Wordmark` (sello metálico + LEGACY FAN), `ArtDecoMotif` (arco solar + cuñas metálicas, inspirado en el carnet), clase `.eyebrow` y `.text-metal-gold`.
 - Header con wordmark (chrome 68px), footer con disclaimer + dirección legal (Dover) + © Legacy Fan.
 - Hero home rediseñado (eyebrow, titular Cormorant, emblema, marquesina de valores), CTAs con gradiente oro, tarjetas de plan y bloque de precio actualizados.
+- Pulido: marquesina infinita animada (CSS, respeta reduce-motion), 3 pilares de valor en home, **carnet digital Art Deco** en /account (réplica del carnet físico con nº de socio; vista previa atenuada para reservas), hover dorado en tarjetas de plan.
 
 ### Fase 1 · Módulo 4 — Checkout de reserva + PayPal (código-completo, sin probar)
 - `PayPalProvider` real: OAuth client_credentials, crear/capturar orden (Orders v2), verificación de webhook. Sandbox/live por `PAYPAL_MODE`.

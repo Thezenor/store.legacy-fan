@@ -34,7 +34,7 @@ export function PlanCard({
 
   return (
     <article
-      className={`flex flex-col rounded-card border ${ring} bg-surface p-6 shadow-card animate-fade-in ${
+      className={`flex flex-col rounded-card border ${ring} bg-surface p-6 shadow-card transition hover:border-gold/60 animate-fade-in ${
         featured ? 'ring-1 ring-gold/30' : ''
       }`}
     >

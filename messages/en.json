@@ -14,7 +14,14 @@
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Premium precious-metal collecting for those who arrive first.",
-    "heroBody": "Choose your access level and join the first generation of Legacy Fan members: physical .999 silver and copper pieces, Mystery Boxes, a member number, a private community and priority on future collections."
+    "heroBody": "Choose your access level and join the first generation of Legacy Fan members: physical .999 silver and copper pieces, Mystery Boxes, a member number, a private community and priority on future collections.",
+    "marquee": "Limited edition · .999 silver · Pure gold · Ultra High Relief · Collectible art · Official license",
+    "pillarsEyebrow": "Why Legacy Fan",
+    "pillars": [
+      { "n": "01", "title": ".999 Silver & Pure Gold", "body": "Certified precious metals, minted in limited, numbered editions." },
+      { "n": "02", "title": "Ultra High Relief", "body": "High-relief minting for exceptional detail and depth." },
+      { "n": "03", "title": "Official Licenses", "body": "Officially licensed pieces with a nominal certificate of authenticity." }
+    ]
   },
   "prime": {
     "title": "Prime Club",

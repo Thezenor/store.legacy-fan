@@ -14,7 +14,14 @@
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Coleccionismo premium en metales preciosos para quienes llegan primero.",
-    "heroBody": "Elige tu nivel de acceso y forma parte de la primera generación de socios Legacy Fan: piezas físicas en plata y cobre .999, Mystery Boxes, número de socio, comunidad privada y prioridad en futuras colecciones."
+    "heroBody": "Elige tu nivel de acceso y forma parte de la primera generación de socios Legacy Fan: piezas físicas en plata y cobre .999, Mystery Boxes, número de socio, comunidad privada y prioridad en futuras colecciones.",
+    "marquee": "Edición limitada · Plata .999 · Oro puro · Ultra High Relief · Arte coleccionable · Licencia oficial",
+    "pillarsEyebrow": "Por qué Legacy Fan",
+    "pillars": [
+      { "n": "01", "title": "Plata .999 & Oro puro", "body": "Metales preciosos certificados, acuñados en ediciones limitadas y numeradas." },
+      { "n": "02", "title": "Ultra High Relief", "body": "Acuñación en altorrelieve para un detalle y una profundidad excepcionales." },
+      { "n": "03", "title": "Licencias oficiales", "body": "Piezas con licencia oficial y certificado de autenticidad nominal." }
+    ]
   },
   "prime": {
     "title": "Prime Club",

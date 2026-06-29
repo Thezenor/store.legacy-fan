@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { ArtDecoMotif } from '@/components/brand/art-deco-motif';
+import { Marquee } from '@/components/brand/marquee';
+import { ValuePillars } from '@/components/brand/value-pillars';
 
 export default async function HomePage({
   params,
@@ -48,11 +50,15 @@ export default async function HomePage({
       </div>
 
       {/* Marquesina de valores (manual de marca) */}
-      <div className="mt-14 overflow-hidden border-y border-border py-3">
-        <p className="text-center text-[11px] uppercase tracking-[0.3em] text-faint">
-          Edición limitada · Plata .999 · Oro puro · Ultra High Relief · Arte coleccionable · Licencia oficial
-        </p>
+      <div className="mt-14">
+        <Marquee text={t('marquee')} />
       </div>
+
+      {/* Pilares de valor */}
+      <ValuePillars
+        eyebrow={t('pillarsEyebrow')}
+        pillars={t.raw('pillars') as { n: string; title: string; body: string }[]}
+      />
     </section>
   );
 }
