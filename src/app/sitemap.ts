@@ -4,7 +4,15 @@ import { routing } from '@/i18n/routing';
 const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://store.legacy-fan.com';
 
 // Rutas públicas indexables. Se ampliará con productos/colecciones/blog en fases siguientes.
-const paths = ['', '/club', '/club/prime', '/club/prestige'];
+const paths = [
+  '',
+  '/club',
+  '/club/prime',
+  '/club/prestige',
+  '/legal/terms',
+  '/legal/privacy',
+  '/legal/cookies',
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];

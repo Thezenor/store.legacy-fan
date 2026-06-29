@@ -94,6 +94,11 @@ export default async function LocaleLayout({
               <div className="hairline-gold mb-8" />
               <div className="flex flex-col items-center gap-4 text-center">
                 <Wordmark />
+                <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted">
+                  <Link href="/legal/terms" className="hover:text-foreground">{t('legalTerms')}</Link>
+                  <Link href="/legal/privacy" className="hover:text-foreground">{t('legalPrivacy')}</Link>
+                  <Link href="/legal/cookies" className="hover:text-foreground">{t('legalCookies')}</Link>
+                </nav>
                 <p className="max-w-2xl text-xs leading-relaxed text-faint">
                   {/* Disclaimer obligatorio (doc 15) */}
                   <DisclaimerText locale={locale} />

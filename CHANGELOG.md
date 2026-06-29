@@ -56,6 +56,10 @@
 - Pulido: marquesina infinita animada (CSS, respeta reduce-motion), 3 pilares de valor en home, **carnet digital Art Deco** en /account (réplica del carnet físico con nº de socio; vista previa atenuada para reservas), hover dorado en tarjetas de plan.
 - **Fidelidad al prototipo** (spec extraído con subagente del handoff): logo recreado "LEGACY FAN + filete dorado + PRECIOUS METALS"; header 74px con nav centrado title-case (13px, tracking 0.04em, oro activo); Hero A·Split con **moneda metálica** (radial plata + doble sombra), eyebrow 0.34em, titular Cormorant 76px con acento dorado en italic, CTAs exactos (gradiente 135deg, radius 4px); marquesina Cormorant 17px sobre #0b0b0d. Verificado por render. Early Collector excluido (regla maestra).
 
+### Fase 1 · Módulo 12 (parcial) — SEO y legal
+- Páginas legales editables (ruta `/legal/[slug]` con fallback de idioma) + seed de términos, privacidad, cookies, envíos, devoluciones, membresía, puntos, referidos.
+- Enlaces legales en el footer; sitemap ampliado con las legales. (GEO por región queda preparado vía SeoMetadata.)
+
 ### Fase 1 · Módulo 8 — Referidos y puntos
 - Código de referido único por socio (`ensureReferralCode`, generado al activar la membresía).
 - Captura de referido en el registro (`?ref=CODE` → relación REGISTRADO); recompensa al pago completo del referido (M6) según modalidad.

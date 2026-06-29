@@ -11,7 +11,10 @@
     "toggleTheme": "Cambia tema",
     "comparePlans": "Confronta i piani",
     "navClub": "Il Club",
-    "menu": "Menu"
+    "menu": "Menu",
+    "legalTerms": "Termini",
+    "legalPrivacy": "Privacy",
+    "legalCookies": "Cookie"
   },
   "home": {
     "heroTitle": "Legacy Fan",

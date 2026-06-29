@@ -154,6 +154,38 @@ async function seedLegalDisclaimer() {
   }
 }
 
+// Páginas legales (doc 09/15). Contenido inicial de marcador, editable desde superadmin.
+const LEGAL_PAGES: { slug: string; es: string; en: string }[] = [
+  { slug: 'terms', es: 'Términos y condiciones', en: 'Terms and conditions' },
+  { slug: 'privacy', es: 'Política de privacidad', en: 'Privacy policy' },
+  { slug: 'cookies', es: 'Política de cookies', en: 'Cookie policy' },
+  { slug: 'shipping', es: 'Política de envíos', en: 'Shipping policy' },
+  { slug: 'returns', es: 'Política de devoluciones', en: 'Returns policy' },
+  { slug: 'membership', es: 'Condiciones de membresía', en: 'Membership terms' },
+  { slug: 'points', es: 'Condiciones de puntos', en: 'Points terms' },
+  { slug: 'referrals', es: 'Condiciones de referidos', en: 'Referral terms' },
+];
+
+async function seedLegalPages() {
+  const placeholder = (title: string) =>
+    `${title}\n\nContenido pendiente de redacción. Esta página es editable desde el superadmin (/lf-admin).`;
+  const placeholderEn = (title: string) =>
+    `${title}\n\nContent to be drafted. This page is editable from the superadmin (/lf-admin).`;
+
+  for (const p of LEGAL_PAGES) {
+    await prisma.legalPage.upsert({
+      where: { slug_locale: { slug: p.slug, locale: Locale.es } },
+      update: {},
+      create: { slug: p.slug, locale: Locale.es, title: p.es, body: placeholder(p.es) },
+    });
+    await prisma.legalPage.upsert({
+      where: { slug_locale: { slug: p.slug, locale: Locale.en } },
+      update: {},
+      create: { slug: p.slug, locale: Locale.en, title: p.en, body: placeholderEn(p.en) },
+    });
+  }
+}
+
 async function main() {
   await seedRoles();
   await seedPlan(ClubType.PRIME, 'prime-club', 'Legacy Prime Club', PRIME_PHASES);
@@ -161,6 +193,7 @@ async function main() {
   await seedSettings();
   await seedReservedMemberNumbers();
   await seedLegalDisclaimer();
+  await seedLegalPages();
   // Silencio en producción; útil en local.
   void ReferralRewardMode;
 }
