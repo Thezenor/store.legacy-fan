@@ -21,23 +21,31 @@ const config: Config = {
         'surface-elevated': 'rgb(var(--lf-surface-elevated) / <alpha-value>)',
         foreground: 'rgb(var(--lf-foreground) / <alpha-value>)',
         muted: 'rgb(var(--lf-muted) / <alpha-value>)',
+        faint: 'rgb(var(--lf-faint) / <alpha-value>)',
         border: 'rgb(var(--lf-border) / <alpha-value>)',
-        // Paleta metal
+        // Paleta metal (handoff hi-fi)
         gold: {
-          DEFAULT: '#C9A227',
-          light: '#E6C75A',
-          dark: '#9C7E1C',
+          DEFAULT: '#c8a24b', // label/acento
+          light: '#e6c878', // texto/precios
+          dark: '#a9822f',
         },
         silver: {
-          DEFAULT: '#C0C5CE',
-          light: '#E2E5EA',
-          dark: '#8A8F99',
+          DEFAULT: '#cfd2d8',
+          light: '#fbfaf6',
+          dark: '#8d9095',
         },
         copper: {
-          DEFAULT: '#B66A3C',
-          light: '#D98C5F',
-          dark: '#8A4E2B',
+          DEFAULT: '#c0855a',
+          light: '#f1efe9',
+          dark: '#7c4f33',
         },
+        // Colores de estado
+        'state-green': '#7bbf8f',
+        'state-blue': '#7ba6bf',
+        'state-amber': '#e6c878',
+      },
+      backgroundImage: {
+        'gold-grad': 'linear-gradient(135deg, #e6c264 0%, #a9822f 100%)',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],

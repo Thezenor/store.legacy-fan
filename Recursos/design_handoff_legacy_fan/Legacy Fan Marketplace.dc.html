@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#08080a;font-family:'Hanken Grotesk',sans-serif}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+  @keyframes lfmarq{to{transform:translateX(-50%)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#08080a;color:#f2f0ea">
+
+  <!-- ============ TOP CHROME (réplica del menú real legacy-fan.com) ============ -->
+  <div style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 26px;height:74px;background:rgba(8,8,10,0.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.07)">
+    <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:14px;cursor:pointer;flex:none">
+      <img src="https://legacy-fan.com/wp-content/uploads/2026/04/Logo-200x60-1.png" alt="Legacy Fan" style="height:40px;width:auto;display:block" />
+    </div>
+
+    <!-- primary menu -->
+    <nav style="display:flex;align-items:center;gap:24px;flex:1;justify-content:center">
+      <sc-for list="{{ mNav }}" as="n" hint-placeholder-count="6">
+        <span onClick="{{ n.onClick }}" style="{{ n.style }}">{{ n.label }}</span>
+      </sc-for>
+    </nav>
+
+    <!-- right cluster: language · search · cart -->
+    <div style="display:flex;align-items:center;gap:14px;flex:none">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="display:inline-flex;align-items:center;gap:5px;cursor:pointer">
+          <span style="width:18px;height:13px;border-radius:2px;overflow:hidden;display:inline-flex;flex-direction:column;border:1px solid rgba(255,255,255,0.15)"><span style="flex:1;background:#c60b1e"></span><span style="flex:1.4;background:#ffc400"></span><span style="flex:1;background:#c60b1e"></span></span>
+          <span style="font-size:12px;color:#e6e3db;letter-spacing:0.05em">ES</span>
+        </span>
+        <span style="color:#4a4843;font-size:12px">|</span>
+        <span style="font-size:12px;color:#9a978f;letter-spacing:0.05em;cursor:pointer;opacity:0.7">EN</span>
+      </div>
+      <div style="width:1px;height:20px;background:rgba(255,255,255,0.1)"></div>
+      <div style="cursor:pointer;color:#cfcdc6;font-size:17px;display:flex;align-items:center" title="Buscar">⌕</div>
+      <div onClick="{{ goCart }}" style="position:relative;cursor:pointer;display:flex;align-items:center;gap:7px;color:#cfcdc6">
+        <span style="font-size:15px">⛒</span>
+        <span style="min-width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;border-radius:999px;background:linear-gradient(135deg,#d9b25a,#a9822f);color:#1a1408;font-weight:700;font-size:11px">{{ cartCount }}</span>
+      </div>
+      <!-- prototype view switch -->
+      <div style="display:flex;align-items:center;gap:3px;padding:3px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:999px;margin-left:2px">
+        <sc-for list="{{ appTabs }}" as="t" hint-placeholder-count="2">
+          <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MARKETPLACE ============ -->
+  <sc-if value="{{ isMarket }}" hint-placeholder-val="{{ true }}">
+  <div>
+
+    <!-- ---- HOME ---- -->
+    <sc-if value="{{ mHome }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <!-- variant switcher -->
+      <div style="display:flex;align-items:center;gap:10px;padding:18px 32px;background:#0b0b0d">
+        <span style="font-size:11px;letter-spacing:0.14em;color:#6a6862">HERO · VARIANTE</span>
+        <sc-for list="{{ heroTabs }}" as="h" hint-placeholder-count="3">
+          <button onClick="{{ h.onClick }}" style="{{ h.style }}">{{ h.label }}</button>
+        </sc-for>
+      </div>
+
+      <!-- Hero A: split -->
+      <sc-if value="{{ heroA }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;padding:70px 48px 80px;background:radial-gradient(120% 80% at 80% 20%,#16140f,#08080a 60%)">
+        <div>
+          <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:26px">ARTE · PLATA .999 · EDICIÓN LIMITADA</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:76px;line-height:1.02;font-weight:500">Donde el Arte<br>Trasciende<br><span style="background:linear-gradient(120deg,#f4efe2,#c6a253,#f4efe2);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:italic">el Metal</span></div>
+          <p style="max-width:440px;margin:28px 0 36px;color:#a6a39b;font-size:16px;line-height:1.65">Obras de arte en plata .999, oro y cobre .999, creadas en ediciones limitadas con licencias oficiales y valor coleccionable.</p>
+          <div style="display:flex;gap:14px">
+            <button onClick="{{ goCatalog }}" style="padding:15px 30px;background:linear-gradient(135deg,#e6c264,#a9822f);color:#160f02;font-weight:600;font-size:13px;letter-spacing:0.08em;border:none;border-radius:4px;cursor:pointer">EXPLORAR COLECCIONES</button>
+            <button style="padding:15px 30px;background:transparent;color:#e6e3db;font-weight:500;font-size:13px;letter-spacing:0.08em;border:1px solid rgba(255,255,255,0.22);border-radius:4px;cursor:pointer">CONTACTAR</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:center">
+          <div style="position:relative;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle at 36% 28%,#fbfaf6,#cfd2d8 30%,#8d9095 58%,#46474b 82%,#26272a);box-shadow:0 40px 90px -20px rgba(0,0,0,0.8),inset 0 0 60px rgba(255,255,255,0.12)">
+            <div style="position:absolute;inset:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.16)"></div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:rgba(40,40,44,0.7);letter-spacing:0.1em">PRODUCT SHOT · 2oz</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- Hero B: centered -->
+      <sc-if value="{{ heroB }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;padding:84px 32px 90px;background:radial-gradient(80% 60% at 50% 0%,#17130c,#08080a 65%)">
+        <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:24px">PRÓXIMO LANZAMIENTO · WORLD PEACE</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:88px;line-height:1.0;font-weight:500;max-width:900px;margin:0 auto">Donde el Arte Trasciende <span style="font-style:italic;background:linear-gradient(120deg,#f4efe2,#c6a253);-webkit-background-clip:text;background-clip:text;color:transparent">el Metal</span></div>
+        <p style="max-width:520px;margin:26px auto 34px;color:#a6a39b;font-size:16px;line-height:1.65">Plata .999, oro y cobre en ediciones limitadas con licencias oficiales y valor coleccionable.</p>
+        <button onClick="{{ goCatalog }}" style="padding:15px 34px;background:linear-gradient(135deg,#e6c264,#a9822f);color:#160f02;font-weight:600;font-size:13px;letter-spacing:0.08em;border:none;border-radius:4px;cursor:pointer">EXPLORAR COLECCIONES</button>
+        <div style="display:flex;justify-content:center;gap:30px;margin-top:60px">
+          <div style="width:170px;height:170px;border-radius:50%;background:radial-gradient(circle at 36% 28%,#fbfaf6,#cfd2d8 32%,#8d9095 62%,#3f4044);box-shadow:0 24px 50px -16px rgba(0,0,0,0.7)"></div>
+          <div style="width:210px;height:210px;border-radius:50%;background:radial-gradient(circle at 36% 28%,#fff7e3,#e6c878 30%,#b88a32 64%,#5e441a);box-shadow:0 30px 60px -16px rgba(0,0,0,0.7)"></div>
+          <div style="width:170px;height:170px;border-radius:50%;background:radial-gradient(circle at 36% 28%,#f1efe9,#c0855a 34%,#7c4f33 70%,#3a261a);box-shadow:0 24px 50px -16px rgba(0,0,0,0.7)"></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- Hero C: full-bleed band -->
+      <sc-if value="{{ heroC }}" hint-placeholder-val="{{ true }}">
+      <div style="position:relative;padding:90px 48px;background:linear-gradient(100deg,#08080a 30%,#1b1810 100%)">
+        <div style="position:absolute;right:48px;top:50%;transform:translateY(-50%);width:460px;height:460px;border-radius:50%;background:radial-gradient(circle at 36% 28%,#fff7e3,#e6c878 30%,#b88a32 64%,#5e441a);opacity:0.5;filter:blur(2px)"></div>
+        <div style="position:relative;max-width:620px">
+          <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:22px">EDICIÓN ULTRA LIMITADA</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:80px;line-height:1.0;font-weight:500">El coleccionismo <span style="font-style:italic">elevado al arte</span></div>
+          <p style="margin:26px 0 34px;color:#bdb9b0;font-size:17px;line-height:1.65">Ultra High Relief de hasta 5mm. Cada detalle, magnificado. Cada pieza, única y certificada.</p>
+          <button onClick="{{ goCatalog }}" style="padding:15px 32px;background:#f2f0ea;color:#0c0c0e;font-weight:600;font-size:13px;letter-spacing:0.08em;border:none;border-radius:4px;cursor:pointer">VER PIEZAS</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- marquee -->
+      <div style="overflow:hidden;border-block:1px solid rgba(255,255,255,0.07);padding:14px 0;background:#0b0b0d">
+        <div style="display:flex;width:max-content;animation:lfmarq 28s linear infinite;font-family:'Cormorant Garamond',serif;font-size:17px;letter-spacing:0.2em;color:#7e7b73">
+          <span>EDICIÓN LIMITADA · PLATA .999 · ORO PURO · ULTRA HIGH RELIEF · ARTE COLECCIONABLE · LICENCIA OFICIAL · &nbsp;</span>
+          <span>EDICIÓN LIMITADA · PLATA .999 · ORO PURO · ULTRA HIGH RELIEF · ARTE COLECCIONABLE · LICENCIA OFICIAL · &nbsp;</span>
+        </div>
+      </div>
+
+      <!-- value pillars -->
+      <div style="padding:80px 48px">
+        <div style="text-align:center;margin-bottom:54px">
+          <div style="font-size:12px;letter-spacing:0.3em;color:#c8a24b;margin-bottom:14px">¿QUÉ ES LEGACY FAN?</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:500">El coleccionismo elevado al arte</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1100px;margin:0 auto">
+          <sc-for list="{{ pillars }}" as="p" hint-placeholder-count="3">
+          <div style="padding:34px 30px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.025),transparent)">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:30px;color:#c8a24b;margin-bottom:18px">{{ p.num }}</div>
+            <div style="font-size:18px;font-weight:600;margin-bottom:12px">{{ p.title }}</div>
+            <p style="color:#9a978f;font-size:14px;line-height:1.6">{{ p.body }}</p>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- collections grid -->
+      <div style="padding:20px 48px 90px">
+        <div style="display:flex;align-items:end;justify-content:space-between;margin-bottom:32px">
+          <div>
+            <div style="font-size:12px;letter-spacing:0.3em;color:#c8a24b;margin-bottom:12px">COLECCIONES</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:500">Piezas que perduran</div>
+          </div>
+          <button onClick="{{ goCatalog }}" style="padding:12px 24px;background:transparent;color:#e6e3db;font-size:13px;letter-spacing:0.06em;border:1px solid rgba(255,255,255,0.2);border-radius:4px;cursor:pointer">VER TODO</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+          <sc-for list="{{ products }}" as="item" hint-placeholder-count="3">
+          <div onClick="{{ item.onOpen }}" style="cursor:pointer;border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden;background:#0e0e10;transition:border-color .2s" style-hover="border-color:rgba(200,162,75,0.5)">
+            <div style="position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#15151a,#0a0a0c)">
+              <div style="width:62%;aspect-ratio:1;border-radius:50%;background:{{ item.coinBg }};box-shadow:0 20px 44px -16px rgba(0,0,0,0.8)"></div>
+              <div style="position:absolute;top:14px;left:14px;font-size:10px;letter-spacing:0.12em;padding:5px 9px;border-radius:3px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);color:#cfcdc6">{{ item.statusLabel }}</div>
+            </div>
+            <div style="padding:22px">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;margin-bottom:6px">{{ item.name }}</div>
+              <div style="font-size:12px;color:#8a8780;letter-spacing:0.04em;margin-bottom:16px">{{ item.specs }}</div>
+              <div style="display:flex;align-items:center;justify-content:between;justify-content:space-between">
+                <div style="font-size:17px;color:#e6c878;font-weight:600">{{ item.priceLabel }}</div>
+                <div style="font-size:12px;color:#6a6862">{{ item.editionLabel }}</div>
+              </div>
+            </div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ---- CATALOG ---- -->
+    <sc-if value="{{ mCatalog }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:240px 1fr;gap:0;min-height:70vh">
+      <aside style="border-right:1px solid rgba(255,255,255,0.07);padding:34px 26px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:24px;margin-bottom:28px">Filtros</div>
+        <sc-for list="{{ filterGroups }}" as="g" hint-placeholder-count="3">
+        <div style="margin-bottom:26px">
+          <div style="font-size:11px;letter-spacing:0.16em;color:#6a6862;margin-bottom:14px">{{ g.label }}</div>
+          <sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="3">
+          <label style="display:flex;align-items:center;gap:10px;margin-bottom:11px;font-size:14px;color:#c2bfb7;cursor:pointer">
+            <span style="width:15px;height:15px;border:1px solid rgba(255,255,255,0.25);border-radius:3px;display:inline-block"></span>{{ o }}
+          </label>
+          </sc-for>
+        </div>
+        </sc-for>
+      </aside>
+      <div style="padding:34px 40px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:34px">Catálogo<span style="font-size:15px;color:#6a6862;font-family:'Hanken Grotesk';margin-left:14px">{{ productCountLabel }}</span></div>
+          <div style="font-size:13px;color:#8a8780;border:1px solid rgba(255,255,255,0.14);padding:9px 16px;border-radius:4px">Ordenar: Novedades ▾</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+          <sc-for list="{{ products }}" as="item" hint-placeholder-count="6">
+          <div onClick="{{ item.onOpen }}" style="cursor:pointer;border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden;background:#0e0e10" style-hover="border-color:rgba(200,162,75,0.5)">
+            <div style="position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#15151a,#0a0a0c)">
+              <div style="width:60%;aspect-ratio:1;border-radius:50%;background:{{ item.coinBg }};box-shadow:0 18px 40px -16px rgba(0,0,0,0.8)"></div>
+              <div style="position:absolute;top:12px;left:12px;font-size:10px;letter-spacing:0.1em;padding:4px 8px;border-radius:3px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);color:#cfcdc6">{{ item.statusLabel }}</div>
+            </div>
+            <div style="padding:18px">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:5px">{{ item.name }}</div>
+              <div style="font-size:11px;color:#8a8780;margin-bottom:12px">{{ item.specs }}</div>
+              <div style="font-size:16px;color:#e6c878;font-weight:600">{{ item.priceLabel }}</div>
+            </div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ---- PRODUCT DETAIL ---- -->
+    <sc-if value="{{ mProduct }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:36px 48px 80px">
+      <div onClick="{{ goCatalog }}" style="font-size:13px;color:#8a8780;cursor:pointer;margin-bottom:28px">← Volver al catálogo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start">
+        <div style="position:sticky;top:90px">
+          <div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,#17171c,#0a0a0c);border:1px solid rgba(255,255,255,0.07);border-radius:12px">
+            <div style="width:66%;aspect-ratio:1;border-radius:50%;background:{{ curCoinBg }};box-shadow:0 36px 80px -22px rgba(0,0,0,0.85),inset 0 0 50px rgba(255,255,255,0.1)">
+              <div style="position:absolute"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:14px">
+            <div style="flex:1;aspect-ratio:1;border:1px solid rgba(200,162,75,0.5);border-radius:8px;background:radial-gradient(circle at 50% 40%,#15151a,#0a0a0c)"></div>
+            <div style="flex:1;aspect-ratio:1;border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:radial-gradient(circle at 50% 40%,#15151a,#0a0a0c)"></div>
+            <div style="flex:1;aspect-ratio:1;border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:radial-gradient(circle at 50% 40%,#15151a,#0a0a0c)"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;letter-spacing:0.2em;color:#c8a24b;margin-bottom:14px">{{ curStatus }}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:58px;font-weight:500;line-height:1.04">{{ curName }}</div>
+          <div style="font-size:15px;color:#9a978f;margin:14px 0 26px">{{ curSpecs }}</div>
+          <div style="font-size:34px;color:#e6c878;font-weight:600;margin-bottom:8px">{{ curPrice }}</div>
+          <div style="font-size:13px;color:#8a8780;margin-bottom:30px">{{ curEdition }}</div>
+
+          <div style="padding:20px;border:1px solid rgba(200,162,75,0.28);border-radius:10px;background:linear-gradient(180deg,rgba(200,162,75,0.06),transparent);margin-bottom:28px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+              <span style="width:8px;height:8px;border-radius:50%;background:#e6c878"></span>
+              <span style="font-size:13px;letter-spacing:0.08em;color:#e6c878">CERTIFICADO DE AUTENTICIDAD INCLUIDO</span>
+            </div>
+            <div style="font-size:13px;color:#9a978f;line-height:1.55">Cada pieza se entrega con certificado de origen numerado y registro en blockchain. Pieza N.º {{ curSerial }}.</div>
+          </div>
+
+          <div style="display:flex;gap:14px;margin-bottom:36px">
+            <button onClick="{{ addCurToCart }}" style="flex:1;padding:17px;background:linear-gradient(135deg,#e6c264,#a9822f);color:#160f02;font-weight:700;font-size:14px;letter-spacing:0.06em;border:none;border-radius:5px;cursor:pointer">AÑADIR AL CARRITO</button>
+            <button style="padding:17px 24px;background:transparent;color:#e6e3db;font-size:14px;border:1px solid rgba(255,255,255,0.2);border-radius:5px;cursor:pointer">♡</button>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.08)">
+            <sc-for list="{{ curSpecRows }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;padding:15px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:14px">
+              <span style="color:#8a8780">{{ r.k }}</span><span style="color:#dcd9d1;font-weight:500">{{ r.v }}</span>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ---- CART ---- -->
+    <sc-if value="{{ mCart }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:44px 48px 80px;max-width:1000px;margin:0 auto">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:46px;margin-bottom:34px">Tu carrito</div>
+      <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:70px;text-align:center;border:1px dashed rgba(255,255,255,0.14);border-radius:12px;color:#8a8780">
+          <div style="font-size:18px;margin-bottom:18px">Tu carrito está vacío</div>
+          <button onClick="{{ goCatalog }}" style="padding:13px 26px;background:linear-gradient(135deg,#e6c264,#a9822f);color:#160f02;font-weight:600;border:none;border-radius:4px;cursor:pointer">EXPLORAR COLECCIONES</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:36px;align-items:start">
+        <div>
+          <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="2">
+          <div style="display:flex;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid rgba(255,255,255,0.07)">
+            <div style="width:72px;height:72px;border-radius:50%;background:{{ c.coinBg }};flex:none"></div>
+            <div style="flex:1">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:22px">{{ c.name }}</div>
+              <div style="font-size:12px;color:#8a8780">{{ c.specs }}</div>
+            </div>
+            <div style="font-size:16px;color:#e6c878;font-weight:600">{{ c.priceLabel }}</div>
+            <div onClick="{{ c.onRemove }}" style="cursor:pointer;color:#6a6862;font-size:20px;padding:0 6px">×</div>
+          </div>
+          </sc-for>
+        </div>
+        <div style="border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:26px;background:#0e0e10">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:24px;margin-bottom:20px">Resumen</div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:#b6b3ab;margin-bottom:12px"><span>Subtotal</span><span>{{ cartTotalLabel }}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:#b6b3ab;margin-bottom:18px"><span>Envío asegurado</span><span>Gratis</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1)"><span>Total</span><span style="color:#e6c878">{{ cartTotalLabel }}</span></div>
+          <button style="width:100%;margin-top:22px;padding:16px;background:linear-gradient(135deg,#e6c264,#a9822f);color:#160f02;font-weight:700;font-size:14px;letter-spacing:0.06em;border:none;border-radius:5px;cursor:pointer">FINALIZAR COMPRA</button>
+          <div style="text-align:center;font-size:11px;color:#6a6862;margin-top:14px">Pago seguro · Certificado incluido</div>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- footer -->
+    <div style="border-top:1px solid rgba(255,255,255,0.07);padding:44px 48px;display:flex;justify-content:space-between;align-items:center;color:#6a6862;font-size:13px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:0.16em;color:#cfcdc6">LEGACY FAN</div>
+      <div>© 2026 Legacy Fan · 8 The Green STE R, Dover DE 19901 · info@legacy-fan.com</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ ADMIN ============ -->
+  <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+  <div style="display:grid;grid-template-columns:248px 1fr;min-height:calc(100vh - 68px)">
+    <!-- sidebar -->
+    <aside style="border-right:1px solid rgba(255,255,255,0.07);padding:24px 16px;background:#0a0a0c">
+      <div style="font-size:11px;letter-spacing:0.16em;color:#6a6862;padding:8px 12px 14px">PANEL DE ADMINISTRACIÓN</div>
+      <sc-for list="{{ aNav }}" as="n" hint-placeholder-count="7">
+        <div onClick="{{ n.onClick }}" style="{{ n.style }}">
+          <span style="font-size:15px;width:20px;text-align:center">{{ n.icon }}</span>{{ n.label }}
+        </div>
+      </sc-for>
+    </aside>
+
+    <!-- admin content -->
+    <main style="padding:34px 38px;background:#08080a">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:30px">
+        <div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:34px">{{ aTitle }}</div>
+          <div style="font-size:13px;color:#8a8780;margin-top:4px">{{ aSub }}</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="font-size:13px;color:#9a978f;border:1px solid rgba(255,255,255,0.12);padding:9px 14px;border-radius:6px">⌕ Buscar</div>
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#e6c264,#a9822f)"></div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <sc-if value="{{ aDash }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:26px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+          <div style="padding:22px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.025),transparent)">
+            <div style="font-size:12px;color:#8a8780;letter-spacing:0.04em;margin-bottom:12px">{{ k.label }}</div>
+            <div style="font-size:30px;font-weight:700;font-family:'Cormorant Garamond',serif">{{ k.value }}</div>
+            <div style="font-size:12px;color:#7bbf8f;margin-top:8px">{{ k.delta }}</div>
+          </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:18px">
+          <div style="padding:24px;border:1px solid rgba(255,255,255,0.08);border-radius:10px">
+            <div style="font-size:15px;font-weight:600;margin-bottom:6px">Ventas · últimos 8 meses</div>
+            <div style="font-size:12px;color:#8a8780;margin-bottom:24px">Ingresos por edición acuñada</div>
+            <div style="display:flex;align-items:end;gap:14px;height:180px">
+              <sc-for list="{{ chartBars }}" as="b" hint-placeholder-count="8">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;justify-content:end;height:100%">
+                <div style="width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#e6c264,#a9822f);height:{{ b.h }}"></div>
+                <div style="font-size:10px;color:#6a6862">{{ b.m }}</div>
+              </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:24px;border:1px solid rgba(255,255,255,0.08);border-radius:10px">
+            <div style="font-size:15px;font-weight:600;margin-bottom:18px">Stock por edición</div>
+            <sc-for list="{{ editions }}" as="e" hint-placeholder-count="4">
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px"><span>{{ e.name }}</span><span style="color:#8a8780">{{ e.ratio }}</span></div>
+              <div style="height:7px;border-radius:6px;background:rgba(255,255,255,0.08)"><div style="height:100%;border-radius:6px;background:linear-gradient(90deg,#cfd2d8,#8d9095);width:{{ e.pct }}"></div></div>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="margin-top:18px;padding:24px;border:1px solid rgba(255,255,255,0.08);border-radius:10px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:18px">Pedidos recientes</div>
+          <sc-for list="{{ orders }}" as="o" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:120px 1fr 1fr 120px 110px;gap:12px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;align-items:center">
+            <span style="color:#8a8780">{{ o.id }}</span>
+            <span>{{ o.customer }}</span>
+            <span style="color:#b6b3ab">{{ o.product }}</span>
+            <span style="color:#e6c878">{{ o.total }}</span>
+            <span style="{{ o.statusStyle }}">{{ o.status }}</span>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- PRODUCTS -->
+      <sc-if value="{{ aProducts }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:12px;padding:16px 22px;background:rgba(255,255,255,0.03);font-size:11px;letter-spacing:0.1em;color:#8a8780">
+          <span>PRODUCTO</span><span>METAL</span><span>PRECIO</span><span>TIRADA</span><span>ESTADO</span>
+        </div>
+        <sc-for list="{{ products }}" as="item" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:12px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;align-items:center">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:38px;height:38px;border-radius:50%;background:{{ item.coinBg }};flex:none"></div>
+            <span style="font-family:'Cormorant Garamond',serif;font-size:19px">{{ item.name }}</span>
+          </div>
+          <span style="color:#b6b3ab">{{ item.metal }}</span>
+          <span style="color:#e6c878">{{ item.priceLabel }}</span>
+          <span style="color:#b6b3ab">{{ item.editionLabel }}</span>
+          <span style="{{ item.adminStatusStyle }}">{{ item.statusLabel }}</span>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <!-- INVENTORY -->
+      <sc-if value="{{ aInv }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px">
+        <sc-for list="{{ editions }}" as="e" hint-placeholder-count="4">
+        <div style="padding:24px;border:1px solid rgba(255,255,255,0.08);border-radius:10px">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:18px">
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:24px">{{ e.name }}</div>
+              <div style="font-size:12px;color:#8a8780">{{ e.metal }}</div>
+            </div>
+            <span style="{{ e.badgeStyle }}">{{ e.badge }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span style="color:#8a8780">Acuñadas / Tirada</span><span>{{ e.ratio }}</span></div>
+          <div style="height:8px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:18px"><div style="height:100%;border-radius:6px;background:linear-gradient(90deg,#e6c264,#a9822f);width:{{ e.pct }}"></div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:13px">
+            <div><div style="color:#8a8780;font-size:11px">Disponibles</div><div style="font-weight:600">{{ e.avail }}</div></div>
+            <div><div style="color:#8a8780;font-size:11px">Reservadas</div><div style="font-weight:600">{{ e.reserved }}</div></div>
+            <div><div style="color:#8a8780;font-size:11px">Vendidas</div><div style="font-weight:600">{{ e.sold }}</div></div>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <!-- ORDERS -->
+      <sc-if value="{{ aOrders }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:110px 1fr 1fr 120px 130px 110px;gap:12px;padding:16px 22px;background:rgba(255,255,255,0.03);font-size:11px;letter-spacing:0.1em;color:#8a8780">
+          <span>PEDIDO</span><span>CLIENTE</span><span>PIEZA</span><span>TOTAL</span><span>ENVÍO</span><span>ESTADO</span>
+        </div>
+        <sc-for list="{{ ordersFull }}" as="o" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:110px 1fr 1fr 120px 130px 110px;gap:12px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.06);font-size:13px;align-items:center">
+          <span style="color:#8a8780">{{ o.id }}</span>
+          <span>{{ o.customer }}</span>
+          <span style="color:#b6b3ab">{{ o.product }}</span>
+          <span style="color:#e6c878">{{ o.total }}</span>
+          <span style="color:#b6b3ab;font-size:12px">{{ o.shipping }}</span>
+          <span style="{{ o.statusStyle }}">{{ o.status }}</span>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <!-- CUSTOMERS / CRM -->
+      <sc-if value="{{ aCustomers }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:1.4fr 1fr 130px 100px 110px;gap:12px;padding:16px 22px;background:rgba(255,255,255,0.03);font-size:11px;letter-spacing:0.1em;color:#8a8780">
+          <span>CLIENTE</span><span>SEGMENTO</span><span>GASTADO</span><span>PIEZAS</span><span>NIVEL</span>
+        </div>
+        <sc-for list="{{ customers }}" as="c" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:1.4fr 1fr 130px 100px 110px;gap:12px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;align-items:center">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:34px;height:34px;border-radius:50%;background:{{ c.avatar }};flex:none"></div>
+            <div><div>{{ c.name }}</div><div style="font-size:11px;color:#8a8780">{{ c.email }}</div></div>
+          </div>
+          <span style="color:#b6b3ab">{{ c.segment }}</span>
+          <span style="color:#e6c878">{{ c.spent }}</span>
+          <span style="color:#b6b3ab">{{ c.pieces }}</span>
+          <span style="{{ c.tierStyle }}">{{ c.tier }}</span>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <!-- DISTRIBUTORS -->
+      <sc-if value="{{ aDist }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:22px">
+          <sc-for list="{{ distKpis }}" as="k" hint-placeholder-count="3">
+          <div style="padding:22px;border:1px solid rgba(255,255,255,0.08);border-radius:10px">
+            <div style="font-size:12px;color:#8a8780;margin-bottom:10px">{{ k.label }}</div>
+            <div style="font-size:28px;font-weight:700;font-family:'Cormorant Garamond',serif">{{ k.value }}</div>
+          </div>
+          </sc-for>
+        </div>
+        <div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:1.4fr 1fr 110px 120px 120px;gap:12px;padding:16px 22px;background:rgba(255,255,255,0.03);font-size:11px;letter-spacing:0.1em;color:#8a8780">
+            <span>DISTRIBUIDOR / PDV</span><span>TIPO</span><span>VENTAS</span><span>COMISIÓN</span><span>ESTADO</span>
+          </div>
+          <sc-for list="{{ distributors }}" as="d" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:1.4fr 1fr 110px 120px 120px;gap:12px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;align-items:center">
+            <div><div>{{ d.name }}</div><div style="font-size:11px;color:#8a8780">{{ d.location }}</div></div>
+            <span style="color:#b6b3ab">{{ d.type }}</span>
+            <span>{{ d.sales }}</span>
+            <span style="color:#e6c878">{{ d.commission }}</span>
+            <span style="{{ d.statusStyle }}">{{ d.status }}</span>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- CERTIFICATES -->
+      <sc-if value="{{ aCerts }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:140px 1fr 1fr 1fr 120px;gap:12px;padding:16px 22px;background:rgba(255,255,255,0.03);font-size:11px;letter-spacing:0.1em;color:#8a8780">
+          <span>Nº SERIE</span><span>PIEZA</span><span>PROPIETARIO</span><span>REGISTRO</span><span>ESTADO</span>
+        </div>
+        <sc-for list="{{ certificates }}" as="c" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:140px 1fr 1fr 1fr 120px;gap:12px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.06);font-size:13px;align-items:center">
+          <span style="font-family:monospace;color:#e6c878">{{ c.serial }}</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-size:17px">{{ c.product }}</span>
+          <span style="color:#b6b3ab">{{ c.owner }}</span>
+          <span style="font-family:monospace;font-size:11px;color:#8a8780">{{ c.hash }}</span>
+          <span style="{{ c.statusStyle }}">{{ c.status }}</span>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { app:'market', mScreen:'home', aScreen:'dash', hero:0, curId:'world-peace', cart:['world-peace'] };
+
+  pill(active){ return active
+    ? "padding:8px 20px;border-radius:999px;border:none;background:linear-gradient(135deg,#e6c264,#a9822f);color:#160f02;font-weight:700;font-size:12px;letter-spacing:0.08em;cursor:pointer"
+    : "padding:8px 20px;border-radius:999px;border:none;background:transparent;color:#cfcdc6;font-weight:500;font-size:12px;letter-spacing:0.08em;cursor:pointer"; }
+
+  navTxt(active){ return active
+    ? "cursor:pointer;color:#e6c878;font-weight:600;font-size:13px;letter-spacing:0.04em;white-space:nowrap"
+    : "cursor:pointer;color:#cbc8c0;font-weight:500;font-size:13px;letter-spacing:0.04em;white-space:nowrap"; }
+
+  heroPill(active){ return active
+    ? "padding:6px 16px;border-radius:5px;border:1px solid rgba(200,162,75,0.6);background:rgba(200,162,75,0.12);color:#e6c878;font-size:12px;cursor:pointer"
+    : "padding:6px 16px;border-radius:5px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:#9a978f;font-size:12px;cursor:pointer"; }
+
+  sideItem(active){ return active
+    ? "display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;margin-bottom:3px;font-size:14px;cursor:pointer;background:linear-gradient(90deg,rgba(200,162,75,0.16),transparent);color:#e6c878;font-weight:600;border:1px solid rgba(200,162,75,0.25)"
+    : "display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;margin-bottom:3px;font-size:14px;cursor:pointer;color:#a6a39b;border:1px solid transparent"; }
+
+  statusChip(color,bg){ return "font-size:11px;letter-spacing:0.04em;padding:5px 10px;border-radius:999px;text-align:center;color:"+color+";background:"+bg; }
+
+  get rawProducts(){ return [
+    {id:'world-peace', name:'World Peace', metal:'Plata .999', weight:'2oz', collection:'World Peace', price:249, status:'preventa', minted:140, total:999, serial:'042 / 999'},
+    {id:'ganesha', name:'Ganesha .01', metal:'Plata .999 · Oro Selectivo', weight:'2oz', collection:'Legacy Fan Club', price:299, status:'preventa', minted:96, total:499, serial:'017 / 499', imgUrl:'https://legacy-fan.com/wp-content/uploads/2026/06/Ganesha-300x300.png'},
+    {id:'moon', name:'Two Faces of the Moon .01', metal:'Plata .999 · Oro Selectivo', weight:'2oz', collection:'Legacy Fan Club', price:299, status:'preventa', minted:58, total:499, serial:'009 / 499'},
+    {id:'viking', name:'Viking Raider', metal:'Plata .999', weight:'2oz', collection:'Legends of War', price:289, status:'desarrollo', minted:0, total:499, serial:'— / 499'},
+  ]; }
+
+  coinBg(p){
+    if(p.imgUrl) return "#0c0c0e url('"+p.imgUrl+"') center/cover no-repeat";
+    if(/Cobre/.test(p.metal)) return "radial-gradient(circle at 36% 28%,#f1efe9,#c0855a 34%,#7c4f33 70%,#3a261a)";
+    if(/^Oro/.test(p.metal)) return "radial-gradient(circle at 36% 28%,#fff7e3,#e6c878 30%,#b88a32 64%,#5e441a)";
+    return "radial-gradient(circle at 36% 28%,#fbfaf6,#cfd2d8 32%,#8d9095 62%,#3f4044)";
+  }
+
+  statusLabel(s){ return {preventa:'PREVENTA', desarrollo:'EN DESARROLLO', disponible:'DISPONIBLE'}[s]||s; }
+  money(n){ return '€'+n.toLocaleString('es-ES'); }
+
+  decorate(p){
+    const pct = p.total? Math.round(p.minted/p.total*100):0;
+    return Object.assign({}, p, {
+      coinBg: this.coinBg(p),
+      specs: p.weight+' · '+p.metal+' · Antiqued Finish',
+      priceLabel: this.money(p.price),
+      statusLabel: this.statusLabel(p.status),
+      editionLabel: 'Ed. '+p.total,
+      onOpen: ()=> this.setState({app:'market', mScreen:'product', curId:p.id}),
+      adminStatusStyle: p.status==='disponible'? this.statusChip('#7bbf8f','rgba(123,191,143,0.12)') : p.status==='preventa'? this.statusChip('#e6c878','rgba(230,200,120,0.12)') : this.statusChip('#9a978f','rgba(255,255,255,0.06)'),
+    });
+  }
+
+  renderVals(){
+    const S=this.state;
+    const products = this.rawProducts.map(p=>this.decorate(p));
+    const byId = {}; products.forEach(p=>byId[p.id]=p);
+    const cur = byId[S.curId] || products[0];
+    const cartItems = S.cart.map(id=>{ const p=byId[id]; return Object.assign({},p,{onRemove:()=>{ const i=S.cart.indexOf(id); const c=S.cart.slice(); c.splice(i,1); this.setState({cart:c}); }}); });
+    const cartTotal = cartItems.reduce((s,c)=>s+c.price,0);
+
+    const setM=(s)=>()=>this.setState({app:'market',mScreen:s});
+    const setA=(s)=>()=>this.setState({app:'admin',aScreen:s});
+
+    const aTitles={dash:['Dashboard','Resumen general del negocio'],products:['Catálogo / Productos','Gestión de piezas y ediciones'],inv:['Inventario y tiradas','Stock por edición acuñada'],orders:['Pedidos y envíos','Seguimiento de órdenes'],customers:['Clientes / CRM','Base de coleccionistas'],dist:['Distribuidores y comisiones','Red de distribución y PDV'],certs:['Certificados de autenticidad','Registro de piezas certificadas']};
+
+    const oStat=(s)=>{ return s==='Entregado'?this.statusChip('#7bbf8f','rgba(123,191,143,0.12)'):s==='Enviado'?this.statusChip('#7ba6bf','rgba(123,166,191,0.12)'):s==='Procesando'?this.statusChip('#e6c878','rgba(230,200,120,0.12)'):this.statusChip('#9a978f','rgba(255,255,255,0.06)'); };
+
+    const orders=[
+      {id:'#LF-2841',customer:'Marcus Hale',product:'World Peace',total:'€289',status:'Procesando',shipping:'DHL Express'},
+      {id:'#LF-2840',customer:'Elena Ríos',product:'Aztec Sun',total:'€1.890',status:'Enviado',shipping:'FedEx Priority'},
+      {id:'#LF-2839',customer:'Yuki Tanaka',product:'Samurai Honor',total:'€279',status:'Entregado',shipping:'DHL Express'},
+      {id:'#LF-2838',customer:'Tom Becker',product:'Phoenix Rise',total:'€79',status:'Entregado',shipping:'Correos'},
+    ].map(o=>Object.assign(o,{statusStyle:oStat(o.status)}));
+    const ordersFull=orders.concat([
+      {id:'#LF-2837',customer:'Sara Lund',product:'Ganesha',total:'€329',status:'Procesando',shipping:'DHL Express',statusStyle:oStat('Procesando')},
+      {id:'#LF-2836',customer:'Carlos Vidal',product:'World Peace',total:'€289',status:'Pendiente',shipping:'—',statusStyle:oStat('Pendiente')},
+    ]);
+
+    const editions=this.rawProducts.filter(p=>p.total).map(p=>{
+      const pct=Math.round(p.minted/p.total*100);
+      const reserved=Math.round((p.total-p.minted)*0.15);
+      const badge = pct>=80?'Casi agotada':pct===0?'En desarrollo':'En curso';
+      return {name:p.name, metal:p.metal, ratio:p.minted+' / '+p.total, pct:pct+'%', avail:(p.total-p.minted-reserved), reserved:reserved, sold:p.minted,
+        badge:badge, badgeStyle: pct>=80?this.statusChip('#e6a878','rgba(230,168,120,0.14)'):pct===0?this.statusChip('#9a978f','rgba(255,255,255,0.06)'):this.statusChip('#7bbf8f','rgba(123,191,143,0.12)')};
+    });
+
+    const tier=(t)=>t==='Founder'?this.statusChip('#e6c878','rgba(230,200,120,0.14)'):t==='Early'?this.statusChip('#bf9bdb','rgba(160,123,191,0.14)'):this.statusChip('#9a978f','rgba(255,255,255,0.06)');
+    const customers=[
+      {name:'Marcus Hale',email:'marcus@mail.com',segment:'Coleccionista',spent:'€2.480',pieces:'7',tier:'Founder',avatar:'linear-gradient(135deg,#e6c264,#a9822f)'},
+      {name:'Elena Ríos',email:'elena@mail.com',segment:'Inversor',spent:'€5.120',pieces:'4',tier:'Founder',avatar:'linear-gradient(135deg,#cfd2d8,#7c7e83)'},
+      {name:'Yuki Tanaka',email:'yuki@mail.com',segment:'Coleccionista',spent:'€890',pieces:'3',tier:'Early',avatar:'linear-gradient(135deg,#bf9bdb,#6e4f8a)'},
+      {name:'Tom Becker',email:'tom@mail.com',segment:'Aficionado',spent:'€158',pieces:'2',tier:'Cliente',avatar:'linear-gradient(135deg,#c0855a,#5e441a)'},
+      {name:'Sara Lund',email:'sara@mail.com',segment:'Coleccionista',spent:'€620',pieces:'2',tier:'Early',avatar:'linear-gradient(135deg,#7ba6bf,#3a5566)'},
+    ].map(c=>Object.assign(c,{tierStyle:tier(c.tier)}));
+
+    const dStat=(s)=>s==='Activo'?this.statusChip('#7bbf8f','rgba(123,191,143,0.12)'):s==='Pendiente'?this.statusChip('#e6c878','rgba(230,200,120,0.12)'):this.statusChip('#9a978f','rgba(255,255,255,0.06)');
+    const distributors=[
+      {name:'Numismática Madrid',location:'Madrid, ES',type:'Distribuidor',sales:'€42.100',commission:'€6.315',status:'Activo'},
+      {name:'Coin Gallery NYC',location:'New York, US',type:'PDV Retail',sales:'€38.900',commission:'€5.835',status:'Activo'},
+      {name:'Tokyo Collectibles',location:'Tokyo, JP',type:'Distribuidor',sales:'€29.400',commission:'€4.410',status:'Activo'},
+      {name:'Berlin Silver Co.',location:'Berlin, DE',type:'PDV Retail',sales:'€12.200',commission:'€1.830',status:'Pendiente'},
+    ].map(d=>Object.assign(d,{statusStyle:dStat(d.status)}));
+
+    const cStat=(s)=>s==='Verificado'?this.statusChip('#7bbf8f','rgba(123,191,143,0.12)'):this.statusChip('#e6c878','rgba(230,200,120,0.12)');
+    const certificates=[
+      {serial:'WP-000042',product:'World Peace',owner:'Marcus Hale',hash:'0x7f3a…e21b',status:'Verificado'},
+      {serial:'AZ-000088',product:'Aztec Sun',owner:'Elena Ríos',hash:'0x91c2…44df',status:'Verificado'},
+      {serial:'SM-000231',product:'Samurai Honor',owner:'Yuki Tanaka',hash:'0x3bd8…9a07',status:'Verificado'},
+      {serial:'GN-000017',product:'Ganesha',owner:'—',hash:'pendiente',status:'Por emitir'},
+      {serial:'PH-000412',product:'Phoenix Rise',owner:'Tom Becker',hash:'0x5e1f…77ca',status:'Verificado'},
+    ].map(c=>Object.assign(c,{statusStyle:cStat(c.status)}));
+
+    return {
+      // chrome
+      appTabs:[
+        {label:'MARKETPLACE', style:this.pill(S.app==='market'), onClick:()=>this.setState({app:'market'})},
+        {label:'ADMIN', style:this.pill(S.app==='admin'), onClick:()=>this.setState({app:'admin'})},
+      ],
+      goCart:setM('cart'), goCatalog:setM('catalog'), goHome:setM('home'),
+      cartCount:S.cart.length,
+      isMarket:S.app==='market', isAdmin:S.app==='admin',
+
+      // market nav — réplica del menú real de legacy-fan.com
+      mNav:[
+        {label:'Colecciones', style:this.navTxt(S.mScreen==='catalog'), onClick:setM('catalog')},
+        {label:'Punto de venta', style:this.navTxt(false), onClick:setM('home')},
+        {label:'Distribuidor', style:this.navTxt(false), onClick:setM('home')},
+        {label:'Founders', style:this.navTxt(false), onClick:setM('home')},
+        {label:'Trabaja con nosotros', style:this.navTxt(false), onClick:setM('home')},
+        {label:'Early Collector', style:this.navTxt(false), onClick:setM('home')},
+      ],
+      mHome:S.mScreen==='home', mCatalog:S.mScreen==='catalog', mProduct:S.mScreen==='product', mCart:S.mScreen==='cart',
+
+      heroTabs:[
+        {label:'A · Split', style:this.heroPill(S.hero===0), onClick:()=>this.setState({hero:0})},
+        {label:'B · Centrado', style:this.heroPill(S.hero===1), onClick:()=>this.setState({hero:1})},
+        {label:'C · Banda', style:this.heroPill(S.hero===2), onClick:()=>this.setState({hero:2})},
+      ],
+      heroA:S.hero===0, heroB:S.hero===1, heroC:S.hero===2,
+
+      pillars:[
+        {num:'01', title:'Plata .999 & Oro Puro', body:'Cada pieza se acuña en plata .999 con detalles en oro de 24 quilates. Metales certificados con valor intrínseco garantizado.'},
+        {num:'02', title:'Ultra High Relief', body:'Técnica de máxima calidad con relieves de hasta 5mm. Cada detalle, magnificado. Cada pieza, única.'},
+        {num:'03', title:'Licencias Oficiales', body:'Colecciones con licencias oficiales de iconos del deporte y la cultura. Autenticidad con certificado de origen.'},
+      ],
+
+      products,
+      productCountLabel:'· '+products.length+' piezas',
+      filterGroups:[
+        {label:'METAL', opts:['Plata .999','Oro .999','Cobre .999']},
+        {label:'PESO', opts:['1oz','2oz','5oz']},
+        {label:'COLECCIÓN', opts:['World Peace','Legends of War','Top Sports','Legacy Fan Club']},
+        {label:'ESTADO', opts:['Disponible','Preventa','En desarrollo']},
+      ],
+
+      // product detail
+      curCoinBg:cur.coinBg,
+      curName:cur.name, curSpecs:cur.specs, curPrice:cur.priceLabel, curStatus:cur.statusLabel,
+      curEdition:'Edición limitada de '+cur.total+' piezas · '+cur.minted+' acuñadas',
+      curSerial:cur.serial,
+      addCurToCart:()=>this.setState({cart:S.cart.concat([cur.id])}),
+      curSpecRows:[
+        {k:'Metal', v:cur.metal},{k:'Peso', v:cur.weight},{k:'Colección', v:cur.collection},
+        {k:'Acabado', v:'Antiqued Finish · Ultra High Relief 5mm'},{k:'Diámetro', v:'50mm'},{k:'Certificado', v:'Numerado + blockchain'},
+      ],
+
+      // cart
+      cartItems, cartEmpty:S.cart.length===0, cartHasItems:S.cart.length>0,
+      cartTotalLabel:this.money(cartTotal),
+
+      // admin
+      aNav:[
+        {label:'Dashboard', icon:'◈', style:this.sideItem(S.aScreen==='dash'), onClick:setA('dash')},
+        {label:'Productos', icon:'◎', style:this.sideItem(S.aScreen==='products'), onClick:setA('products')},
+        {label:'Inventario', icon:'▦', style:this.sideItem(S.aScreen==='inv'), onClick:setA('inv')},
+        {label:'Pedidos', icon:'❏', style:this.sideItem(S.aScreen==='orders'), onClick:setA('orders')},
+        {label:'Clientes / CRM', icon:'☻', style:this.sideItem(S.aScreen==='customers'), onClick:setA('customers')},
+        {label:'Distribuidores', icon:'⬡', style:this.sideItem(S.aScreen==='dist'), onClick:setA('dist')},
+        {label:'Certificados', icon:'✦', style:this.sideItem(S.aScreen==='certs'), onClick:setA('certs')},
+      ],
+      aTitle:(aTitles[S.aScreen]||['',''])[0], aSub:(aTitles[S.aScreen]||['',''])[1],
+      aDash:S.aScreen==='dash', aProducts:S.aScreen==='products', aInv:S.aScreen==='inv', aOrders:S.aScreen==='orders', aCustomers:S.aScreen==='customers', aDist:S.aScreen==='dist', aCerts:S.aScreen==='certs',
+
+      kpis:[
+        {label:'Ingresos (mes)', value:'€128.4k', delta:'▲ 18% vs anterior'},
+        {label:'Pedidos', value:'342', delta:'▲ 9% vs anterior'},
+        {label:'Piezas acuñadas', value:'810', delta:'de 2.850 totales'},
+        {label:'Coleccionistas', value:'1.207', delta:'▲ 64 nuevos'},
+      ],
+      chartBars:[
+        {m:'Nov',h:'42%'},{m:'Dic',h:'58%'},{m:'Ene',h:'48%'},{m:'Feb',h:'70%'},{m:'Mar',h:'62%'},{m:'Abr',h:'85%'},{m:'May',h:'78%'},{m:'Jun',h:'100%'},
+      ],
+      editions, orders, ordersFull, customers, distributors, certificates,
+      distKpis:[
+        {label:'Red activa', value:'24 socios'},
+        {label:'Ventas canal (mes)', value:'€122.6k'},
+        {label:'Comisiones pagadas', value:'€18.4k'},
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -76,13 +76,13 @@ export default async function PrimePage({
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           <Link
             href="/checkout?club=PRIME&type=join"
-            className="rounded-card bg-gold px-5 py-3 text-center font-semibold text-background transition hover:bg-gold-light"
+            className="rounded bg-gold-grad px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider text-[#160f02] transition hover:brightness-110"
           >
             {t('ctaJoin')}
           </Link>
           <Link
             href="/checkout?club=PRIME&type=reserve"
-            className="rounded-card border border-border px-5 py-3 text-center font-medium text-foreground transition hover:bg-surface-elevated"
+            className="rounded border border-gold/40 px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-gold-light transition hover:bg-surface-elevated"
           >
             {t('ctaReserve')}
           </Link>

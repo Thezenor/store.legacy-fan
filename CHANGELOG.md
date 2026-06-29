@@ -47,6 +47,13 @@
 - Stub `/checkout` con gating de compra (M1: requiere email verificado) + resumen de precio (M2).
 - Build OK (49 páginas).
 
+### Diseño — Sistema visual de marca (handoff hi-fi + carnet Art Deco)
+- Fuentes reales auto-alojadas: Cormorant Garamond (display) + Hanken Grotesk (UI) vía @fontsource.
+- Tokens hi-fi: negro mate #08080a, texto #f2f0ea/#9a978f, oro label #c8a24b / texto #e6c878 / gradiente, metales plata/cobre, colores de estado.
+- Componentes de marca: `Wordmark` (sello metálico + LEGACY FAN), `ArtDecoMotif` (arco solar + cuñas metálicas, inspirado en el carnet), clase `.eyebrow` y `.text-metal-gold`.
+- Header con wordmark (chrome 68px), footer con disclaimer + dirección legal (Dover) + © Legacy Fan.
+- Hero home rediseñado (eyebrow, titular Cormorant, emblema, marquesina de valores), CTAs con gradiente oro, tarjetas de plan y bloque de precio actualizados.
+
 ### Fase 1 · Módulo 4 — Checkout de reserva + PayPal (código-completo, sin probar)
 - `PayPalProvider` real: OAuth client_credentials, crear/capturar orden (Orders v2), verificación de webhook. Sandbox/live por `PAYPAL_MODE`.
 - Servicio de reserva: crea `Reservation` (50 €/$ genérica, club preseleccionado no vinculante) + `Payment` PayPal; captura idempotente; regla 1 email = 1 reserva/membresía activa (doc 03).

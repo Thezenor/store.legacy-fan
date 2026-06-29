@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#070708;font-family:'Hanken Grotesk',sans-serif}
+  ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<div style="background:#070708;color:#f2f0ea;-webkit-font-smoothing:antialiased">
+<div style="max-width:1080px;margin:0 auto;padding:0 40px">
+
+  <!-- COVER -->
+  <section data-screen-label="Portada" style="min-height:92vh;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:12px;letter-spacing:0.4em;color:#c8a24b;margin-bottom:40px">MANUAL DE MARCA · 2026</div>
+    <img src="https://legacy-fan.com/wp-content/uploads/2026/04/Logo-200x60-1.png" alt="Legacy Fan" style="height:78px;width:auto;margin-bottom:48px" />
+    <div style="font-family:'Cormorant Garamond',serif;font-size:80px;line-height:1.0;font-weight:500;max-width:760px">Donde el Arte <span style="font-style:italic;background:linear-gradient(120deg,#f4efe2,#c6a253,#f4efe2);-webkit-background-clip:text;background-clip:text;color:transparent">Trasciende</span> el Metal</div>
+    <p style="max-width:560px;margin-top:32px;color:#a6a39b;font-size:17px;line-height:1.65">Sistema visual y de comunicación de Legacy Fan. Define el uso correcto del logotipo, la paleta, la tipografía, los materiales y la voz de marca.</p>
+    <div style="display:flex;gap:36px;margin-top:56px;font-size:13px;color:#6a6862">
+      <div><div style="color:#c8a24b;letter-spacing:0.18em;margin-bottom:6px">SECTOR</div>Arte coleccionable · Numismática premium</div>
+      <div><div style="color:#c8a24b;letter-spacing:0.18em;margin-bottom:6px">CONTACTO</div>info@legacy-fan.com</div>
+      <div><div style="color:#c8a24b;letter-spacing:0.18em;margin-bottom:6px">SOCIAL</div>@legacy_fan_ofi</div>
+    </div>
+  </section>
+
+  <!-- ESSENCE -->
+  <section data-screen-label="Esencia" style="padding:90px 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:18px">01 · ESENCIA DE MARCA</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:500;max-width:740px;margin-bottom:50px">El coleccionismo elevado al arte</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <sc-for list="{{ essence }}" as="e" hint-placeholder-count="3">
+      <div style="padding:30px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.025),transparent)">
+        <div style="font-size:11px;letter-spacing:0.16em;color:#c8a24b;margin-bottom:14px">{{ e.k }}</div>
+        <p style="font-size:16px;line-height:1.6;color:#dcd9d1">{{ e.v }}</p>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- LOGO -->
+  <section data-screen-label="Logotipo" style="padding:90px 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:18px">02 · LOGOTIPO</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:500;margin-bottom:40px">El sello Legacy Fan</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+      <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;background:#070708;border:1px solid rgba(255,255,255,0.1);border-radius:10px">
+        <img src="https://legacy-fan.com/wp-content/uploads/2026/04/Logo-200x60-1.png" alt="Legacy Fan sobre fondo oscuro" style="height:56px;width:auto" />
+      </div>
+      <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;background:#f2f0ea;border:1px solid rgba(255,255,255,0.1);border-radius:10px">
+        <img src="https://legacy-fan.com/wp-content/uploads/2026/04/Logo-200x60-1.png" alt="Legacy Fan sobre fondo claro" style="height:56px;width:auto;filter:invert(1)" />
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div style="padding:26px;border:1px solid rgba(123,191,143,0.3);border-radius:10px;background:rgba(123,191,143,0.05)">
+        <div style="font-size:13px;letter-spacing:0.1em;color:#7bbf8f;margin-bottom:16px">USO CORRECTO</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;font-size:14px;color:#c2bfb7">
+          <sc-for list="{{ logoDo }}" as="d" hint-placeholder-count="4"><li style="display:flex;gap:10px"><span style="color:#7bbf8f">✓</span>{{ d }}</li></sc-for>
+        </ul>
+      </div>
+      <div style="padding:26px;border:1px solid rgba(214,120,120,0.3);border-radius:10px;background:rgba(214,120,120,0.05)">
+        <div style="font-size:13px;letter-spacing:0.1em;color:#d68b8b;margin-bottom:16px">EVITAR</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;font-size:14px;color:#c2bfb7">
+          <sc-for list="{{ logoDont }}" as="d" hint-placeholder-count="4"><li style="display:flex;gap:10px"><span style="color:#d68b8b">✕</span>{{ d }}</li></sc-for>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLOR -->
+  <section data-screen-label="Color" style="padding:90px 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:18px">03 · PALETA DE COLOR</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:500;margin-bottom:14px">Negro, plata y oro</div>
+    <p style="color:#a6a39b;font-size:15px;max-width:600px;margin-bottom:40px">El negro profundo aporta lujo y deja respirar al producto. El oro es el acento de prestigio; reservado para llamadas a la acción, precios y detalles. La plata evoca el material noble.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:30px">
+      <sc-for list="{{ colors }}" as="c" hint-placeholder-count="8">
+      <div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">
+        <div style="height:110px;background:{{ c.bg }}"></div>
+        <div style="padding:14px 16px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">{{ c.name }}</div>
+          <div style="font-size:12px;color:#8a8780;font-family:monospace">{{ c.hex }}</div>
+          <div style="font-size:11px;color:#6a6862;margin-top:6px">{{ c.use }}</div>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section data-screen-label="Tipografía" style="padding:90px 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:18px">04 · TIPOGRAFÍA</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px">
+      <div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:14px;margin-bottom:20px">
+          <span style="font-family:'Cormorant Garamond',serif;font-size:30px">Cormorant Garamond</span>
+          <span style="font-size:12px;color:#8a8780">DISPLAY · SERIF</span>
+        </div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:64px;line-height:1.05;font-weight:500;margin-bottom:8px">Aa</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;margin-bottom:6px">Donde el Arte Trasciende</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;color:#c8a24b;margin-bottom:18px">el Metal · edición limitada</div>
+        <p style="font-size:13px;color:#8a8780;line-height:1.6">Titulares, nombres de pieza y citas. Pesos 400–600. El <em>italic</em> aporta el matiz editorial y de prestigio.</p>
+      </div>
+      <div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:14px;margin-bottom:20px">
+          <span style="font-size:26px;font-weight:600">Hanken Grotesk</span>
+          <span style="font-size:12px;color:#8a8780">UI · SANS</span>
+        </div>
+        <div style="font-size:64px;line-height:1.05;font-weight:600;margin-bottom:8px">Aa</div>
+        <div style="font-size:18px;font-weight:500;margin-bottom:10px">Cuerpo, etiquetas y datos de producto</div>
+        <div style="font-size:11px;letter-spacing:0.18em;color:#c8a24b;margin-bottom:18px">2OZ · PLATA .999 · ULTRA HIGH RELIEF</div>
+        <p style="font-size:13px;color:#8a8780;line-height:1.6">Texto corrido, navegación, tablas y precios. Pesos 300–700. Mayúsculas con tracking amplio para etiquetas técnicas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MATERIALS -->
+  <section data-screen-label="Materiales" style="padding:90px 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:18px">05 · MATERIALES Y ACABADOS</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:500;margin-bottom:40px">La materia del legado</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:24px">
+      <sc-for list="{{ metals }}" as="m" hint-placeholder-count="3">
+      <div style="text-align:center;padding:30px;border:1px solid rgba(255,255,255,0.08);border-radius:10px">
+        <div style="width:120px;height:120px;border-radius:50%;margin:0 auto 22px;background:{{ m.bg }};box-shadow:0 16px 40px -14px rgba(0,0,0,0.8)"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:24px;margin-bottom:6px">{{ m.name }}</div>
+        <div style="font-size:13px;color:#8a8780">{{ m.spec }}</div>
+      </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px">
+      <sc-for list="{{ finishes }}" as="f" hint-placeholder-count="2">
+      <div style="padding:26px;border:1px solid rgba(200,162,75,0.25);border-radius:10px;background:linear-gradient(180deg,rgba(200,162,75,0.05),transparent)">
+        <div style="font-size:16px;font-weight:600;color:#e6c878;margin-bottom:10px">{{ f.name }}</div>
+        <p style="font-size:14px;color:#a6a39b;line-height:1.6">{{ f.desc }}</p>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- VOICE -->
+  <section data-screen-label="Voz" style="padding:90px 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:18px">06 · VOZ Y TONO</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:500;margin-bottom:14px">Sobria. Aspiracional. Precisa.</div>
+    <p style="color:#a6a39b;font-size:15px;max-width:640px;margin-bottom:40px">Hablamos como una casa de arte, no como una tienda. Frases cortas y rotundas. El metal y la técnica se nombran con exactitud; el valor se sugiere, no se grita.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:40px">
+      <sc-for list="{{ keywords }}" as="k" hint-placeholder-count="6">
+        <span style="padding:10px 20px;border:1px solid rgba(200,162,75,0.4);border-radius:999px;font-size:14px;color:#e6c878;font-family:'Cormorant Garamond',serif;font-style:italic">{{ k }}</span>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div style="padding:26px;border:1px solid rgba(123,191,143,0.3);border-radius:10px;background:rgba(123,191,143,0.05)">
+        <div style="font-size:13px;letter-spacing:0.1em;color:#7bbf8f;margin-bottom:14px">DECIMOS</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;font-size:14px;color:#dcd9d1">
+          <sc-for list="{{ voiceDo }}" as="d" hint-placeholder-count="3"><li>"{{ d }}"</li></sc-for>
+        </ul>
+      </div>
+      <div style="padding:26px;border:1px solid rgba(214,120,120,0.3);border-radius:10px;background:rgba(214,120,120,0.05)">
+        <div style="font-size:13px;letter-spacing:0.1em;color:#d68b8b;margin-bottom:14px">EVITAMOS</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;font-size:14px;color:#a6a39b">
+          <sc-for list="{{ voiceDont }}" as="d" hint-placeholder-count="3"><li>{{ d }}</li></sc-for>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPLICATION -->
+  <section data-screen-label="Aplicación" style="padding:90px 0 30px">
+    <div style="font-size:12px;letter-spacing:0.34em;color:#c8a24b;margin-bottom:18px">07 · APLICACIÓN</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:500;margin-bottom:40px">El sistema en acción</div>
+    <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:24px">
+      <!-- product card mock -->
+      <div style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;background:#0e0e10">
+        <div style="aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#15151a,#0a0a0c)">
+          <div style="width:54%;aspect-ratio:1;border-radius:50%;background:#0c0c0e url('https://legacy-fan.com/wp-content/uploads/2026/06/Ganesha-300x300.png') center/cover no-repeat;box-shadow:0 20px 44px -16px rgba(0,0,0,0.8)"></div>
+        </div>
+        <div style="padding:24px">
+          <div style="font-size:11px;letter-spacing:0.16em;color:#c8a24b;margin-bottom:10px">LEGACY FAN CLUB · PREVENTA</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:30px;margin-bottom:6px">Ganesha .01</div>
+          <div style="font-size:12px;color:#8a8780;margin-bottom:16px">2oz · Plata .999 · Oro Selectivo · Ultra High Relief</div>
+          <div style="font-size:20px;color:#e6c878;font-weight:600">€299</div>
+        </div>
+      </div>
+      <!-- certificate mock -->
+      <div style="border:1px solid rgba(200,162,75,0.3);border-radius:12px;padding:32px;background:linear-gradient(160deg,#16130c,#0a0a0c);display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <img src="https://legacy-fan.com/wp-content/uploads/2026/04/Logo-200x60-1.png" alt="Legacy Fan" style="height:30px;width:auto;margin-bottom:30px" />
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-style:italic;color:#e6c878;margin-bottom:6px">Certificado de Autenticidad</div>
+          <p style="font-size:13px;color:#a6a39b;line-height:1.6">Esta pieza ha sido acuñada en plata .999 con acabado Antiqued Finish y Ultra High Relief, en edición numerada y limitada.</p>
+        </div>
+        <div style="margin-top:30px;border-top:1px solid rgba(200,162,75,0.25);padding-top:18px;display:flex;justify-content:space-between;font-size:12px">
+          <div><div style="color:#8a8780">PIEZA</div><div style="font-family:monospace;color:#e6c878">WP-000042</div></div>
+          <div><div style="color:#8a8780">EDICIÓN</div><div style="font-family:monospace">042 / 999</div></div>
+          <div><div style="color:#8a8780">REGISTRO</div><div style="font-family:monospace;color:#e6c878">0x7f3a…e21b</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;color:#4a4843;font-size:12px;margin-top:60px;padding-top:30px;border-top:1px solid rgba(255,255,255,0.06)">© 2026 Legacy Fan · 8 The Green STE R, Dover DE 19901 · info@legacy-fan.com</div>
+  </section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1160,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  renderVals(){
+    return {
+      essence:[
+        {k:'PROPÓSITO', v:'Transformamos la pasión de los fans en arte coleccionable con valor.'},
+        {k:'POSICIONAMIENTO', v:'El coleccionismo elevado al arte. Piezas que perduran, no souvenirs.'},
+        {k:'PROMESA', v:'Plata .999 y oro puro, en ediciones limitadas con licencias oficiales y certificado de origen.'},
+      ],
+      logoDo:[
+        'Mantener el área de respeto libre alrededor del logotipo',
+        'Usar la versión clara sobre fondos oscuros o fotografía',
+        'Conservar siempre la proporción original',
+        'Asegurar contraste suficiente con el fondo',
+      ],
+      logoDont:[
+        'Deformar, rotar o aplicar efectos al logotipo',
+        'Recolorear fuera de la paleta de marca',
+        'Colocarlo sobre fondos de bajo contraste',
+        'Reconstruir el wordmark con otra tipografía',
+      ],
+      colors:[
+        {name:'Negro Legado', hex:'#070708', bg:'#070708', use:'Fondo principal'},
+        {name:'Carbón', hex:'#0E0E10', bg:'#0E0E10', use:'Superficies elevadas'},
+        {name:'Oro Legacy', hex:'#E6C264', bg:'linear-gradient(135deg,#e6c264,#a9822f)', use:'CTA · acentos'},
+        {name:'Oro Claro', hex:'#E6C878', bg:'#E6C878', use:'Precios · texto destacado'},
+        {name:'Plata', hex:'#CFD2D8', bg:'linear-gradient(135deg,#f6f4ef,#8d9095)', use:'Material · detalles'},
+        {name:'Marfil', hex:'#F2F0EA', bg:'#F2F0EA', use:'Texto sobre oscuro'},
+        {name:'Gris Humo', hex:'#8A8780', bg:'#8A8780', use:'Texto secundario'},
+        {name:'Cobre', hex:'#C0855A', bg:'linear-gradient(135deg,#f1efe9,#7c4f33)', use:'Línea de entrada'},
+      ],
+      metals:[
+        {name:'Plata .999', spec:'Pureza 99,9% · base de cada pieza', bg:'radial-gradient(circle at 36% 28%,#fbfaf6,#cfd2d8 32%,#8d9095 62%,#3f4044)'},
+        {name:'Oro 24k', spec:'Detalles selectivos de prestigio', bg:'radial-gradient(circle at 36% 28%,#fff7e3,#e6c878 30%,#b88a32 64%,#5e441a)'},
+        {name:'Cobre .999', spec:'Línea de acceso al coleccionismo', bg:'radial-gradient(circle at 36% 28%,#f1efe9,#c0855a 34%,#7c4f33 70%,#3a261a)'},
+      ],
+      finishes:[
+        {name:'Ultra High Relief', desc:'Relieves escultóricos de hasta 5mm de profundidad. Cada detalle magnificado; cada pieza, única.'},
+        {name:'Antiqued Finish', desc:'Acabado envejecido que realza el contraste y la profundidad del relieve, dando carácter y nobleza a la pieza.'},
+      ],
+      keywords:['Trascender','Legado','Limitado','Auténtico','Escultórico','Atesorable'],
+      voiceDo:[
+        'Donde el Arte Trasciende el Metal',
+        'El coleccionismo elevado al arte',
+        '2oz · Plata .999 · Ultra High Relief',
+      ],
+      voiceDont:[
+        'Lenguaje de descuento o urgencia agresiva',
+        'Tecnicismos vacíos o superlativos sin respaldo',
+        'Emojis y exclamaciones múltiples',
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

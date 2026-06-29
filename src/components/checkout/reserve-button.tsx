@@ -41,7 +41,7 @@ export function ReserveButton({
         type="button"
         onClick={go}
         disabled={pending}
-        className="w-full rounded-card bg-gold px-5 py-3 font-semibold text-background transition hover:bg-gold-light disabled:opacity-60"
+        className="w-full rounded bg-gold-grad px-5 py-3 text-sm font-semibold uppercase tracking-wider text-[#160f02] transition hover:brightness-110 disabled:opacity-60"
       >
         {pending ? pendingLabel : label}
       </button>

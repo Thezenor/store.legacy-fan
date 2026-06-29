@@ -22,12 +22,12 @@ export async function PriceBlock({
 
   return (
     <div className="mt-6 rounded-card border border-border bg-surface-elevated p-5">
-      <p className="text-xs uppercase tracking-wide text-muted">
-        {t('currentPhase')}: {pricing.phaseName}
+      <p className="eyebrow">
+        {t('currentPhase')} · {pricing.phaseName}
       </p>
-      <p className="mt-1">
+      <p className="mt-2">
         <span className="text-sm text-muted">{t('from')} </span>
-        <span className="font-display text-3xl font-bold text-metal-gold">
+        <span className="font-display text-4xl font-semibold text-metal-gold">
           {pricing.priceFormatted}
         </span>
       </p>

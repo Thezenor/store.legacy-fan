@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { ArtDecoMotif } from '@/components/brand/art-deco-motif';
 
 export default async function HomePage({
   params,
@@ -13,36 +14,44 @@ export default async function HomePage({
 
   return (
     <section className="animate-fade-in">
-      <div className="py-10 text-center sm:py-16">
-        <h1 className="font-display text-4xl font-bold text-metal-gold sm:text-6xl">
-          {t('heroTitle')}
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-lg text-foreground sm:text-xl">
-          {t('heroTagline')}
-        </p>
-        <p className="mx-auto mt-4 max-w-2xl text-sm text-muted sm:text-base">{t('heroBody')}</p>
+      <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Texto */}
+        <div className="order-2 lg:order-1">
+          <p className="eyebrow">{c('siteName')} · Legacy Fan Club</p>
+          <h1 className="mt-5 font-display text-4xl font-medium leading-[1.05] sm:text-6xl">
+            <span className="text-foreground">{t('heroTagline')}</span>
+          </h1>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+            {t('heroBody')}
+          </p>
 
-        {/* CTA mobile-first: apilados en móvil, en fila en desktop */}
-        <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/club/prime"
-            className="rounded-card border border-silver/40 bg-surface px-6 py-3 font-medium text-foreground transition hover:bg-surface-elevated"
-          >
-            {c('viewPrime')}
-          </Link>
-          <Link
-            href="/club/prestige"
-            className="rounded-card border border-gold/50 bg-surface px-6 py-3 font-medium text-gold transition hover:bg-surface-elevated"
-          >
-            {c('viewPrestige')}
-          </Link>
-          <Link
-            href="/club"
-            className="rounded-card bg-gold px-6 py-3 font-semibold text-background transition hover:bg-gold-light"
-          >
-            {c('reserve')}
-          </Link>
+          <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row">
+            <Link
+              href="/club"
+              className="rounded bg-gold-grad px-7 py-3.5 text-center text-sm font-semibold uppercase tracking-wider text-[#160f02] transition hover:brightness-110"
+            >
+              {c('comparePlans')}
+            </Link>
+            <Link
+              href="/club/prestige"
+              className="rounded border border-gold/40 px-7 py-3.5 text-center text-sm font-medium uppercase tracking-wider text-gold-light transition hover:bg-surface-elevated"
+            >
+              {c('viewPrestige')}
+            </Link>
+          </div>
         </div>
+
+        {/* Emblema Art Deco */}
+        <div className="order-1 flex justify-center lg:order-2">
+          <ArtDecoMotif className="w-64 max-w-full sm:w-80 lg:w-[26rem]" />
+        </div>
+      </div>
+
+      {/* Marquesina de valores (manual de marca) */}
+      <div className="mt-14 overflow-hidden border-y border-border py-3">
+        <p className="text-center text-[11px] uppercase tracking-[0.3em] text-faint">
+          Edición limitada · Plata .999 · Oro puro · Ultra High Relief · Arte coleccionable · Licencia oficial
+        </p>
       </div>
     </section>
   );

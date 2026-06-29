@@ -42,17 +42,17 @@ export function PlanCard({
       <p className="mt-2 text-sm font-medium text-foreground">{tagline}</p>
 
       <div className="mt-4">
-        <p className="text-xs uppercase tracking-wide text-muted">
-          {labels.currentPhase}: {pricing.phaseName}
+        <p className="eyebrow">
+          {labels.currentPhase} · {pricing.phaseName}
         </p>
-        <p className="mt-1">
+        <p className="mt-2">
           <span className="text-sm text-muted">{labels.from} </span>
-          <span className="font-display text-3xl font-bold text-metal-gold">
+          <span className="font-display text-4xl font-semibold text-metal-gold">
             {pricing.priceFormatted}
           </span>
         </p>
         <p className="mt-1 text-sm text-muted">
-          {labels.reservation}: <span className="text-foreground">{reservationFormatted}</span>
+          {labels.reservation}: <span className="text-gold-light">{reservationFormatted}</span>
         </p>
       </div>
 
@@ -69,13 +69,13 @@ export function PlanCard({
       <div className="mt-6 flex flex-col gap-2">
         <Link
           href={`/checkout?club=${club}&type=join`}
-          className="rounded-card bg-gold px-5 py-3 text-center font-semibold text-background transition hover:bg-gold-light"
+          className="rounded bg-gold-grad px-5 py-3 text-center text-sm font-semibold uppercase tracking-wider text-[#160f02] transition hover:brightness-110"
         >
           {labels.join}
         </Link>
         <Link
           href={`/checkout?club=${club}&type=reserve`}
-          className="rounded-card border border-border px-5 py-3 text-center font-medium text-foreground transition hover:bg-surface-elevated"
+          className="rounded border border-gold/40 px-5 py-3 text-center text-sm font-medium uppercase tracking-wider text-gold-light transition hover:bg-surface-elevated"
         >
           {labels.reserve}
         </Link>

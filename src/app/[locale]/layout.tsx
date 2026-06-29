@@ -5,9 +5,20 @@ import { notFound } from 'next/navigation';
 import { routing, type AppLocale } from '@/i18n/routing';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthNav } from '@/components/auth/auth-nav';
+import { Wordmark } from '@/components/brand/wordmark';
 import { Link } from '@/i18n/navigation';
 import { auth } from '@/lib/auth';
 import '../globals.css';
+// Fuentes de marca auto-alojadas (Cormorant Garamond display + Hanken Grotesk UI)
+import '@fontsource/hanken-grotesk/300.css';
+import '@fontsource/hanken-grotesk/400.css';
+import '@fontsource/hanken-grotesk/500.css';
+import '@fontsource/hanken-grotesk/600.css';
+import '@fontsource/hanken-grotesk/700.css';
+import '@fontsource/cormorant-garamond/400.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/600.css';
+import '@fontsource/cormorant-garamond/500-italic.css';
 
 // Fuentes: stack del sistema vía variables CSS (definidas en globals.css).
 // TODO(Fase 1): auto-alojar Inter + Cormorant Garamond con next/font/local
@@ -50,12 +61,12 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <NextIntlClientProvider>
-          <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
-            <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-              <Link href="/" className="font-display text-xl font-bold text-metal-gold">
-                {t('siteName')}
+          <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
+            <nav className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-4 sm:px-6">
+              <Link href="/" aria-label={t('siteName')}>
+                <Wordmark />
               </Link>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <AuthNav
                   isLoggedIn={!!session?.user?.id}
                   accountLabel={t('account')}
@@ -66,12 +77,23 @@ export default async function LocaleLayout({
               </div>
             </nav>
           </header>
-          <main className="mx-auto min-h-[70vh] max-w-6xl px-4 py-8">{children}</main>
-          <footer className="border-t border-border px-4 py-8 text-center text-xs text-muted">
-            <p className="mx-auto max-w-2xl">
-              {/* Disclaimer obligatorio (doc 15) */}
-              <DisclaimerText locale={locale} />
-            </p>
+          <main className="mx-auto min-h-[70vh] max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+            {children}
+          </main>
+          <footer className="border-t border-border px-4 py-12 sm:px-6">
+            <div className="mx-auto max-w-6xl">
+              <div className="hairline-gold mb-8" />
+              <div className="flex flex-col items-center gap-4 text-center">
+                <Wordmark />
+                <p className="max-w-2xl text-xs leading-relaxed text-faint">
+                  {/* Disclaimer obligatorio (doc 15) */}
+                  <DisclaimerText locale={locale} />
+                </p>
+                <p className="text-[11px] tracking-wide text-faint">
+                  © 2026 Legacy Fan · 8 The Green STE R, Dover DE 19901 · info@legacy-fan.com
+                </p>
+              </div>
+            </div>
           </footer>
         </NextIntlClientProvider>
       </body>
