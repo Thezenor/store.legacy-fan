@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations, getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing, type AppLocale } from '@/i18n/routing';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -55,13 +55,14 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: 'common' });
+  const messages = await getMessages();
   const session = await auth();
 
   return (
     // Modo oscuro por defecto: sin clase `.light` en el render inicial.
     <html lang={locale} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages}>
           <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
             <div className="mx-auto flex h-[74px] max-w-6xl items-center justify-between gap-3 px-4 sm:gap-5 sm:px-6">
               <Link href="/" aria-label={t('siteName')} className="flex-none">
