@@ -59,7 +59,8 @@
 ### Fase 1 · Módulo 10 (base) — Superadmin /lf-admin
 - Gate RBAC (`requireAdmin`) por roles con bootstrap por `SUPERADMIN_EMAILS` (acceso inicial antes de asignar roles).
 - Layout admin propio (sidebar 248px, no localizado, noindex) + dashboard con KPIs (socios activos, reservas, pagos, ingresos).
-- Listados (solo lectura): socios, reservas y pagos, ajustes del sistema, auditoría. CRUD de escritura en próxima iteración.
+- Listados (solo lectura): socios, reservas y pagos, auditoría.
+- **Edición**: fases y precios (EUR/USD + activar/forzar estado), ajustes del sistema (valor JSON) y páginas legales (ES/EN), con auditoría y revalidación. Server actions protegidas por gate admin.
 
 ### Fase 1 · Módulo 12 (parcial) — SEO y legal
 - Páginas legales editables (ruta `/legal/[slug]` con fallback de idioma) + seed de términos, privacidad, cookies, envíos, devoluciones, membresía, puntos, referidos.

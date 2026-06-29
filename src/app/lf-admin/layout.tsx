@@ -16,6 +16,8 @@ const NAV = [
   { href: '/lf-admin', label: 'Dashboard' },
   { href: '/lf-admin/socios', label: 'Socios' },
   { href: '/lf-admin/pagos', label: 'Reservas y pagos' },
+  { href: '/lf-admin/fases', label: 'Fases y precios' },
+  { href: '/lf-admin/legal', label: 'Legal' },
   { href: '/lf-admin/ajustes', label: 'Ajustes' },
   { href: '/lf-admin/auditoria', label: 'Auditoría' },
 ];
