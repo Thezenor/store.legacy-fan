@@ -21,14 +21,52 @@
     "tagline": "Tu puerta de entrada al universo Legacy Fan.",
     "body": "Una membresía anual para comenzar tu colección con Mystery Boxes de plata y cobre .999, número de socio, comunidad privada, acceso anticipado a preventas seleccionadas y beneficios exclusivos.",
     "ctaReserve": "Reservar Prime Club",
-    "ctaJoin": "Unirme a Prime Club"
+    "ctaJoin": "Unirme a Prime Club",
+    "includes": [
+      "Mystery Box de plata .999",
+      "Mystery Box de cobre .999",
+      "Carnet ID Member Legacy Fan Club",
+      "Acceso prioritario a preventas",
+      "Canal privado Telegram / Discord",
+      "Newsletter privada y canal YouTube exclusivo",
+      "Puntos por compras y sorteos de upgrade",
+      "Programa de referidos"
+    ]
   },
   "prestige": {
     "title": "Prestige Club",
     "tagline": "El acceso premium al universo Legacy Fan.",
     "body": "Recibe una pieza inaugural de 3 oz en plata .999, una pieza exclusiva de 1 kg en cobre .999 colorized, Mystery Boxes de plata y cobre, certificación nominal, packaging Prestige y prioridad superior en futuras colecciones.",
     "ctaReserve": "Reservar Prestige Club",
-    "ctaJoin": "Unirme a Prestige Club"
+    "ctaJoin": "Unirme a Prestige Club",
+    "includes": [
+      "Moneda inaugural 3 oz plata .999",
+      "Regalo exclusivo 1 kg cobre .999 colorized",
+      "Mystery Box de plata y cobre .999",
+      "Certificación nominal y packaging premium con QR",
+      "Adelanto 48–72 h y precio de socio (5% siempre + 10% primer año)",
+      "Voto en diseños y drops ocultos",
+      "Newsletter, YouTube exclusivo y eventos online",
+      "Puntos, sorteos y programa de referidos",
+      "Acceso a Slab MS70/PF70 e invitación a Founders Circle"
+    ]
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "items": [
+      {
+        "q": "¿La reserva me asigna número de socio?",
+        "a": "No. El número de socio solo se asigna con el pago completo de la membresía. El importe de la reserva se descuenta del total."
+      },
+      {
+        "q": "¿Puedo elegir o cambiar de club al pagar?",
+        "a": "Sí. La reserva es genérica; eliges o confirmas tu club (Prime o Prestige) al completar el pago."
+      },
+      {
+        "q": "¿Los productos son una inversión?",
+        "a": "No. Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura."
+      }
+    ]
   },
   "pricing": {
     "from": "Desde",
@@ -37,6 +75,15 @@
     "reservationNote": "La reserva no asigna número de socio y se descuenta del pago completo.",
     "freeShippingEs": "Envío gratis en España",
     "includes": "Qué incluye"
+  },
+  "checkout": {
+    "title": "Finalizar tu acceso",
+    "plan": "Plan elegido",
+    "typeReserve": "Reserva",
+    "typeJoin": "Pago completo",
+    "amount": "Importe",
+    "comingSoon": "El pago se habilitará en breve (integración PayPal en curso). Hemos guardado tu selección.",
+    "back": "Volver a los planes"
   },
   "legal": {
     "disclaimer": "Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura."

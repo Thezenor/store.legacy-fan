@@ -38,3 +38,11 @@
 - Pricing por club/divisa (`getClubPricing`) y términos de reserva con caducidad/reembolso (`getReservationTerms`).
 - Formato de dinero en céntimos → EUR/USD por locale (`Intl.NumberFormat`).
 - Precio de fase activa + reserva mostrados en páginas Prime/Prestige. Verificado contra BD: Prime 149 €/$179, Prestige 599 €/$699, reserva 50 €.
+
+### Fase 1 · Módulo 3 — Páginas de conversión
+- Landing `/club` con comparativa Prime vs Prestige (precio de fase activa, reserva, "qué incluye").
+- Selector de divisa EUR/USD (cookie + server action; preferencia de perfil si hay sesión).
+- Páginas Prime/Prestige enriquecidas (beneficios, CTAs, FAQ).
+- SEO estructurado JSON-LD: Product/Offer, FAQPage, BreadcrumbList. FAQ multiidioma.
+- Stub `/checkout` con gating de compra (M1: requiere email verificado) + resumen de precio (M2).
+- Build OK (49 páginas).
