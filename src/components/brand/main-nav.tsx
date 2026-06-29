@@ -20,14 +20,17 @@ export function MainNav({
 
   return (
     <>
-      {/* Desktop */}
-      <nav className="hidden items-center gap-7 md:flex">
+      {/* Desktop (estilo del diseño: title-case 13px, tracking 0.04em) */}
+      <nav className="hidden flex-1 items-center justify-center gap-6 md:flex">
         {items.map((it) => (
           <Link
             key={it.href}
             href={it.href}
-            className={`text-xs uppercase tracking-[0.14em] transition ${
-              isActive(it.href) ? 'text-gold-light' : 'text-muted hover:text-foreground'
+            style={{ fontSize: '13px', letterSpacing: '0.04em' }}
+            className={`whitespace-nowrap transition ${
+              isActive(it.href)
+                ? 'font-semibold text-gold-light'
+                : 'font-medium text-[#cbc8c0] hover:text-foreground'
             }`}
           >
             {it.label}
@@ -55,8 +58,8 @@ export function MainNav({
                 key={it.href}
                 href={it.href}
                 onClick={() => setOpen(false)}
-                className={`border-b border-border/60 py-3 text-sm uppercase tracking-[0.14em] last:border-0 ${
-                  isActive(it.href) ? 'text-gold-light' : 'text-muted'
+                className={`border-b border-border/60 py-3 text-sm tracking-[0.04em] last:border-0 ${
+                  isActive(it.href) ? 'font-semibold text-gold-light' : 'text-[#cbc8c0]'
                 }`}
               >
                 {it.label}

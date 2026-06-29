@@ -54,6 +54,7 @@
 - Header con wordmark (chrome 68px), footer con disclaimer + dirección legal (Dover) + © Legacy Fan.
 - Hero home rediseñado (eyebrow, titular Cormorant, emblema, marquesina de valores), CTAs con gradiente oro, tarjetas de plan y bloque de precio actualizados.
 - Pulido: marquesina infinita animada (CSS, respeta reduce-motion), 3 pilares de valor en home, **carnet digital Art Deco** en /account (réplica del carnet físico con nº de socio; vista previa atenuada para reservas), hover dorado en tarjetas de plan.
+- **Fidelidad al prototipo** (spec extraído con subagente del handoff): logo recreado "LEGACY FAN + filete dorado + PRECIOUS METALS"; header 74px con nav centrado title-case (13px, tracking 0.04em, oro activo); Hero A·Split con **moneda metálica** (radial plata + doble sombra), eyebrow 0.34em, titular Cormorant 76px con acento dorado en italic, CTAs exactos (gradiente 135deg, radius 4px); marquesina Cormorant 17px sobre #0b0b0d. Verificado por render. Early Collector excluido (regla maestra).
 
 ### Fase 1 · Módulo 4 — Checkout de reserva + PayPal (código-completo, sin probar)
 - `PayPalProvider` real: OAuth client_credentials, crear/capturar orden (Orders v2), verificación de webhook. Sandbox/live por `PAYPAL_MODE`.

@@ -1,20 +1,24 @@
-// Wordmark Legacy Fan: sello metálico + "LEGACY FAN" en Cormorant, tracking 0.16em.
+// Wordmark Legacy Fan (réplica del logo del diseño):
+// "LEGACY FAN" en Cormorant + filete dorado + "PRECIOUS METALS" en versales finas.
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className ?? ''}`}>
+    <span className={`inline-flex flex-col items-center leading-none ${className ?? ''}`}>
       <span
-        aria-hidden="true"
-        className="h-7 w-7 shrink-0 rounded-full"
-        style={{
-          background: 'radial-gradient(circle at 35% 30%, #fbfaf6, #cfd2d8 45%, #8d9095 100%)',
-          boxShadow: 'inset 0 0 6px rgba(0,0,0,0.35)',
-        }}
-      />
-      <span
-        className="font-display text-lg font-semibold text-foreground"
-        style={{ letterSpacing: '0.16em' }}
+        className="font-display font-semibold text-foreground"
+        style={{ fontSize: '21px', letterSpacing: '0.18em' }}
       >
         LEGACY FAN
+      </span>
+      <span
+        aria-hidden="true"
+        className="my-1 h-px w-full"
+        style={{ background: 'linear-gradient(90deg, transparent, #c8a24b 20%, #c8a24b 80%, transparent)' }}
+      />
+      <span
+        className="font-sans"
+        style={{ fontSize: '8px', letterSpacing: '0.42em', color: '#c8a24b' }}
+      >
+        PRECIOUS METALS
       </span>
     </span>
   );

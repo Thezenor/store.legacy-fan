@@ -62,9 +62,9 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <NextIntlClientProvider>
-          <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-            <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-              <Link href="/" aria-label={t('siteName')}>
+          <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
+            <div className="mx-auto flex h-[74px] max-w-6xl items-center justify-between gap-5 px-5 sm:px-6">
+              <Link href="/" aria-label={t('siteName')} className="flex-none">
                 <Wordmark />
               </Link>
               <MainNav
@@ -75,7 +75,7 @@ export default async function LocaleLayout({
                   { href: '/club/prestige', label: 'Prestige' },
                 ]}
               />
-              <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex flex-none items-center gap-3 sm:gap-4">
                 <AuthNav
                   isLoggedIn={!!session?.user?.id}
                   accountLabel={t('account')}
