@@ -1,0 +1,35 @@
+{
+  "common": {
+    "siteName": "Legacy Fan",
+    "viewPrime": "Vedi Prime Club",
+    "viewPrestige": "Vedi Prestige Club",
+    "reserve": "Prenota il mio accesso",
+    "login": "Accedi",
+    "register": "Crea account",
+    "account": "Il mio account",
+    "toggleTheme": "Cambia tema",
+    "comparePlans": "Confronta i piani"
+  },
+  "home": {
+    "heroTitle": "Legacy Fan",
+    "heroTagline": "Collezionismo premium in metalli preziosi per chi arriva per primo.",
+    "heroBody": "Scegli il tuo livello di accesso ed entra a far parte della prima generazione di soci Legacy Fan: pezzi fisici in argento e rame .999, Mystery Box, numero di socio, comunità privata e priorità sulle collezioni future."
+  },
+  "prime": {
+    "title": "Prime Club",
+    "tagline": "La tua porta d'ingresso all'universo Legacy Fan.",
+    "body": "Un abbonamento annuale per iniziare la tua collezione con Mystery Box in argento e rame .999, numero di socio, comunità privata, accesso anticipato a prevendite selezionate e vantaggi esclusivi.",
+    "ctaReserve": "Prenota Prime Club",
+    "ctaJoin": "Iscriviti a Prime Club"
+  },
+  "prestige": {
+    "title": "Prestige Club",
+    "tagline": "L'accesso premium all'universo Legacy Fan.",
+    "body": "Ricevi un pezzo inaugurale da 3 oz in argento .999, un pezzo esclusivo da 1 kg in rame .999 colorato, Mystery Box in argento e rame, certificazione nominale, packaging Prestige e priorità superiore sulle collezioni future.",
+    "ctaReserve": "Prenota Prestige Club",
+    "ctaJoin": "Iscriviti a Prestige Club"
+  },
+  "legal": {
+    "disclaimer": "I prodotti Legacy Fan sono articoli da collezione. Non costituiscono un prodotto finanziario né una promessa di rendimento futuro."
+  }
+}

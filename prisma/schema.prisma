@@ -1,0 +1,697 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Legacy Fan — Schema de base de datos (PostgreSQL / Railway)
+// Basado en docs/13_DATABASE_SCHEMA_DRAFT.md y reglas de negocio (docs 02-09, 15).
+//
+// Invariantes clave:
+//  - Email único (User.email).
+//  - Número de socio único global LF-000101+ (1–100 reservados a admin manual).
+//  - Solo el pago completo de un club asigna número de socio. La reserva NO numera.
+//  - Puntos y descuentos SOLO sobre premium (nunca sobre spot del metal).
+//  - Devoluciones generan transacciones negativas de puntos/saldo.
+//  - Referidos activan recompensa SOLO con pago completo del referido.
+//  - Todo cambio crítico se audita (AuditLog).
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum Currency {
+  EUR
+  USD
+}
+
+enum Locale {
+  es
+  en
+  fr
+  it
+}
+
+enum ClubType {
+  PRIME
+  PRESTIGE
+}
+
+// Estados de reserva/pago (doc 07)
+enum PaymentStatus {
+  RESERVA_PENDIENTE
+  PENDIENTE_DE_PAGO
+  PAGO_COMPLETO
+  RESERVA_CADUCADA
+  CANCELADO
+  REEMBOLSADO
+  INCIDENCIA
+}
+
+// Estados de socio (doc 07)
+enum MemberStatus {
+  CUENTA_CREADA
+  RESERVA_PENDIENTE
+  SOCIO_ACTIVO
+  SOCIO_CADUCADO
+  SOCIO_SUSPENDIDO
+  UPGRADE_PENDIENTE
+  UPGRADE_COMPLETADO
+}
+
+// Estados de producto/pedido (doc 07)
+enum OrderItemStatus {
+  PENDIENTE_DE_LANZAMIENTO
+  PENDIENTE_DE_PRODUCCION
+  PENDIENTE_DE_RECEPCION
+  EN_PREPARACION
+  ENVIADO_PARCIALMENTE
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+  REEMBOLSADO
+  INCIDENCIA
+}
+
+enum CollectionStatus {
+  BORRADOR
+  PROXIMA
+  ACTIVA
+  AGOTADA
+  OCULTA
+  PRIVADA_DROP
+}
+
+enum ReservationType {
+  RESERVA // 50 € / 50 $
+  PAGO_COMPLETO
+}
+
+enum PaymentProvider {
+  PAYPAL
+  STRIPE
+}
+
+enum PaymentMode {
+  TEST
+  LIVE
+}
+
+enum PointsTxnType {
+  EARN
+  SPEND
+  REFUND_REVERSAL
+  EXPIRATION
+  ADMIN_ADJUST
+  REFERRAL_REWARD
+}
+
+enum ReferralRewardMode {
+  REFERRER_100 // 100% para quien refiere
+  SPLIT_50_50
+  REFERRED_100 // 100% para el referido
+}
+
+enum ReferralStatus {
+  REGISTRADO
+  RESERVA
+  PAGO_COMPLETO
+}
+
+enum ShipmentStatus {
+  EN_PREPARACION
+  ENVIADO
+  ENTREGADO
+  INCIDENCIA
+}
+
+enum BlogStatus {
+  BORRADOR
+  PUBLICADO
+}
+
+enum EmailJobStatus {
+  PROGRAMADO
+  ENVIADO
+  FALLIDO
+  CANCELADO
+}
+
+// ───────────────────────── Usuarios / RBAC ─────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  emailVerified DateTime?
+  isActive      Boolean   @default(true)
+  isBlocked     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile      UserProfile?
+  roles        UserRole[]
+  membership   Membership?
+  reservations Reservation[]
+  payments     Payment[]
+  orders       Order[]
+  pointsWallet PointsWallet?
+  referralCode ReferralCode?
+  referralsMade Referral[]  @relation("Referrer")
+  referredAs    Referral?   @relation("Referred")
+  sessions     Session[]
+  accounts     Account[]
+
+  @@index([email])
+}
+
+model UserProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  firstName     String
+  lastName      String
+  phone         String?
+  country       String? // ISO-3166 alpha-2
+  preferredLocale Locale @default(es)
+  preferredCurrency Currency @default(EUR) // selección manual (decisión: sin GEO de divisa)
+  addressLine1  String?
+  addressLine2  String?
+  city          String?
+  postalCode    String?
+  marketingOptIn Boolean @default(false)
+  termsAcceptedAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  key         String   @unique // superadmin, admin, marketing, soporte, logistica, finanzas, editor
+  name        String
+  description String?
+  permissions RolePermission[]
+  users       UserRole[]
+  createdAt   DateTime @default(now())
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  key         String   @unique // p.ej. products.write, members.assign_number
+  module      String
+  description String?
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+// Auth.js (NextAuth) — adaptador Prisma
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ───────────────────── Membresías / fases / precios ─────────────────────
+
+model MembershipPlan {
+  id        String   @id @default(cuid())
+  club      ClubType @unique
+  name      String
+  slug      String   @unique
+  active    Boolean  @default(true)
+  phases    MembershipPhase[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Fases globales (doc 09): precios por club, fechas, envío gratis, estado.
+model MembershipPhase {
+  id            String   @id @default(cuid())
+  planId        String
+  key           String // FASE_0, FASE_1, ...
+  name          String
+  startsAt      DateTime?
+  endsAt        DateTime?
+  priceEurCents Int
+  priceUsdCents Int
+  freeShipping  Boolean  @default(false)
+  freeShippingCountries String[] @default([])
+  promoText     String?
+  isActive      Boolean  @default(false) // admin puede forzar estado
+  forcedState   Boolean  @default(false) // si true, no cambia por fecha
+  sortOrder     Int      @default(0)
+  plan          MembershipPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([planId, key])
+}
+
+model Membership {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  club         ClubType
+  status       MemberStatus @default(CUENTA_CREADA)
+  memberNumber MemberNumber?
+  startsAt     DateTime?
+  endsAt       DateTime?
+  launchDate   DateTime? // fecha oficial de lanzamiento aplicada
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Numeración global única LF-000101+ (doc 04)
+model MemberNumber {
+  id           String   @id @default(cuid())
+  number       Int      @unique // valor entero; 1–100 reservados a admin manual
+  formatted    String   @unique // LF-000101
+  membershipId String?  @unique
+  isReserved   Boolean  @default(false) // rango 1–100
+  isBlocked    Boolean  @default(false)
+  assignedAt   DateTime?
+  membership   Membership? @relation(fields: [membershipId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+// ───────────────────── Reservas / pagos / facturas ─────────────────────
+
+model Reservation {
+  id            String          @id @default(cuid())
+  userId        String
+  type          ReservationType @default(RESERVA)
+  club          ClubType? // null hasta confirmar en pago completo
+  status        PaymentStatus   @default(RESERVA_PENDIENTE)
+  currency      Currency
+  amountPaidCents Int           @default(0) // 50€/$ en reserva
+  totalDueCents Int           @default(0)
+  launchDate    DateTime?
+  expiresAt     DateTime? // lanzamiento + margen 7 días (configurable)
+  refundableUntil DateTime? // 24h antes de lanzamiento (configurable)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+  order    Order?
+
+  @@index([userId])
+}
+
+model Payment {
+  id            String          @id @default(cuid())
+  userId        String
+  reservationId String?
+  provider      PaymentProvider
+  mode          PaymentMode     @default(TEST)
+  status        PaymentStatus
+  currency      Currency
+  amountCents   Int
+  providerRef   String? // id de transacción PayPal/Stripe
+  rawPayload    Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+  invoice     Invoice?
+
+  @@index([userId])
+  @@index([providerRef])
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  paymentId   String   @unique
+  number      String   @unique // serie configurable desde admin
+  currency    Currency
+  subtotalCents Int
+  taxCents    Int      @default(0)
+  totalCents  Int
+  issuedAt    DateTime @default(now())
+  billingJson Json? // datos fiscales snapshot
+  payment     Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────── Colecciones / productos / certificados ─────────────────
+
+model Collection {
+  id        String           @id @default(cuid())
+  slug      String           @unique
+  name      String
+  status    CollectionStatus @default(BORRADOR)
+  sortOrder Int              @default(0)
+  products  Product[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  collectionId    String?
+  slug            String   @unique
+  name            String
+  description     String?
+  priceEurCents   Int      @default(0)
+  priceUsdCents   Int      @default(0)
+  premiumEurCents Int      @default(0) // base para puntos/descuentos
+  premiumUsdCents Int      @default(0)
+  spotBaseCents   Int? // valor spot/base si aplica
+  launchDate      DateTime?
+  available       Boolean  @default(true)
+  visible         Boolean  @default(true)
+  includedInPrime Boolean  @default(false)
+  includedInPrestige Boolean @default(false)
+  isInauguralCoin Boolean  @default(false) // moneda inaugural seleccionable
+  isAdditionalPurchase Boolean @default(false)
+  isHiddenDrop    Boolean  @default(false)
+  certificateRequired Boolean @default(false)
+  hasAuthenticityQr Boolean @default(false)
+  logisticStatus  OrderItemStatus @default(PENDIENTE_DE_LANZAMIENTO)
+  collection      Collection? @relation(fields: [collectionId], references: [id])
+  translations    ProductTranslation[]
+  images          ProductImage[]
+  orderItems      OrderItem[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ProductTranslation {
+  id          String  @id @default(cuid())
+  productId   String
+  locale      Locale
+  name        String
+  description String?
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, locale])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────── Pedidos / envíos / certificados ───────────────────
+
+model Order {
+  id            String   @id @default(cuid())
+  userId        String
+  reservationId String?  @unique
+  currency      Currency
+  totalCents    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+  items       OrderItem[]
+  shipments   Shipment[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id            String          @id @default(cuid())
+  orderId       String
+  productId     String?
+  name          String // snapshot
+  status        OrderItemStatus @default(PENDIENTE_DE_LANZAMIENTO)
+  quantity      Int             @default(1)
+  unitPriceCents Int            @default(0)
+  isInauguralPrimary Boolean    @default(false) // elección de moneda principal (no editable tras pago)
+  isUpsellSecondCoin Boolean    @default(false) // upsell segunda moneda (solo Prestige)
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product?        @relation(fields: [productId], references: [id])
+  certificate   Certificate?
+  shipmentItems ShipmentItem[]
+}
+
+model Shipment {
+  id           String         @id @default(cuid())
+  orderId      String
+  status       ShipmentStatus @default(EN_PREPARACION)
+  carrier      String?
+  trackingCode String?
+  shippedAt    DateTime?
+  deliveredAt  DateTime?
+  order        Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  items        ShipmentItem[]
+  createdAt    DateTime       @default(now())
+}
+
+model ShipmentItem {
+  id          String    @id @default(cuid())
+  shipmentId  String
+  orderItemId String
+  quantity    Int       @default(1)
+  shipment    Shipment  @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  orderItemId String   @unique
+  serial      String   @unique
+  qrCode      String   @unique // QR único de autenticidad
+  digitalUrl  String?
+  nominalName String? // certificación nominal (Prestige)
+  issuedAt    DateTime @default(now())
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────────── Puntos / saldo / referidos ─────────────────────
+
+model PointsWallet {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  balanceCents  Int      @default(0) // saldo disponible (equiv. interno)
+  pendingCents  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  PointsTransaction[]
+}
+
+model PointsTransaction {
+  id          String        @id @default(cuid())
+  walletId    String
+  type        PointsTxnType
+  amountCents Int // negativo en SPEND/EXPIRATION/REFUND_REVERSAL
+  reason      String?
+  expiresAt   DateTime? // caducidad por defecto 2 años (configurable)
+  createdAt   DateTime      @default(now())
+  wallet      PointsWallet  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId])
+}
+
+model ReferralCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  code      String   @unique
+  rewardMode ReferralRewardMode @default(SPLIT_50_50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referrals Referral[]
+}
+
+model Referral {
+  id             String         @id @default(cuid())
+  referralCodeId String
+  referrerId     String
+  referredUserId String?        @unique
+  status         ReferralStatus @default(REGISTRADO)
+  rewardGrantedCents Int        @default(0) // solo al pago completo del referido
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  referralCode ReferralCode @relation(fields: [referralCodeId], references: [id], onDelete: Cascade)
+  referrer     User         @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUser User?        @relation("Referred", fields: [referredUserId], references: [id])
+
+  @@index([referrerId])
+}
+
+// ───────────────────── Emails / contenido / sistema ─────────────────────
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  key       String   @unique // welcome, reservation_received, ...
+  active    Boolean  @default(true)
+  translations EmailTemplateTranslation[]
+  jobs      EmailJob[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmailTemplateTranslation {
+  id         String @id @default(cuid())
+  templateId String
+  locale     Locale
+  subject    String
+  body       String
+  template   EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, locale])
+}
+
+model EmailJob {
+  id         String         @id @default(cuid())
+  templateId String?
+  toEmail    String
+  locale     Locale         @default(es)
+  status     EmailJobStatus @default(PROGRAMADO)
+  scheduledAt DateTime?
+  sentAt     DateTime?
+  payload    Json?
+  template   EmailTemplate? @relation(fields: [templateId], references: [id])
+  logs       EmailLog[]
+  createdAt  DateTime       @default(now())
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  jobId     String?
+  toEmail   String
+  provider  String
+  success   Boolean
+  error     String?
+  createdAt DateTime @default(now())
+  job       EmailJob? @relation(fields: [jobId], references: [id])
+}
+
+// Ajustes globales clave/valor (precios base, fechas, fiscal, pasarelas, flags)
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  group     String?  // payments, shipping, fiscal, seo, points, referrals...
+  updatedAt DateTime @updatedAt
+}
+
+model LegalPage {
+  id        String   @id @default(cuid())
+  slug      String // terms, privacy, cookies, shipping, returns, membership, points, referrals, disclaimer
+  locale    Locale
+  title     String
+  body      String
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, locale])
+}
+
+model FaqItem {
+  id        String  @id @default(cuid())
+  locale    Locale
+  question  String
+  answer    String
+  category  String?
+  sortOrder Int     @default(0)
+  visible   Boolean @default(true)
+
+  @@index([locale])
+}
+
+model SeoMetadata {
+  id              String  @id @default(cuid())
+  path            String // ruta lógica de la página
+  locale          Locale
+  title           String?
+  description     String?
+  keywords        String?
+  ogImageUrl      String?
+  canonical       String?
+  schemaJson      Json?
+  updatedAt       DateTime @updatedAt
+
+  @@unique([path, locale])
+}
+
+model BlogPost {
+  id           String     @id @default(cuid())
+  slug         String
+  locale       Locale
+  title        String
+  excerpt      String?
+  body         String
+  status       BlogStatus @default(BORRADOR)
+  author       String?
+  featuredImage String?
+  publishedAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([slug, locale])
+}
+
+// Auditoría (doc 13): todo cambio crítico
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String? // usuario/admin que hizo el cambio
+  actorEmail String?
+  action     String
+  entity     String
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  @@index([entity, entityId])
+}

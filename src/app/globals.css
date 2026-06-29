@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tokens de color Legacy Fan.
+ * Modo OSCURO por defecto (:root). Modo claro mediante .light en <html>.
+ * Valores en canal RGB para usar con <alpha-value> de Tailwind.
+ */
+:root {
+  /* Fuentes (stack del sistema; sustituibles por Inter/Cormorant auto-alojadas en Fase 1) */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-display: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+
+  --lf-background: 13 13 15; /* casi negro */
+  --lf-surface: 22 22 26;
+  --lf-surface-elevated: 30 31 36;
+  --lf-foreground: 237 238 242;
+  --lf-muted: 148 152 162;
+  --lf-border: 48 50 58;
+}
+
+.light {
+  --lf-background: 250 250 251;
+  --lf-surface: 255 255 255;
+  --lf-surface-elevated: 244 245 247;
+  --lf-foreground: 23 24 28;
+  --lf-muted: 92 96 104;
+  --lf-border: 222 224 230;
+}
+
+* {
+  border-color: rgb(var(--lf-border));
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: rgb(var(--lf-background));
+  color: rgb(var(--lf-foreground));
+  font-feature-settings: 'cv11', 'ss01';
+  text-rendering: optimizeLegibility;
+}
+
+/* Utilidad para acabados metálicos en titulares */
+.text-metal-gold {
+  background: linear-gradient(135deg, #E6C75A 0%, #C9A227 50%, #9C7E1C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

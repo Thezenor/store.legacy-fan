@@ -1,0 +1,35 @@
+{
+  "common": {
+    "siteName": "Legacy Fan",
+    "viewPrime": "View Prime Club",
+    "viewPrestige": "View Prestige Club",
+    "reserve": "Reserve my access",
+    "login": "Log in",
+    "register": "Create account",
+    "account": "My account",
+    "toggleTheme": "Toggle theme",
+    "comparePlans": "Compare plans"
+  },
+  "home": {
+    "heroTitle": "Legacy Fan",
+    "heroTagline": "Premium precious-metal collecting for those who arrive first.",
+    "heroBody": "Choose your access level and join the first generation of Legacy Fan members: physical .999 silver and copper pieces, Mystery Boxes, a member number, a private community and priority on future collections."
+  },
+  "prime": {
+    "title": "Prime Club",
+    "tagline": "Your gateway to the Legacy Fan universe.",
+    "body": "An annual membership to start your collection with .999 silver and copper Mystery Boxes, a member number, a private community, early access to selected pre-sales and exclusive benefits.",
+    "ctaReserve": "Reserve Prime Club",
+    "ctaJoin": "Join Prime Club"
+  },
+  "prestige": {
+    "title": "Prestige Club",
+    "tagline": "Premium access to the Legacy Fan universe.",
+    "body": "Receive a 3 oz .999 silver inaugural piece, an exclusive 1 kg .999 colorized copper piece, silver and copper Mystery Boxes, nominal certification, Prestige packaging and superior priority on future collections.",
+    "ctaReserve": "Reserve Prestige Club",
+    "ctaJoin": "Join Prestige Club"
+  },
+  "legal": {
+    "disclaimer": "Legacy Fan products are collectible items. They do not constitute a financial product or any promise of future returns."
+  }
+}
