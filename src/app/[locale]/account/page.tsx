@@ -2,11 +2,21 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { requireUser, isEmailVerified } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { formatMoney } from '@/lib/commerce/money';
+import { getPointsSummary } from '@/lib/points/summary';
+import { getReferralSummary } from '@/lib/referrals/stats';
 import { DigitalMemberCard } from '@/components/brand/member-card';
 import { FullPaymentButton } from '@/components/checkout/full-payment-button';
 import { Link } from '@/i18n/navigation';
 
-// Panel de usuario (Módulo 1 + reserva del Módulo 4). Secciones completas: Módulo 9.
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-6 rounded-card border border-border bg-surface p-5">
+      <h2 className="font-display text-xl font-semibold text-foreground">{title}</h2>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
 export default async function AccountPage({
   params,
 }: {
@@ -15,6 +25,8 @@ export default async function AccountPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const session = await requireUser(locale);
+  const userId = session.user.id;
+
   const t = await getTranslations({ locale, namespace: 'auth' });
   const a = await getTranslations({ locale, namespace: 'account' });
   const co = await getTranslations({ locale, namespace: 'checkout' });
@@ -25,29 +37,30 @@ export default async function AccountPage({
     error: co('errors.error'),
   };
 
-  const [profile, reservation, membership] = await Promise.all([
-    prisma.userProfile.findUnique({
-      where: { userId: session.user.id },
-      select: { firstName: true, lastName: true, preferredCurrency: true },
-    }),
+  const [profile, reservation, membership, orders, payments, points, referral] = await Promise.all([
+    prisma.userProfile.findUnique({ where: { userId } }),
     prisma.reservation.findFirst({
-      where: { userId: session.user.id, status: { in: ['RESERVA_PENDIENTE', 'PAGO_COMPLETO'] } },
+      where: { userId, status: { in: ['RESERVA_PENDIENTE', 'PAGO_COMPLETO'] } },
       orderBy: { createdAt: 'desc' },
     }),
-    prisma.membership.findUnique({
-      where: { userId: session.user.id },
-      include: { memberNumber: true },
-    }),
+    prisma.membership.findUnique({ where: { userId }, include: { memberNumber: true } }),
+    prisma.order.findMany({ where: { userId }, include: { items: true }, orderBy: { createdAt: 'desc' } }),
+    prisma.payment.findMany({ where: { userId }, include: { invoice: true }, orderBy: { createdAt: 'desc' } }),
+    getPointsSummary(userId),
+    getReferralSummary(userId),
   ]);
 
   const verified = isEmailVerified(session);
   const fullName = profile ? `${profile.firstName} ${profile.lastName}` : (session.user.email ?? '');
+  const currency = profile?.preferredCurrency ?? 'EUR';
+  const isMember = membership?.status === 'SOCIO_ACTIVO' && !!membership.memberNumber;
+  const fmtDate = (d: Date | null) =>
+    d ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(d) : '—';
+  const invoices = payments.filter((p) => p.invoice);
 
   return (
     <section className="mx-auto max-w-2xl animate-fade-in">
-      <h1 className="font-display text-3xl font-bold text-metal-gold">
-        {profile ? `${profile.firstName} ${profile.lastName}` : session.user.email}
-      </h1>
+      <h1 className="font-display text-3xl font-bold text-metal-gold">{fullName}</h1>
       <p className="mt-2 text-muted">{session.user.email}</p>
 
       {!verified ? (
@@ -61,10 +74,10 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      {/* Carnet digital: activo si hay membresía con número; vista previa si solo hay reserva */}
-      {membership?.memberNumber ? (
+      {/* Carnet digital */}
+      {isMember ? (
         <div className="mt-6 max-w-md">
-          <DigitalMemberCard name={fullName} number={membership.memberNumber.formatted} />
+          <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} />
         </div>
       ) : reservation ? (
         <div className="mt-6 max-w-md">
@@ -77,10 +90,44 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      {reservation ? (
-        <div className="mt-6 rounded-card border border-border bg-surface p-5">
-          <h2 className="font-display text-xl font-bold text-foreground">{a('reservationTitle')}</h2>
-          <p className="mt-1 text-sm text-gold">{a('statusReservaPendiente')}</p>
+      {/* Socio activo: resumen + membresía + productos + comunidad */}
+      {isMember ? (
+        <>
+          <Section title={a('summaryTitle')}>
+            <dl className="grid grid-cols-2 gap-y-2 text-sm">
+              <dt className="text-muted">{a('club')}</dt>
+              <dd className="text-foreground">{membership!.club}</dd>
+              <dt className="text-muted">{a('memberNumber')}</dt>
+              <dd className="text-gold-light">{membership!.memberNumber!.formatted}</dd>
+              <dt className="text-muted">{a('since')}</dt>
+              <dd className="text-foreground">{fmtDate(membership!.startsAt)}</dd>
+              <dt className="text-muted">{a('until')}</dt>
+              <dd className="text-foreground">{fmtDate(membership!.endsAt)}</dd>
+            </dl>
+          </Section>
+
+          <Section title={a('productsTitle')}>
+            {orders.flatMap((o) => o.items).length === 0 ? (
+              <p className="text-sm text-muted">{a('noProducts')}</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {orders.flatMap((o) => o.items).map((it) => (
+                  <li key={it.id} className="flex justify-between border-b border-border/60 pb-2">
+                    <span className="text-foreground">{it.name}</span>
+                    <span className="text-xs text-muted">{it.status.replaceAll('_', ' ').toLowerCase()}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+
+          <Section title={a('communityTitle')}>
+            <p className="text-sm text-muted">{a('communitySoon')}</p>
+          </Section>
+        </>
+      ) : reservation ? (
+        <Section title={a('reservationTitle')}>
+          <p className="text-sm text-gold">{a('statusReservaPendiente')}</p>
           <div className="mt-3 space-y-1 text-sm text-muted">
             <p>
               {a('paid')}:{' '}
@@ -102,7 +149,6 @@ export default async function AccountPage({
             ) : null}
           </div>
           <p className="mt-3 text-xs text-muted">{a('noMemberNumberYet')}</p>
-          {/* Pagar el restante para completar la membresía (M6) */}
           <div className="mt-4">
             {reservation.club ? (
               <FullPaymentButton
@@ -117,15 +163,91 @@ export default async function AccountPage({
               </Link>
             )}
           </div>
-        </div>
-      ) : (
-        <div className="mt-6 rounded-card border border-border bg-surface p-5 text-sm text-muted">
-          <p>
-            {a('currency')}: {profile?.preferredCurrency ?? 'EUR'}
+        </Section>
+      ) : null}
+
+      {/* Puntos / saldo */}
+      <Section title={a('pointsTitle')}>
+        <p className="text-sm text-muted">
+          {a('balance')}:{' '}
+          <span className="font-display text-2xl text-metal-gold">
+            {formatMoney(points.balanceCents, currency, locale)}
+          </span>
+        </p>
+        {points.transactions.length > 0 ? (
+          <ul className="mt-3 space-y-1 text-xs text-muted">
+            {points.transactions.map((tx) => (
+              <li key={tx.id} className="flex justify-between">
+                <span>{tx.reason ?? tx.type}</span>
+                <span className={tx.amountCents >= 0 ? 'text-state-green' : 'text-red-400'}>
+                  {tx.amountCents >= 0 ? '+' : ''}
+                  {formatMoney(tx.amountCents, currency, locale)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-xs text-muted">{a('noActivity')}</p>
+        )}
+      </Section>
+
+      {/* Referidos */}
+      {referral ? (
+        <Section title={a('referralsTitle')}>
+          <p className="text-sm text-muted">
+            {a('yourCode')}: <span className="font-mono text-gold-light">{referral.code}</span>
           </p>
-          <p className="mt-2">Las secciones de membresía, productos, puntos y referidos llegarán pronto.</p>
-        </div>
-      )}
+          <p className="mt-1 break-all text-xs text-muted">
+            {a('yourLink')}: <span className="text-foreground">{referral.link}</span>
+          </p>
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
+            <div className="rounded border border-border p-2">
+              <div className="text-lg text-foreground">{referral.registered}</div>
+              <div className="text-[11px] text-muted">{a('registered')}</div>
+            </div>
+            <div className="rounded border border-border p-2">
+              <div className="text-lg text-foreground">{referral.conversion}%</div>
+              <div className="text-[11px] text-muted">{a('conversion')}</div>
+            </div>
+            <div className="rounded border border-border p-2">
+              <div className="text-lg text-gold-light">
+                {formatMoney(referral.generatedCents, currency, locale)}
+              </div>
+              <div className="text-[11px] text-muted">{a('generated')}</div>
+            </div>
+          </div>
+        </Section>
+      ) : null}
+
+      {/* Pedidos y facturas */}
+      <Section title={a('ordersTitle')}>
+        {invoices.length === 0 && orders.length === 0 ? (
+          <p className="text-sm text-muted">{a('noOrders')}</p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {invoices.map((p) => (
+              <li key={p.id} className="flex justify-between">
+                <span className="text-foreground">
+                  {a('invoice')} {p.invoice!.number}
+                </span>
+                <span className="text-gold-light">
+                  {formatMoney(p.invoice!.totalCents, p.invoice!.currency, locale)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {/* Perfil */}
+      <Section title={a('profileTitle')}>
+        <dl className="grid grid-cols-2 gap-y-2 text-sm">
+          <dt className="text-muted">{t('emailLabel')}</dt>
+          <dd className="text-foreground">{session.user.email}</dd>
+          <dt className="text-muted">{a('currency')}</dt>
+          <dd className="text-foreground">{currency}</dd>
+        </dl>
+      </Section>
     </section>
   );
 }

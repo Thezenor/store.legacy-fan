@@ -21,9 +21,9 @@
 - [x] **Módulo 4** — Reserva 50 € + checkout PayPal + webhooks (CÓDIGO-COMPLETO; falta probar con credenciales sandbox)
 - [x] **Módulo 5** — Numeración de socios: servicio atómico LF-000101+ (advisory lock, idempotente, conserva nº en upgrade) + activación de membresía. Verificado sin duplicados bajo concurrencia.
 - [x] **Módulo 6** — Pago completo (CÓDIGO-COMPLETO): club, numeración, productos incluidos, factura, puntos, referidos, emails. Falta probar pagos con sandbox.
-- [ ] Upsell segunda moneda (solo Prestige)
-- [ ] Puntos + referidos
-- [ ] Panel `/account`
+- [ ] Upsell segunda moneda (solo Prestige) — Módulo 7 (pendiente)
+- [x] **Módulo 8** — Puntos + referidos (código por socio, captura en registro, recompensa al pago, resúmenes)
+- [x] **Módulo 9** — Panel `/account` completo (resumen, membresía, productos, puntos, referidos, pedidos/facturas, perfil)
 - [ ] Superadmin `/lf-admin`
 - [ ] Emails esenciales + máquina de estados
 - [ ] SEO técnico completo + GEO + páginas legales

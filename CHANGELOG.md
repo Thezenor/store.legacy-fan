@@ -56,6 +56,15 @@
 - Pulido: marquesina infinita animada (CSS, respeta reduce-motion), 3 pilares de valor en home, **carnet digital Art Deco** en /account (réplica del carnet físico con nº de socio; vista previa atenuada para reservas), hover dorado en tarjetas de plan.
 - **Fidelidad al prototipo** (spec extraído con subagente del handoff): logo recreado "LEGACY FAN + filete dorado + PRECIOUS METALS"; header 74px con nav centrado title-case (13px, tracking 0.04em, oro activo); Hero A·Split con **moneda metálica** (radial plata + doble sombra), eyebrow 0.34em, titular Cormorant 76px con acento dorado en italic, CTAs exactos (gradiente 135deg, radius 4px); marquesina Cormorant 17px sobre #0b0b0d. Verificado por render. Early Collector excluido (regla maestra).
 
+### Fase 1 · Módulo 8 — Referidos y puntos
+- Código de referido único por socio (`ensureReferralCode`, generado al activar la membresía).
+- Captura de referido en el registro (`?ref=CODE` → relación REGISTRADO); recompensa al pago completo del referido (M6) según modalidad.
+- Resúmenes para el panel: puntos/saldo con histórico y estadísticas de referidos (registrados, conversión, saldo generado).
+
+### Fase 1 · Módulo 9 — Panel /account completo
+- Secciones (doc 08): resumen (club, nº socio, fechas), mi membresía, mis productos con estado, comunidad, puntos/saldo con movimientos, referidos (código/enlace/stats), pedidos y facturas, perfil.
+- Carnet digital para socios; panel de reserva con "pagar restante" para reservas pendientes.
+
 ### Fase 1 · Módulo 6 — Pago completo (código-completo, sin probar)
 - `startFullPayment` (descuenta automáticamente la reserva si existe) + `captureFullPaymentByOrder` con PayPal (intent=full en el retorno).
 - Al capturar, en una sola transacción: club definitivo, número de socio (M5), pedido con productos incluidos, factura con serie, puntos sobre premium y recompensa de referido. Idempotente.

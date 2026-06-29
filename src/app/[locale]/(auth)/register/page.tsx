@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { registerAction } from '@/lib/auth-actions';
@@ -10,6 +11,7 @@ import { COUNTRIES } from '@/lib/countries';
 export default function RegisterPage() {
   const t = useTranslations('auth');
   const locale = useLocale();
+  const ref = useSearchParams().get('ref') ?? '';
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -43,6 +45,7 @@ export default function RegisterPage() {
       <form action={onSubmit} className="space-y-4">
         {error ? <Alert kind="error">{error}</Alert> : null}
         <input type="hidden" name="locale" value={locale} />
+        {ref ? <input type="hidden" name="ref" value={ref} /> : null}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t('firstNameLabel')} name="firstName" required error={fieldErrors.firstName} />
           <Field label={t('lastNameLabel')} name="lastName" required error={fieldErrors.lastName} />

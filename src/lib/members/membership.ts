@@ -2,6 +2,7 @@ import type { ClubType, Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 import { getDate } from '../commerce/settings';
 import { assignMemberNumber } from './numbering';
+import { ensureReferralCode } from '../referrals/code';
 
 // Duración de membresía (doc 02): 12 meses desde el lanzamiento (preventa) o
 // desde el pago completo si es posterior. Configurable vía settings en el futuro.
@@ -43,6 +44,9 @@ export async function activateMembershipTx(
       });
 
   const number = await assignMemberNumber(tx, membership.id);
+
+  // Cada socio dispone de su código de referido (doc 06)
+  await ensureReferralCode(tx, userId);
 
   await tx.auditLog.create({
     data: {

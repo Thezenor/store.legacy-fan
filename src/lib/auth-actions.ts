@@ -61,7 +61,7 @@ export async function registerAction(formData: FormData): Promise<ActionResult> 
   }
 
   const passwordHash = await bcrypt.hash(data.password, 12);
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: data.email,
       passwordHash,
@@ -78,6 +78,22 @@ export async function registerAction(formData: FormData): Promise<ActionResult> 
       },
     },
   });
+
+  // Captura de referido (doc 06): si llegó con un código válido, registrar la relación.
+  const ref = (formData.get('ref') as string | null)?.trim();
+  if (ref) {
+    const code = await prisma.referralCode.findUnique({ where: { code: ref } });
+    if (code && code.userId !== user.id) {
+      await prisma.referral.create({
+        data: {
+          referralCodeId: code.id,
+          referrerId: code.userId,
+          referredUserId: user.id,
+          status: 'REGISTRADO',
+        },
+      });
+    }
+  }
 
   const token = await emailVerification.create(data.email);
   await sendVerificationEmail(data.email, locale, token);
