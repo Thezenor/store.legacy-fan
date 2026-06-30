@@ -108,7 +108,7 @@ export default async function AccountPage({
       tier: membership!.club,
     });
     if (token) {
-      const url = `${appUrl()}/api/verify-member?token=${encodeURIComponent(token)}`;
+      const url = `${appUrl()}/verify?token=${encodeURIComponent(token)}`;
       memberQrDataUri = await QRCode.toString(url, {
         type: 'svg',
         margin: 0,

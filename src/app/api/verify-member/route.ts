@@ -1,58 +1,36 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getPassSecret, verifyMemberToken, isWalletEnabled } from '@/lib/members/pass-token';
+import { verifyMemberByToken } from '@/lib/members/verify';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Verificación del carnet de socio (entrada a eventos / control de acceso).
+ * Verificación del carnet de socio (uso programático / control de acceso).
  *   GET /api/verify-member?token=...
- *
- * Valida la firma y la caducidad del token y comprueba contra la BD que el
- * socio sigue activo (revocación instantánea: basta con dar de baja la
- * membresía). Devuelve solo los datos necesarios para el control en puerta.
- * El token en sí no contiene datos personales en claro.
+ * Para una pantalla amable de puerta, usar la página /verify?token=...
  */
 export async function GET(req: NextRequest) {
-  if (!(await isWalletEnabled())) {
-    return NextResponse.json({ valid: false, reason: 'disabled' }, { status: 503 });
-  }
   const token = new URL(req.url).searchParams.get('token') ?? '';
-  if (!token) {
-    return NextResponse.json({ valid: false, reason: 'missing_token' }, { status: 400 });
-  }
-  const secret = await getPassSecret();
-  if (!secret) {
-    return NextResponse.json({ valid: false, reason: 'not_configured' }, { status: 503 });
-  }
+  const r = await verifyMemberByToken(token);
 
-  const nowSec = Math.floor(Date.now() / 1000);
-  const res = verifyMemberToken(token, secret, nowSec);
-  if (!res.valid) {
-    return NextResponse.json({ valid: false, reason: res.reason }, { status: 200 });
+  switch (r.status) {
+    case 'disabled':
+      return NextResponse.json({ valid: false, reason: 'disabled' }, { status: 503 });
+    case 'not_configured':
+      return NextResponse.json({ valid: false, reason: 'not_configured' }, { status: 503 });
+    case 'missing_token':
+      return NextResponse.json({ valid: false, reason: 'missing_token' }, { status: 400 });
+    case 'invalid':
+      return NextResponse.json({ valid: false, reason: r.reason }, { status: 200 });
+    case 'revoked':
+      return NextResponse.json({ valid: false, reason: 'revoked', number: r.number }, { status: 200 });
+    case 'valid':
+      return NextResponse.json({
+        valid: true,
+        number: r.number,
+        tier: r.tier,
+        name: r.name,
+        expiresAt: r.expiresAt,
+      });
   }
-
-  // Comprobación de estado en BD (revocación / baja / número cambiado).
-  const membership = await prisma.membership.findUnique({
-    where: { userId: res.payload.sub },
-    include: { memberNumber: true, user: { select: { profile: { select: { firstName: true, lastName: true } } } } },
-  });
-  const active =
-    membership?.status === 'SOCIO_ACTIVO' &&
-    membership.memberNumber?.formatted === res.payload.num;
-
-  if (!active) {
-    return NextResponse.json({ valid: false, reason: 'revoked', number: res.payload.num }, { status: 200 });
-  }
-
-  const p = membership!.user?.profile;
-  const name = p ? `${p.firstName} ${p.lastName}`.trim() : null;
-  return NextResponse.json({
-    valid: true,
-    number: res.payload.num,
-    tier: membership!.club,
-    name, // para que el personal de puerta coteje identidad
-    expiresAt: new Date(res.payload.exp * 1000).toISOString(),
-  });
 }
