@@ -4,12 +4,15 @@
 
 - Numeración única global para todos los socios.
 - No hay distinción por Prime o Prestige en el número.
-- Formato: `LF-000101`.
+- Formato: `LF-000051`.
 
 ## Números reservados
 
-- `LF-000001` a `LF-000100` reservados para asignación manual por superadmin.
-- Numeración automática empieza en `LF-000101`.
+- `LF-000001` a `LF-000050` reservados para asignación manual por superadmin
+  (decisión usuario; antes 1–100).
+- Numeración automática empieza en `LF-000051`.
+- La asignación automática toma el **primer hueco libre ≥ 51** (no el máximo+1),
+  para no dejar saltos cuando un número alto se asigna manualmente.
 
 ## Asignación
 
@@ -28,7 +31,7 @@
 
 Debe poder:
 - Crear socio manualmente.
-- Asignar números 1–100.
+- Asignar números 1–50.
 - Cambiar número manualmente si es necesario.
 - Bloquear número.
 - Ver histórico de cambios.
