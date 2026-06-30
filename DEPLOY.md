@@ -23,7 +23,7 @@ NEXT_PUBLIC_SITE_NAME=Legacy Fan
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 
 # Auth.js (NextAuth)
-AUTH_SECRET=8V6ifejKTaRqjgP8ssiUdIXek/tx4XTuQb+JXeerk9c=
+AUTH_SECRET=43c255ce7387a70d0ceeb9bf54dcaea905598775cd97914ac3e6c1e283c0c88e
 AUTH_URL=https://store.legacy-fan.com
 AUTH_TRUST_HOST=true
 

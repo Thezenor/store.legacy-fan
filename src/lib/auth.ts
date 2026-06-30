@@ -20,6 +20,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   // Necesario detrás de proxies (Railway/Cloudflare) para validar el host.
   trustHost: true,
+  // Secreto explícito (Auth.js lo exige en producción). Definir AUTH_SECRET en el entorno.
+  secret: process.env.AUTH_SECRET,
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
