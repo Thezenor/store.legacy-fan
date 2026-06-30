@@ -1,31 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { Link, useRouter } from '@/i18n/navigation';
-import { loginAction } from '@/lib/auth-actions';
+import { useActionState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { loginAction, type ActionResult } from '@/lib/auth-actions';
 import { AuthCard, Field, SubmitButton, Alert } from '@/components/auth/ui';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-
-  async function onSubmit(formData: FormData) {
-    setError(null);
-    const res = await loginAction(formData);
-    if (res.ok) {
-      router.push('/account');
-      router.refresh();
-    } else {
-      setError(t(`errors.${res.code}`));
-    }
-  }
+  const locale = useLocale();
+  const [state, formAction] = useActionState<ActionResult | null, FormData>(loginAction, null);
+  const error = state && !state.ok ? t(`errors.${state.code}`) : null;
 
   return (
     <AuthCard title={t('login.title')}>
-      <form action={onSubmit} className="space-y-4">
+      <form action={formAction} className="space-y-4">
         {error ? <Alert kind="error">{error}</Alert> : null}
+        <input type="hidden" name="locale" value={locale} />
         <Field label={t('emailLabel')} name="email" type="email" required autoComplete="email" />
         <Field
           label={t('passwordLabel')}

@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers';
 import bcrypt from 'bcryptjs';
+import { AuthError } from 'next-auth';
 import { prisma } from './prisma';
 import { signIn, signOut } from './auth';
 import { RL } from './rate-limit';
@@ -160,7 +161,10 @@ export async function resetPasswordAction(formData: FormData): Promise<ActionRes
   return { ok: true, message: 'password_updated' };
 }
 
-export async function loginAction(formData: FormData): Promise<ActionResult> {
+export async function loginAction(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const parsed = loginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -171,15 +175,23 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     return { ok: false, code: 'rate_limited' };
   }
 
+  const locale = (formData.get('locale') as string) || 'es';
+  const dest = locale === 'es' ? '/account' : `/${locale}/account`;
+
   try {
+    // Patrón canónico Auth.js v5: redirectTo lanza NEXT_REDIRECT al tener éxito
+    // (se reenvía); en credenciales inválidas lanza AuthError (se captura).
     await signIn('credentials', {
       email: parsed.data.email,
       password: parsed.data.password,
-      redirect: false,
+      redirectTo: dest,
     });
     return { ok: true };
-  } catch {
-    return { ok: false, code: 'invalid_credentials' };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { ok: false, code: 'invalid_credentials' };
+    }
+    throw error; // NEXT_REDIRECT u otros: dejar que Next gestione la navegación
   }
 }
 
