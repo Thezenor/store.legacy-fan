@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { createProductAction, updateProductAction } from '@/lib/admin-actions';
+import { createProductAction, updateProductAction, deleteProductAction } from '@/lib/admin-actions';
 
 export default async function AdminProductos() {
   const [products, collections] = await Promise.all([
@@ -64,7 +64,10 @@ export default async function AdminProductos() {
               <input type="hidden" name="id" value={p.id} />
               <div className="flex items-center justify-between">
                 <span className="text-foreground">{p.name} <span className="font-mono text-[11px] text-faint">/{p.slug}</span></span>
-                <button type="submit" className="rounded border border-gold/40 px-3 py-1.5 text-xs uppercase tracking-wider text-gold-light hover:bg-surface-elevated">Guardar</button>
+                <div className="flex gap-2">
+                  <button type="submit" className="border border-gold/40 px-3 py-1.5 text-xs uppercase tracking-wider text-gold-light hover:bg-surface-elevated">Guardar</button>
+                  <button type="submit" formAction={deleteProductAction} className="border border-red-500/40 px-3 py-1.5 text-xs uppercase tracking-wider text-red-400 hover:bg-surface-elevated">Borrar</button>
+                </div>
               </div>
               <div className="flex flex-wrap gap-3">
                 <label className="block"><span className="text-xs text-muted">priceEur</span>

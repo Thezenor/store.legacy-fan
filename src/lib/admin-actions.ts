@@ -435,6 +435,91 @@ export async function updateOrderItemStatusAction(formData: FormData): Promise<v
   revalidatePath('/lf-admin/pedidos');
 }
 
+// ───────────────── Configuración del sistema (panel agrupado) ─────────────────
+
+// Mapa de campos del panel de configuración: clave → tipo de coerción.
+const CONFIG_FIELDS: { key: string; type: 'string' | 'number' | 'bool' | 'money' | 'date' }[] = [
+  { key: 'fiscal.company_name', type: 'string' },
+  { key: 'fiscal.base_country', type: 'string' },
+  { key: 'fiscal.base_currency', type: 'string' },
+  { key: 'fiscal.invoice_series', type: 'string' },
+  { key: 'launch.date', type: 'date' },
+  { key: 'payments.paypal.enabled', type: 'bool' },
+  { key: 'payments.stripe.enabled', type: 'bool' },
+  { key: 'payments.mode', type: 'string' },
+  { key: 'reservation.amount.eur', type: 'money' },
+  { key: 'reservation.amount.usd', type: 'money' },
+  { key: 'reservation.grace_days_after_launch', type: 'number' },
+  { key: 'reservation.refundable_hours_before_launch', type: 'number' },
+  { key: 'points.ratio_per_currency_unit', type: 'number' },
+  { key: 'points.expiry_years', type: 'number' },
+  { key: 'upsell.second_coin.enabled_prime', type: 'bool' },
+  { key: 'upsell.second_coin.enabled_prestige', type: 'bool' },
+  { key: 'system.maintenance_mode', type: 'bool' },
+];
+
+/** Guarda todo el panel de configuración de una vez (doc 09). */
+export async function saveConfigAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  for (const f of CONFIG_FIELDS) {
+    const raw = formData.get(f.key);
+    let value: unknown;
+    switch (f.type) {
+      case 'bool':
+        value = raw === 'on';
+        break;
+      case 'number':
+        value = Math.round(Number(raw ?? 0)) || 0;
+        break;
+      case 'money':
+        value = Math.round(parseFloat(String(raw ?? '0').replace(',', '.')) * 100) || 0;
+        break;
+      case 'date':
+        value = raw ? new Date(String(raw)).toISOString() : null;
+        break;
+      default:
+        value = String(raw ?? '');
+    }
+    await prisma.systemSetting.upsert({
+      where: { key: f.key },
+      update: { value: value as object },
+      create: { key: f.key, value: value as object, group: f.key.split('.')[0] },
+    });
+  }
+  await audit(admin.id, admin.email, 'config.save', 'SystemSetting', 'panel', null, { fields: CONFIG_FIELDS.length });
+  revalidatePath('/lf-admin/config');
+}
+
+/** Bloquea/desbloquea un número de socio (doc 04). */
+export async function toggleMemberNumberBlockAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  const mn = await prisma.memberNumber.findUnique({ where: { id } });
+  if (!mn || mn.membershipId) return; // no bloquear números ya asignados
+  await prisma.memberNumber.update({ where: { id }, data: { isBlocked: !mn.isBlocked } });
+  await audit(admin.id, admin.email, 'member_number.block_toggle', 'MemberNumber', id, { isBlocked: mn.isBlocked }, { isBlocked: !mn.isBlocked });
+  revalidatePath('/lf-admin/numeracion');
+}
+
+export async function deleteProductAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  await prisma.product.delete({ where: { id } }).catch(() => {});
+  await audit(admin.id, admin.email, 'product.delete', 'Product', id, null, null);
+  revalidatePath('/lf-admin/productos');
+}
+
+export async function deleteCollectionAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  // Evita borrar colecciones con productos (integridad).
+  const count = await prisma.product.count({ where: { collectionId: id } });
+  if (count > 0) return;
+  await prisma.collection.delete({ where: { id } }).catch(() => {});
+  await audit(admin.id, admin.email, 'collection.delete', 'Collection', id, null, null);
+  revalidatePath('/lf-admin/colecciones');
+}
+
 /** Crea un envío con tracking para un pedido y marca sus items como enviados. */
 export async function createShipmentAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();

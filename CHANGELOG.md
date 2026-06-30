@@ -83,7 +83,10 @@
 - **FAQ** CRUD, **SEO/GEO** (metatítulos/descr./keywords por ruta e idioma), **Roles** (asignar/quitar rol a usuario por email).
 - **Pedidos y envíos**: cambiar estado logístico por item + crear envío con tracking.
 - **Modo mantenimiento**: si está activo, solo los admin ven la web (resto ve aviso).
-- Menú admin ampliado (14 secciones). Build OK (66 páginas).
+- Menú admin ampliado. Build OK.
+- **Configuración del sistema** `/lf-admin/config`: panel agrupado y usable (empresa/fiscal, lanzamiento, pasarelas PayPal/Stripe + modo, reserva, puntos/upsell, mantenimiento) en un solo formulario.
+- **Numeración de socios** `/lf-admin/numeracion`: rejilla de reservados 1–100 (bloquear/activar), tabla de asignados.
+- **Logs de email** en la sección Emails; **borrado** de productos y colecciones (con guardas de integridad). Build OK (72 páginas, 16 secciones admin).
 
 ### Fase 1 · Módulo 11 — Emails gestionables + máquina de estados
 - Plantillas de email en BD (seed de 6 esenciales ES/EN), editables desde `/lf-admin/emails` (asunto/cuerpo por idioma, activar/desactivar, **envío de prueba**).

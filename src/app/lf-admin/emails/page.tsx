@@ -5,10 +5,13 @@ import { updateEmailTemplateAction, sendTestEmailAction } from '@/lib/admin-acti
 // activar/desactivar y enviar test. Variables disponibles: {{firstName}}, {{amount}},
 // {{memberNumber}}, {{deadline}}.
 export default async function AdminEmails() {
-  const templates = await prisma.emailTemplate.findMany({
-    include: { translations: { orderBy: { locale: 'asc' } } },
-    orderBy: { key: 'asc' },
-  });
+  const [templates, logs] = await Promise.all([
+    prisma.emailTemplate.findMany({
+      include: { translations: { orderBy: { locale: 'asc' } } },
+      orderBy: { key: 'asc' },
+    }),
+    prisma.emailLog.findMany({ orderBy: { createdAt: 'desc' }, take: 15 }),
+  ]);
 
   return (
     <div>
@@ -51,6 +54,28 @@ export default async function AdminEmails() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Logs de envío */}
+      <h2 className="mt-10 font-display text-xl text-gold-light">Últimos envíos</h2>
+      <div className="mt-3 overflow-x-auto rounded-card border border-border">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-surface text-xs uppercase tracking-wider text-faint">
+            <tr><th className="px-4 py-3">Fecha</th><th className="px-4 py-3">Para</th><th className="px-4 py-3">Proveedor</th><th className="px-4 py-3">Estado</th></tr>
+          </thead>
+          <tbody>
+            {logs.length === 0 ? (
+              <tr><td colSpan={4} className="px-4 py-6 text-center text-muted">Sin envíos registrados.</td></tr>
+            ) : logs.map((l) => (
+              <tr key={l.id} className="border-t border-border">
+                <td className="px-4 py-3 text-muted">{new Intl.DateTimeFormat('es', { dateStyle: 'short', timeStyle: 'short' }).format(l.createdAt)}</td>
+                <td className="px-4 py-3 text-foreground">{l.toEmail}</td>
+                <td className="px-4 py-3 text-muted">{l.provider}</td>
+                <td className={`px-4 py-3 ${l.success ? 'text-state-green' : 'text-red-400'}`}>{l.success ? 'OK' : (l.error ?? 'error')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

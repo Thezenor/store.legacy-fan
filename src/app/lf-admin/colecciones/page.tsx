@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { createCollectionAction, updateCollectionAction } from '@/lib/admin-actions';
+import { createCollectionAction, updateCollectionAction, deleteCollectionAction } from '@/lib/admin-actions';
 
 const STATUSES = ['BORRADOR', 'PROXIMA', 'ACTIVA', 'AGOTADA', 'OCULTA', 'PRIVADA_DROP'];
 
@@ -52,9 +52,14 @@ export default async function AdminColecciones() {
               <select name="status" defaultValue={c.status} className="rounded border border-border bg-background px-2 py-1.5 text-sm text-foreground">
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
-              <button type="submit" className="rounded border border-gold/40 px-3 py-1.5 text-xs uppercase tracking-wider text-gold-light hover:bg-surface-elevated">
+              <button type="submit" className="border border-gold/40 px-3 py-1.5 text-xs uppercase tracking-wider text-gold-light hover:bg-surface-elevated">
                 Guardar
               </button>
+              {c._count.products === 0 ? (
+                <button type="submit" formAction={deleteCollectionAction} className="border border-red-500/40 px-3 py-1.5 text-xs uppercase tracking-wider text-red-400 hover:bg-surface-elevated">
+                  Borrar
+                </button>
+              ) : null}
             </form>
           ))
         )}
