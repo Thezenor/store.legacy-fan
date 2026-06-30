@@ -18,7 +18,7 @@ const VIDEO = new Set(['mp4', 'webm', 'mov']);
 export async function saveUpload(file: File): Promise<{ name: string; url: string }> {
   const ext = (file.name.split('.').pop() ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
   if (!EXT_OK.has(ext)) throw new Error('Formato no soportado.');
-  const maxMb = VIDEO.has(ext) ? 60 : 8;
+  const maxMb = VIDEO.has(ext) ? 60 : 15;
   if (file.size > maxMb * 1024 * 1024) throw new Error(`El archivo supera ${maxMb} MB.`);
 
   await mkdir(DIR, { recursive: true });

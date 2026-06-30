@@ -106,10 +106,10 @@ export default async function AdminConfig() {
         <button type="submit" className="bevel bg-gold px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Guardar configuración</button>
       </form>
 
-      {/* Imágenes de las monedas del upsell (subida de fichero, formularios aparte) */}
+      {/* Imágenes de las monedas del upsell: subir fichero o pegar URL */}
       <div className="mt-4 rounded-card border border-border bg-surface p-5">
         <h2 className="font-display text-lg text-gold-light">Imágenes de las monedas (Prestige)</h2>
-        <p className="mt-1 text-xs text-faint">Sube una imagen por moneda. Requiere el Volume de Railway montado para que persistan.</p>
+        <p className="mt-1 text-xs text-faint">Sube un fichero (≤15 MB; jpg/png/webp/avif/gif) o pega una URL de imagen.</p>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           {(['a', 'b'] as const).map((coin) => (
             <form key={coin} action={uploadUpsellCoinImageAction} className="rounded border border-border p-3">
@@ -122,7 +122,11 @@ export default async function AdminConfig() {
                 <p className="mt-2 text-xs text-faint">Sin imagen</p>
               )}
               <input type="file" name="file" accept="image/*" className="mt-2 block w-full text-xs text-muted" />
-              <button className="bevel mt-2 bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#1a1408]">Subir imagen</button>
+              <input name="url" defaultValue={str(`upsell.coin.${coin}.image`)} placeholder="o pega una URL de imagen" className={`${inp} mt-2 w-full text-xs`} />
+              <button className="bevel mt-2 bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#1a1408]">Guardar imagen</button>
+              {str(`upsell.coin.${coin}.image_error`) ? (
+                <p className="mt-2 text-[11px] text-red-400">⚠ {str(`upsell.coin.${coin}.image_error`)}</p>
+              ) : null}
             </form>
           ))}
         </div>

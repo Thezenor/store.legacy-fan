@@ -762,20 +762,46 @@ export async function saveGatewayAction(formData: FormData): Promise<void> {
   revalidatePath('/lf-admin/config');
 }
 
-/** Sube la imagen de una moneda del upsell (a|b) y guarda su URL en settings. */
+/**
+ * Imagen de una moneda del upsell (a|b): por subida de fichero o por URL pegada.
+ * Guarda la URL en settings y, si falla, un mensaje de error visible en el panel.
+ */
 export async function uploadUpsellCoinImageAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const coin = String(formData.get('coin') ?? 'a') === 'b' ? 'b' : 'a';
-  const file = formData.get('file');
-  if (!(file instanceof File) || file.size === 0) return;
-  const { url } = await saveUpload(file);
   const key = `upsell.coin.${coin}.image`;
-  await prisma.systemSetting.upsert({
-    where: { key },
-    update: { value: url },
-    create: { key, value: url, group: 'upsell' },
-  });
-  await audit(admin.id, admin.email, 'upsell.coin_image', 'SystemSetting', key, null, { url });
+  const errKey = `upsell.coin.${coin}.image_error`;
+  const file = formData.get('file');
+  const pastedUrl = String(formData.get('url') ?? '').trim();
+
+  const setErr = (msg: string) =>
+    prisma.systemSetting.upsert({
+      where: { key: errKey },
+      update: { value: msg },
+      create: { key: errKey, value: msg, group: 'upsell' },
+    });
+
+  try {
+    let url: string;
+    if (file instanceof File && file.size > 0) {
+      url = (await saveUpload(file)).url;
+    } else if (pastedUrl) {
+      url = pastedUrl;
+    } else {
+      await setErr('No se recibió ni fichero ni URL.');
+      revalidatePath('/lf-admin/config');
+      return;
+    }
+    await prisma.systemSetting.upsert({
+      where: { key },
+      update: { value: url },
+      create: { key, value: url, group: 'upsell' },
+    });
+    await prisma.systemSetting.deleteMany({ where: { key: errKey } });
+    await audit(admin.id, admin.email, 'upsell.coin_image', 'SystemSetting', key, null, { url });
+  } catch (e) {
+    await setErr(e instanceof Error ? e.message : 'Error al guardar la imagen.');
+  }
   revalidatePath('/lf-admin/config');
 }
 
