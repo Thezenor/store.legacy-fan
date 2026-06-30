@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin';
 import '../globals.css';
-import '@fontsource/hanken-grotesk/400.css';
-import '@fontsource/hanken-grotesk/600.css';
-import '@fontsource/cormorant-garamond/500.css';
-import '@fontsource/cormorant-garamond/600.css';
+import '@fontsource/spectral/400.css';
+import '@fontsource/spectral/600.css';
+import '@fontsource/cinzel/600.css';
+import '@fontsource/cinzel/700.css';
 
 export const metadata: Metadata = {
   title: 'Legacy Fan · Superadmin',

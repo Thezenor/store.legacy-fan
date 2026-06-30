@@ -25,6 +25,7 @@
     "heroL2": "Transcende",
     "heroAccent": "le Métal",
     "marquee": "Édition limitée · Argent .999 · Or pur · Ultra High Relief · Art de collection · Licence officielle",
+    "specs": ["Argent .999", "2 oz", "Tirage 999", "MMXXVI", "Ø 38 mm"],
     "pillarsEyebrow": "Pourquoi Legacy Fan",
     "pillars": [
       { "n": "01", "title": "Argent .999 & Or pur", "body": "Métaux précieux certifiés, frappés en éditions limitées et numérotées." },

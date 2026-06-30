@@ -25,18 +25,18 @@ export async function PriceBlock({
       <p className="eyebrow">
         {t('currentPhase')} · {pricing.phaseName}
       </p>
-      <p className="mt-2">
-        <span className="text-sm text-muted">{t('from')} </span>
-        <span className="font-display text-3xl font-semibold text-metal-gold sm:text-4xl">
+      <p className="mt-2 flex items-baseline gap-2">
+        <span className="text-xs uppercase tracking-wider text-muted">{t('from')}</span>
+        <span className="text-3xl font-semibold tabular-nums text-foreground sm:text-4xl">
           {pricing.priceFormatted}
         </span>
       </p>
       <p className="mt-3 text-sm text-foreground">
-        {t('reservation')}: <span className="font-semibold">{reservation.amountFormatted}</span>
+        {t('reservation')}: <span className="serial">{reservation.amountFormatted}</span>
       </p>
       <p className="mt-1 text-xs text-muted">{t('reservationNote')}</p>
       {pricing.freeShipping && pricing.freeShippingCountries.includes('ES') ? (
-        <p className="mt-2 text-xs text-silver">★ {t('freeShippingEs')}</p>
+        <p className="mt-2 text-xs text-silver">✦ {t('freeShippingEs')}</p>
       ) : null}
     </div>
   );

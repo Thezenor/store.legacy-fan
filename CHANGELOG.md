@@ -47,6 +47,13 @@
 - Stub `/checkout` con gating de compra (M1: requiere email verificado) + resumen de precio (M2).
 - Build OK (49 páginas).
 
+### Diseño — Rediseño "menos IA, más original" (auditado con 2 agentes)
+- **Tipografía nueva**: fuera Cormorant Garamond + Hanken Grotesk (dúo "IA/plantilla"); entran **Cinzel** (capitales romanas grabadas, ADN de acuñación/medallística) para títulos y **Spectral** (serif editorial) para texto. Auto-alojadas (@fontsource).
+- **Oro como filete, no relleno**: eliminado el gradiente dorado en titulares/precios (`text-metal-gold` ahora sólido sobrio); precios en marfil con cifras tabulares; el acento del hero es un filete oro bajo una palabra.
+- **Fuera la marquesina** (banner de texto corriendo, cliché IA) → **cartela de especificación estática** numismática (Plata .999 · 2 oz · Tirada 999 · MMXXVI · Ø 38 mm) entre filetes.
+- **Moneda acuñada** de verdad: canto estriado, leyenda circular tipográfica, monograma LF y nº de serie grabado, acabado mate (sustituye el radial-gradient 3D genérico).
+- **Toques Art Deco**: esquinas biseladas (`.bevel` clip-path), pilares con numeración romana (I·II·III) y filete, números de serie como motivo recurrente (clase `.serial` en cobre), bullets ✓ → filete metálico, hero editorial asimétrico (sin glow de esquina), botones oro sólido (sin gradiente+brightness).
+
 ### Diseño — Auditoría y correcciones responsive (escritorio + móvil)
 - Auditoría con 4 agentes en paralelo (chrome, home/club, auth/checkout/account, admin).
 - Global: `overflow-x-hidden` en body (elimina scroll horizontal de los márgenes negativos).

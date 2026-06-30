@@ -40,7 +40,7 @@ export function FullPaymentButton({
         type="button"
         onClick={go}
         disabled={pending}
-        className="w-full rounded bg-gold-grad px-5 py-3 text-sm font-semibold uppercase tracking-wider text-[#160f02] transition hover:brightness-110 disabled:opacity-60"
+        className="bevel w-full bg-gold px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#1a1408] transition hover:bg-gold-light disabled:opacity-60"
       >
         {pending ? pendingLabel : label}
       </button>

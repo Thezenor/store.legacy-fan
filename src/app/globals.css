@@ -8,8 +8,11 @@
  * Modo OSCURO por defecto (:root); modo claro mediante .light.
  */
 :root {
-  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Cormorant Garamond', ui-serif, Georgia, 'Times New Roman', serif;
+  /* Tipografía con carácter (acuñación/medallística): Cinzel (capitales grabadas)
+     para títulos cortos y Spectral (serif editorial) para texto. */
+  --font-sans: 'Spectral', Georgia, 'Times New Roman', serif;
+  --font-display: 'Cinzel', 'Spectral', Georgia, serif;
+  --font-mono: 'Spectral', ui-monospace, 'Courier New', monospace;
 
   /* Canal RGB para usar con <alpha-value> de Tailwind */
   --lf-background: 8 8 10; /* #08080a */
@@ -55,38 +58,40 @@ h1, h2, h3, .font-display {
   font-family: var(--font-display);
 }
 
-/* Acabado metálico dorado para titulares y acentos (manual de marca) */
+/* Oro SÓLIDO y sobrio (no gradiente): el oro es escaso y aparece en filetes,
+   números de serie y un único acento por pantalla. */
 .text-metal-gold {
-  background: linear-gradient(120deg, #f4efe2 0%, #c6a253 45%, #e6c878 70%, #a9822f 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #caa84f;
 }
 
-/* Eyebrow / kicker dorado en versales */
+/* Eyebrow / kicker: un único token de tracking (antes había 3 distintos) */
 .eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.32em;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: #c8a24b;
 }
 
+/* Número de serie / dato técnico grabado (cobre, cifras tabulares) */
+.serial {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: #c0855a;
+}
+
 /* Filo dorado sutil (líneas Art Deco) */
 .hairline-gold {
-  background: linear-gradient(90deg, transparent, rgba(200, 162, 75, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(200, 162, 75, 0.55), transparent);
   height: 1px;
 }
 
-/* Marquesina infinita (manual de marca, 28s linear) */
-.lf-marquee {
-  display: flex;
-  width: max-content;
-  animation: lf-marquee 28s linear infinite;
+/* Esquinas biseladas Art Deco (chaflán en 2 esquinas opuestas) */
+.bevel {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
 }
-@keyframes lf-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .lf-marquee { animation: none; }
+
+/* Texto grabado en relieve (doble sombra clara/oscura) */
+.engraved {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.12), 0 -1px 0 rgba(0, 0, 0, 0.6);
 }

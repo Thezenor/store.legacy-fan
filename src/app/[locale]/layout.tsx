@@ -10,16 +10,14 @@ import { MainNav } from '@/components/brand/main-nav';
 import { Link } from '@/i18n/navigation';
 import { auth } from '@/lib/auth';
 import '../globals.css';
-// Fuentes de marca auto-alojadas (Cormorant Garamond display + Hanken Grotesk UI)
-import '@fontsource/hanken-grotesk/300.css';
-import '@fontsource/hanken-grotesk/400.css';
-import '@fontsource/hanken-grotesk/500.css';
-import '@fontsource/hanken-grotesk/600.css';
-import '@fontsource/hanken-grotesk/700.css';
-import '@fontsource/cormorant-garamond/400.css';
-import '@fontsource/cormorant-garamond/500.css';
-import '@fontsource/cormorant-garamond/600.css';
-import '@fontsource/cormorant-garamond/500-italic.css';
+// Fuentes de marca auto-alojadas: Cinzel (display, capitales grabadas) + Spectral (texto)
+import '@fontsource/spectral/300.css';
+import '@fontsource/spectral/400.css';
+import '@fontsource/spectral/500.css';
+import '@fontsource/spectral/600.css';
+import '@fontsource/spectral/400-italic.css';
+import '@fontsource/cinzel/600.css';
+import '@fontsource/cinzel/700.css';
 
 // Fuentes: stack del sistema vía variables CSS (definidas en globals.css).
 // TODO(Fase 1): auto-alojar Inter + Cormorant Garamond con next/font/local
