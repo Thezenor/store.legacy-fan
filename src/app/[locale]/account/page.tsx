@@ -8,6 +8,7 @@ import { DigitalMemberCard } from '@/components/brand/member-card';
 import { FullPaymentButton } from '@/components/checkout/full-payment-button';
 import { CancelSubscriptionButton } from '@/components/account/cancel-subscription-button';
 import { AccountNav, type AccountNavItem } from '@/components/account/account-nav';
+import { ChangePasswordForm } from '@/components/account/change-password-form';
 import { updateOwnProfileAction } from '@/lib/account-actions';
 import { COUNTRIES } from '@/lib/countries';
 import { Link } from '@/i18n/navigation';
@@ -88,6 +89,7 @@ export default async function AccountPage({
     ...(referral ? [{ id: 'referidos', label: a('referralsTitle') }] : []),
     { id: 'pedidos', label: a('ordersTitle') },
     { id: 'perfil', label: a('profileTitle') },
+    { id: 'password', label: a('passwordTitle') },
   ];
 
   return (
@@ -351,6 +353,11 @@ export default async function AccountPage({
             </button>
           </div>
         </form>
+      </Section>
+
+      {/* Contraseña */}
+      <Section id="password" title={a('passwordTitle')}>
+        <ChangePasswordForm />
       </Section>
         </div>
       </div>
