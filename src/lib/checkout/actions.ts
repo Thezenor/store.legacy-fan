@@ -11,6 +11,7 @@ import { getDisplayCurrency } from '../commerce/currency';
 import { getPlan } from '../commerce';
 import { getSetting } from '../commerce/settings';
 import { getSecondCoinUpsell } from '../commerce/upsell';
+import { getReservationTerms } from '../commerce';
 import { startSubscription } from '../subscriptions';
 import { checkoutRegisterSchema, loginSchema } from '../validation/auth';
 import { emailVerification } from '../tokens';
@@ -228,13 +229,25 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
   // Upsell de 2ª moneda (Prestige): elección de moneda incluida y, si añade la
   // segunda, su importe con descuento (calculado en el servidor, no del cliente).
   const includedCoin = (String(formData.get('includedCoin') ?? '') || null) as 'a' | 'b' | null;
-  const wantsSecond = formData.get('addSecondCoin') === 'on';
+  const secondChoice = (() => {
+    const v = String(formData.get('secondCoinChoice') ?? 'none');
+    return v === 'reserve' || v === 'full' ? v : 'none';
+  })();
   let secondCoinCents = 0;
-  if (wantsSecond) {
+  if (secondChoice === 'full') {
     const up = await getSecondCoinUpsell(club, currency);
     secondCoinCents = up?.secondCents ?? 0;
+  } else if (secondChoice === 'reserve') {
+    // Reservar la 2ª moneda = un depósito igual al de la membresía (50 €/$).
+    const terms = await getReservationTerms(currency);
+    secondCoinCents = terms.amountCents;
   }
-  const coinOpts = { includedCoin, secondCoin: secondCoinCents > 0, secondCoinCents };
+  const coinOpts = {
+    includedCoin,
+    secondCoin: secondChoice !== 'none' && secondCoinCents > 0,
+    secondCoinCents,
+    secondCoinChoice: secondChoice,
+  };
 
   // 2) Iniciar el pago elegido.
   try {

@@ -42,6 +42,7 @@ export async function startReservation(opts: {
   includedCoin?: 'a' | 'b' | null;
   secondCoin?: boolean;
   secondCoinCents?: number;
+  secondCoinChoice?: string;
 }): Promise<StartReservationResult> {
   const terms = await getReservationTerms(opts.currency, undefined, opts.club ?? undefined);
   const fullPricing = opts.club ? await getClubPricing(opts.club, opts.currency) : null;
@@ -60,6 +61,7 @@ export async function startReservation(opts: {
       includedCoin: opts.includedCoin ?? null,
       secondCoin: secondCoinCents > 0,
       secondCoinCents,
+      secondCoinChoice: opts.secondCoinChoice ?? null,
       launchDate: terms.launchDate,
       expiresAt: terms.expiresAt,
       refundableUntil: terms.refundableUntil,

@@ -29,6 +29,7 @@ export async function startFullPayment(opts: {
   includedCoin?: 'a' | 'b' | null;
   secondCoin?: boolean;
   secondCoinCents?: number;
+  secondCoinChoice?: string;
 }) {
   const membership = await prisma.membership.findUnique({ where: { userId: opts.userId } });
   if (membership?.status === 'SOCIO_ACTIVO') {
@@ -67,6 +68,7 @@ export async function startFullPayment(opts: {
             includedCoin: opts.includedCoin ?? null,
             secondCoin: secondCoinCents > 0,
             secondCoinCents,
+            secondCoinChoice: opts.secondCoinChoice ?? null,
           },
         })
       ).id;
@@ -95,6 +97,7 @@ export async function startFullPayment(opts: {
           includedCoin: opts.includedCoin ?? null,
           secondCoin: secondCoinCents > 0,
           secondCoinCents,
+          secondCoinChoice: opts.secondCoinChoice ?? null,
         },
       });
     }

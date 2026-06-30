@@ -368,6 +368,7 @@ model Reservation {
   includedCoin    String? // 'a' | 'b' (moneda incluida elegida)
   secondCoin      Boolean @default(false)
   secondCoinCents Int     @default(0)
+  secondCoinChoice String? // 'reserve' | 'full' | 'none' (cómo añade la 2ª moneda)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 

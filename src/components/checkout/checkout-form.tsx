@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { checkoutSubmitAction, checkEmailExistsAction } from '@/lib/checkout/actions';
 import { inputClass, Alert } from '@/components/auth/ui';
 import { COUNTRIES } from '@/lib/countries';
@@ -43,6 +44,7 @@ export function CheckoutForm({
   // Campos controlados (para memorizarlos y comprobar el email en tiempo real).
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
@@ -215,24 +217,38 @@ export function CheckoutForm({
               </p>
             ) : null}
 
-            {/* 2º contraseña */}
+            {/* 2º contraseña (con ver/ocultar) */}
             <label className="block">
               <span className="mb-1 block text-sm text-muted">{ta('passwordLabel')}</span>
-              <input
-                className={inputClass}
-                name="password"
-                type="password"
-                required
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                aria-invalid={!!fieldErrors.password}
-              />
+              <span className="relative block">
+                <input
+                  className={`${inputClass} pr-20`}
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  aria-invalid={!!fieldErrors.password}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gold hover:underline"
+                >
+                  {showPassword ? tc('hidePassword') : tc('showPassword')}
+                </button>
+              </span>
               {showRegisterFields ? (
                 <span className="mt-1 block text-xs text-faint">{tc('passwordHint')}</span>
               ) : null}
               {fieldErrors.password ? (
                 <span className="mt-1 block text-xs text-red-400">{fieldErrors.password}</span>
+              ) : null}
+              {emailExists && mode === 'login' ? (
+                <Link href="/forgot-password" className="mt-1 inline-block text-xs text-gold hover:underline">
+                  {tc('forgotPassword')}
+                </Link>
               ) : null}
             </label>
 
