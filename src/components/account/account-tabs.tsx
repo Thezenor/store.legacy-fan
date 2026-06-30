@@ -8,29 +8,37 @@ export interface AccountTab {
   node: ReactNode;
 }
 
-// Panel de usuario por pestañas: muestra UNA sección a la vez. En móvil, un
-// selector desplegable; en escritorio, menú lateral fijo.
+// Panel de usuario por secciones: muestra UNA sección a la vez.
+//  - Móvil/tablet: barra de chips siempre visible (scroll horizontal).
+//  - Escritorio: menú lateral fijo.
 export function AccountTabs({ items }: { items: AccountTab[] }) {
   const [active, setActive] = useState(items[0]?.id);
   const current = items.find((i) => i.id === active) ?? items[0];
 
+  if (items.length === 0) return null;
+
   return (
     <div className="mt-8 grid gap-6 md:grid-cols-[210px_1fr]">
-      {/* Móvil: selector */}
-      <label className="block md:hidden">
-        <span className="sr-only">Sección</span>
-        <select
-          value={active}
-          onChange={(e) => setActive(e.target.value)}
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground"
-        >
+      {/* Móvil/tablet: chips horizontales (siempre visibles) */}
+      <div className="-mx-4 md:hidden">
+        <div className="flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {items.map((it) => (
-            <option key={it.id} value={it.id}>
+            <button
+              key={it.id}
+              type="button"
+              onClick={() => setActive(it.id)}
+              aria-current={active === it.id ? 'true' : undefined}
+              className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm transition ${
+                active === it.id
+                  ? 'border-gold/50 bg-gold/15 font-medium text-gold-light'
+                  : 'border-border bg-surface text-muted'
+              }`}
+            >
               {it.label}
-            </option>
+            </button>
           ))}
-        </select>
-      </label>
+        </div>
+      </div>
 
       {/* Escritorio: menú lateral */}
       <nav className="hidden md:sticky md:top-24 md:flex md:flex-col md:gap-1 md:self-start">
