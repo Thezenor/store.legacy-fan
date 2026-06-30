@@ -6,7 +6,7 @@ import { getSettingString } from '../commerce/settings';
 import { getClubPricing, getClubLaunchDate, getPlan } from '../commerce';
 import { activateMembershipTx, renewMembershipTx } from '../members/membership';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '../app-url';
 
 /** Modo (sandbox/live) configurado para una pasarela. */
 async function providerMode(key: 'PAYPAL' | 'STRIPE'): Promise<'sandbox' | 'live'> {

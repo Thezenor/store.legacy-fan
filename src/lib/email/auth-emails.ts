@@ -5,7 +5,7 @@ import { getEmailProvider } from './index';
 
 type Locale = 'es' | 'en' | 'fr' | 'it';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '../app-url';
 
 function shell(title: string, bodyHtml: string): string {
   return `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;color:#16161a">

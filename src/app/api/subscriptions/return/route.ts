@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { reconcileSubscriptionActivated } from '@/lib/subscriptions';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '@/lib/app-url';
 
 function localizedPath(locale: string, path: string): string {
   const prefix = locale && locale !== 'es' ? `/${locale}` : '';

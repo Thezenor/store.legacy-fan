@@ -1,6 +1,6 @@
 import { prisma } from '../prisma';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '../app-url';
 
 // Resumen de referidos para el panel (doc 06/08).
 export async function getReferralSummary(userId: string) {

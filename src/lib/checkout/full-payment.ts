@@ -10,7 +10,7 @@ import { createInvoice } from '../members/invoice';
 import { earnPointsOnPurchase } from '../points/earn';
 import { activateReferralReward } from '../referrals/activate';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '../app-url';
 
 async function paymentMode(): Promise<'TEST' | 'LIVE'> {
   return (await getSetting<string>('payments.mode')) === 'live' ? 'LIVE' : 'TEST';

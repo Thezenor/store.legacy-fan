@@ -5,7 +5,7 @@ import { captureFullPaymentByOrder } from '@/lib/checkout/full-payment';
 import { sendReservationReceivedEmail, sendFullPaymentEmail } from '@/lib/email/checkout-emails';
 import { formatMoney } from '@/lib/commerce/money';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '@/lib/app-url';
 
 function localizedPath(locale: string, path: string): string {
   const prefix = locale && locale !== 'es' ? `/${locale}` : '';

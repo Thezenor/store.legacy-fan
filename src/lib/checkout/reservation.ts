@@ -5,7 +5,7 @@ import { getPaymentProviderUnchecked, isGatewayEnabled } from '../payments';
 import { getClubPricing, getReservationTerms } from '../commerce';
 import { getSetting } from '../commerce/settings';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '../app-url';
 
 async function paymentMode(): Promise<'TEST' | 'LIVE'> {
   const mode = await getSetting<string>('payments.mode');

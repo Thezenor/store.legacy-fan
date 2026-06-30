@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+import { appUrl } from '@/lib/app-url';
 
 // El usuario canceló el pago en PayPal: volver a los planes.
 export async function GET(req: NextRequest) {
