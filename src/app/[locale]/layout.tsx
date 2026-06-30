@@ -20,6 +20,10 @@ import '@fontsource/spectral/600.css';
 import '@fontsource/spectral/400-italic.css';
 import '@fontsource/cinzel/600.css';
 import '@fontsource/cinzel/700.css';
+// Inter para el menú superior (UI)
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
 
 // Fuentes: stack del sistema vía variables CSS (definidas en globals.css).
 // TODO(Fase 1): auto-alojar Inter + Cormorant Garamond con next/font/local
