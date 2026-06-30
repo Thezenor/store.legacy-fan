@@ -53,17 +53,21 @@
   "prime": {
     "title": "Prime Club",
     "tagline": "Votre porte d'entrée dans l'univers Legacy Fan.",
-    "body": "Un abonnement annuel pour démarrer votre collection avec des Mystery Boxes en argent et cuivre .999, un numéro de membre, une communauté privée, un accès anticipé à des préventes sélectionnées et des avantages exclusifs.",
+    "body": "Le premier palier premium de l'écosystème Legacy Fan : une expérience d'entrée avec du métal réel, une Mystery Box, une communauté privée et un accès privilégié au contenu, aux avantages, aux points et aux préventes. Accessible, à collectionner et aspirationnel.",
     "ctaReserve": "Réserver Prime Club",
     "ctaJoin": "Rejoindre Prime Club",
+    "slogan": "Métal réel · Effet de surprise · Accès privé",
+    "renewalNote": "Abonnement annuel renouvelable · numéro de membre permanent",
     "includes": [
-      "Mystery Box en argent .999",
-      "Mystery Box en cuivre .999",
-      "Carte de membre Legacy Fan Club",
-      "Accès prioritaire aux préventes",
-      "Canal privé Telegram / Discord",
+      "Carte ID Member Legacy Fan Club",
+      "Mystery Box en argent .999 (valeur 99 € / 115 $)",
+      "Mystery Box en cuivre .999 (valeur 19 € / 23 $)",
+      "Canal privé de la communauté (Telegram / Discord)",
+      "Aperçus exclusifs des futurs lancements",
       "Newsletter privée et chaîne YouTube exclusive",
-      "Points sur les achats et tirages de surclassement",
+      "Accès prioritaire aux préventes",
+      "Tirages de surclassement et points sur les achats",
+      "Possibilité de passer à une catégorie supérieure",
       "Programme de parrainage"
     ]
   },

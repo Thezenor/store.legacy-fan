@@ -64,6 +64,7 @@ export default async function PrimePage({
         </div>
         <p className="mt-3 text-lg text-foreground">{t('tagline')}</p>
         <p className="mt-4 text-sm text-muted">{t('body')}</p>
+        <p className="mt-4 text-xs uppercase tracking-[0.18em] text-gold-light">{t('slogan')}</p>
 
         <PriceBlock club="PRIME" currency={currency} locale={locale} />
 
@@ -84,6 +85,7 @@ export default async function PrimePage({
           >
             {t('ctaReserve')}
           </Link>
+          <p className="mt-3 text-xs text-faint">{t('renewalNote')}</p>
         </div>
 
         <FaqSection title={faqT('title')} items={faqItems} />
