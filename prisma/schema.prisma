@@ -188,9 +188,11 @@ model UserProfile {
   country       String? // ISO-3166 alpha-2
   preferredLocale Locale @default(es)
   preferredCurrency Currency @default(EUR) // selección manual (decisión: sin GEO de divisa)
+  shippingName  String? // destinatario (puede diferir del nombre de la cuenta)
   addressLine1  String?
   addressLine2  String?
   city          String?
+  region        String? // provincia/estado
   postalCode    String?
   marketingOptIn Boolean @default(false)
   termsAcceptedAt DateTime?

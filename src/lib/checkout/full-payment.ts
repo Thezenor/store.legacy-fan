@@ -9,6 +9,7 @@ import { createIncludedOrder } from '../members/order';
 import { createInvoice } from '../members/invoice';
 import { earnPointsOnPurchase } from '../points/earn';
 import { activateReferralReward } from '../referrals/activate';
+import { saveShippingToProfile } from '../members/shipping';
 
 import { appUrl } from '../app-url';
 
@@ -248,6 +249,9 @@ export async function captureFullPaymentByOrder(orderId: string): Promise<string
   const provider = getPaymentProviderUnchecked('PAYPAL');
   const result = await provider.capturePayment(orderId);
   if (result.status !== 'COMPLETED') return 'pending'; // PENDING/FAILED: no activar ni fingir éxito
+
+  // Guarda la dirección de envío de PayPal en el perfil del socio.
+  await saveShippingToProfile(payment.userId, result.shipping);
 
   return activateFullPayment({
     paymentId: payment.id,

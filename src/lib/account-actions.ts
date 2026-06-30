@@ -78,6 +78,29 @@ export async function submitCancellationAction(formData: FormData): Promise<void
   redirect(`${base}?saved=cancelled#suscripcion`);
 }
 
+// El propio usuario edita su dirección de envío.
+export async function updateOwnAddressAction(formData: FormData): Promise<void> {
+  const session = await auth();
+  if (!session?.user?.id) return;
+  const s = (k: string) => String(formData.get(k) ?? '').trim();
+  await prisma.userProfile.update({
+    where: { userId: session.user.id },
+    data: {
+      shippingName: s('shippingName') || null,
+      addressLine1: s('addressLine1') || null,
+      addressLine2: s('addressLine2') || null,
+      city: s('city') || null,
+      region: s('region') || null,
+      postalCode: s('postalCode') || null,
+      ...(s('country') ? { country: s('country').toUpperCase().slice(0, 2) } : {}),
+    },
+  });
+  const locale = s('locale') || 'es';
+  const base = locale === 'es' ? '/account' : `/${locale}/account`;
+  revalidatePath('/[locale]/account', 'page');
+  redirect(`${base}?saved=address`);
+}
+
 // El propio usuario edita sus datos de perfil (no requiere admin).
 export async function updateOwnProfileAction(formData: FormData): Promise<void> {
   const session = await auth();

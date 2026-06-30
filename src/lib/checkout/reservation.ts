@@ -4,6 +4,7 @@ import { prisma } from '../prisma';
 import { getPaymentProviderUnchecked, isGatewayEnabled } from '../payments';
 import { getClubPricing, getReservationTerms } from '../commerce';
 import { getSetting } from '../commerce/settings';
+import { saveShippingToProfile } from '../members/shipping';
 
 import { appUrl } from '../app-url';
 
@@ -147,6 +148,9 @@ export async function captureReservationByOrder(orderId: string): Promise<string
       },
     }),
   ]);
+
+  // Guarda la dirección de envío facilitada por PayPal en el perfil.
+  await saveShippingToProfile(payment.userId, result.shipping);
 
   return payment.reservationId;
 }

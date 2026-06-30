@@ -20,11 +20,23 @@ export interface CreatePaymentResult {
   approveUrl?: string;
 }
 
+export interface ShippingAddress {
+  name?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  region?: string;
+  postalCode?: string;
+  country?: string;
+}
+
 export interface CapturePaymentResult {
   providerRef: string;
   status: 'COMPLETED' | 'PENDING' | 'FAILED';
   amountCents: number;
   currency: Currency;
+  /** Dirección de envío facilitada por la pasarela, si la hay. */
+  shipping?: ShippingAddress;
   raw: unknown;
 }
 

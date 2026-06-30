@@ -184,6 +184,8 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
         application_context: {
           brand_name: 'Legacy Fan',
           user_action: 'PAY_NOW',
+          // Recoger la dirección de envío del comprador y devolverla en la captura.
+          shipping_preference: 'GET_FROM_FILE',
           return_url: input.returnUrl,
           cancel_url: input.cancelUrl,
         },
@@ -211,18 +213,43 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
       status?: string;
       purchase_units?: {
         payments?: { captures?: { amount?: { currency_code?: string; value?: string } }[] };
+        shipping?: {
+          name?: { full_name?: string };
+          address?: {
+            address_line_1?: string;
+            address_line_2?: string;
+            admin_area_2?: string; // ciudad
+            admin_area_1?: string; // provincia/estado
+            postal_code?: string;
+            country_code?: string;
+          };
+        };
       }[];
     };
     if (!res.ok) throw new Error(`PayPal capture falló: HTTP ${res.status}`);
 
-    const capture = data.purchase_units?.[0]?.payments?.captures?.[0];
+    const unit = data.purchase_units?.[0];
+    const capture = unit?.payments?.captures?.[0];
     const value = capture?.amount?.value ?? '0';
     const currency = (capture?.amount?.currency_code ?? 'EUR') as 'EUR' | 'USD';
+    const sh = unit?.shipping;
+    const shipping = sh?.address
+      ? {
+          name: sh.name?.full_name,
+          line1: sh.address.address_line_1,
+          line2: sh.address.address_line_2,
+          city: sh.address.admin_area_2,
+          region: sh.address.admin_area_1,
+          postalCode: sh.address.postal_code,
+          country: sh.address.country_code,
+        }
+      : undefined;
     return {
       providerRef,
       status: data.status === 'COMPLETED' ? 'COMPLETED' : data.status === 'PENDING' ? 'PENDING' : 'FAILED',
       amountCents: Math.round(parseFloat(value) * 100),
       currency,
+      shipping,
       raw: data,
     };
   }
