@@ -44,35 +44,29 @@ export function DigitalMemberCard({
       {/* Reverso: nombre + número + leyenda + footer (texto vivo, en oro). */}
       {isBack && active ? (
         <>
-          {/* Bloque central (en el panel oscuro de la derecha) */}
+          {/* Solo nombre + número, centrados en el panel oscuro de la derecha */}
           <div
             className="absolute flex flex-col items-center text-center"
-            style={{ left: '33%', right: '3%', top: '45%', transform: 'translateY(-50%)', color: GOLD }}
+            style={{ left: '33%', right: '3%', top: '50%', transform: 'translateY(-50%)', color: GOLD }}
           >
             {name ? (
               <span
                 className="block max-w-full truncate font-sans"
-                style={{ fontSize: '4.2cqw', lineHeight: 1.1 }}
+                style={{ fontSize: '4.7cqw', lineHeight: 1.1 }}
               >
                 {name}
               </span>
             ) : null}
             <span
               className="font-sans font-semibold"
-              style={{ fontSize: '6.2cqw', lineHeight: 1.15, marginTop: '2.5cqw', letterSpacing: '0.01em' }}
+              style={{ fontSize: '6.7cqw', lineHeight: 1.15, marginTop: '2.8cqw', letterSpacing: '0.01em' }}
             >
-              <span style={{ fontSize: '3.4cqw', verticalAlign: '0.9em', marginRight: '0.2em' }}>Nº</span>
+              <span style={{ fontSize: '3.6cqw', verticalAlign: '0.95em', marginRight: '0.25em' }}>Nº</span>
               {number}
-            </span>
-            <span
-              className="font-sans uppercase"
-              style={{ fontSize: '2.25cqw', letterSpacing: '0.18em', marginTop: '2.2cqw', opacity: 0.92 }}
-            >
-              Legacy Fan Club · Member Card
             </span>
           </div>
 
-          {/* Footer */}
+          {/* Footer (se mantiene tal cual) */}
           <div
             className="absolute text-center font-sans"
             style={{ left: '33%', right: '3%', bottom: '7%', color: GOLD, opacity: 0.78, fontSize: '1.55cqw', letterSpacing: '0.06em' }}
