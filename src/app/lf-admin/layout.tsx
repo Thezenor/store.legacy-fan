@@ -20,6 +20,7 @@ const NAV = [
   { href: '/lf-admin/numeracion', label: 'Numeración' },
   { href: '/lf-admin/pagos', label: 'Reservas y pagos' },
   { href: '/lf-admin/bajas', label: 'Bajas y retención' },
+  { href: '/lf-admin/carnet', label: 'Carnet y Wallet' },
   { href: '/lf-admin/pedidos', label: 'Pedidos y envíos' },
   { href: '/lf-admin/clubs', label: 'Clubs' },
   { href: '/lf-admin/colecciones', label: 'Colecciones' },

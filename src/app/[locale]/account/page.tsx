@@ -5,6 +5,9 @@ import { formatMoney } from '@/lib/commerce/money';
 import { getPointsSummary } from '@/lib/points/summary';
 import { getReferralSummary } from '@/lib/referrals/stats';
 import { DigitalMemberCard } from '@/components/brand/member-card';
+import { issueMemberToken } from '@/lib/members/pass-token';
+import { appUrl } from '@/lib/app-url';
+import QRCode from 'qrcode';
 import { FullPaymentButton } from '@/components/checkout/full-payment-button';
 import { CancelSubscriptionFlow } from '@/components/account/cancel-subscription-flow';
 import { AccountTabs, type AccountTab } from '@/components/account/account-tabs';
@@ -93,6 +96,27 @@ export default async function AccountPage({
   const fullName = profile ? `${profile.firstName} ${profile.lastName}` : (session.user.email ?? '');
   const currency = profile?.preferredCurrency ?? 'EUR';
   const isMember = membership?.status === 'SOCIO_ACTIVO' && !!membership.memberNumber;
+
+  // Carnet digital: QR firmado para el reverso (solo si el sistema está activo
+  // en el panel y hay secreto configurado). El QR lleva un token firmado, no
+  // datos personales en claro; se verifica en /api/verify-member.
+  let memberQrDataUri: string | undefined;
+  if (isMember) {
+    const token = await issueMemberToken({
+      userId,
+      number: membership!.memberNumber!.formatted,
+      tier: membership!.club,
+    });
+    if (token) {
+      const url = `${appUrl()}/api/verify-member?token=${encodeURIComponent(token)}`;
+      memberQrDataUri = await QRCode.toString(url, {
+        type: 'svg',
+        margin: 0,
+        errorCorrectionLevel: 'M',
+        color: { dark: '#0a0a0c', light: '#ffffff' },
+      }).then((svg) => `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`);
+    }
+  }
   const fmtDate = (d: Date | null) =>
     d ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(d) : '—';
   const invoices = payments.filter((p) => p.invoice);
@@ -459,7 +483,12 @@ export default async function AccountPage({
       {isMember ? (
         <div className="mt-6 grid max-w-md gap-4 sm:max-w-2xl sm:grid-cols-2">
           <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} side="front" />
-          <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} side="back" />
+          <DigitalMemberCard
+            name={fullName}
+            number={membership!.memberNumber!.formatted}
+            side="back"
+            qrDataUri={memberQrDataUri}
+          />
         </div>
       ) : reservation ? (
         <div className="mt-6 max-w-md">

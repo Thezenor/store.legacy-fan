@@ -8,12 +8,15 @@ export function DigitalMemberCard({
   side = 'front',
   active = true,
   pendingLabel,
+  qrDataUri,
 }: {
   name: string;
   number: string;
   side?: 'front' | 'back';
   active?: boolean;
   pendingLabel?: string;
+  /** QR firmado (data URI SVG) para el reverso; solo si el sistema está activo. */
+  qrDataUri?: string;
 }) {
   return (
     <div
@@ -53,6 +56,12 @@ export function DigitalMemberCard({
           </>
         ) : (
           <>
+            {qrDataUri ? (
+              <div className="absolute left-5 top-5 rounded-md bg-white p-1.5 shadow-card sm:left-7 sm:top-7">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qrDataUri} alt={`QR socio ${number}`} className="h-16 w-16 sm:h-20 sm:w-20" />
+              </div>
+            ) : null}
             <p className="ml-auto mt-auto max-w-[55%] text-right text-[9px] leading-relaxed tracking-wide text-gold-light/70 sm:text-[11px]">
               Legacy-fan.com
               <br />© Legacy Fan Precious Metals LLC.

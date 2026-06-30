@@ -18,6 +18,7 @@ import { saveUpload, optimizeImageToDataUri } from './storage';
 import { getSubscriptionProviderForAdmin, testGatewayConnection } from './payments';
 import { getClubPricing, getPlan } from './commerce';
 import { emailVerification } from './tokens';
+import { generatePassSecret } from './members/pass-token';
 import { sendVerificationEmail } from './email/auth-emails';
 
 // Lee campos opcionales de ficha técnica del producto desde un formulario.
@@ -761,6 +762,67 @@ export async function saveGatewayAction(formData: FormData): Promise<void> {
   });
   await audit(admin.id, admin.email, 'gateway.save', 'SystemSetting', gateway, null, { gateway });
   revalidatePath('/lf-admin/config');
+}
+
+// ───────────────── Carnet digital / Wallet (Apple & Google) ─────────────────
+
+/**
+ * Configura el sistema de carnet digital y futuros pases de Wallet.
+ * - Flags (activar carnet/QR, Apple, Google) desde checkboxes.
+ * - TTL del token en días.
+ * - Secretos (HMAC, certificado Apple, service account Google): solo se
+ *   sobrescriben si llegan con valor (campo vacío conserva lo guardado).
+ */
+export async function saveWalletAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  // _scope evita que un formulario pise los flags del otro (una casilla
+  // desmarcada no se envía; solo procesamos los flags de su propio bloque).
+  const scope = String(formData.get('_scope') ?? '');
+
+  const upsert = (key: string, value: boolean | string) =>
+    prisma.systemSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value, group: 'wallet' },
+    });
+
+  if (scope === 'card') {
+    await upsert('wallet.enabled', formData.get('enabled') === 'on');
+    const ttl = String(formData.get('wallet.token_ttl_days') ?? '').trim();
+    if (ttl) await upsert('wallet.token_ttl_days', ttl);
+    const secret = String(formData.get('wallet.token_secret') ?? '');
+    if (secret !== '') await upsert('wallet.token_secret', secret);
+  }
+
+  if (scope === 'platforms') {
+    await upsert('wallet.apple.enabled', formData.get('apple_enabled') === 'on');
+    await upsert('wallet.google.enabled', formData.get('google_enabled') === 'on');
+    // IDs no secretos: se sobrescriben siempre (vacío permitido).
+    for (const key of ['wallet.apple.team_id', 'wallet.apple.pass_type_id', 'wallet.google.issuer_id']) {
+      await upsert(key, String(formData.get(key) ?? ''));
+    }
+    // Secretos: solo si llegan con valor (vacío conserva el guardado).
+    for (const key of ['wallet.apple.cert_p12', 'wallet.apple.cert_password', 'wallet.google.service_account_json']) {
+      const value = String(formData.get(key) ?? '');
+      if (value !== '') await upsert(key, value);
+    }
+  }
+
+  await audit(admin.id, admin.email, 'wallet.save', 'SystemSetting', scope || 'wallet', null, null);
+  revalidatePath('/lf-admin/carnet');
+}
+
+/** Genera y guarda un secreto HMAC robusto para el token del carnet. */
+export async function generateWalletSecretAction(): Promise<void> {
+  const admin = await ensureAdmin();
+  const secret = generatePassSecret();
+  await prisma.systemSetting.upsert({
+    where: { key: 'wallet.token_secret' },
+    update: { value: secret },
+    create: { key: 'wallet.token_secret', value: secret, group: 'wallet' },
+  });
+  await audit(admin.id, admin.email, 'wallet.secret.generate', 'SystemSetting', 'wallet.token_secret', null, null);
+  revalidatePath('/lf-admin/carnet');
 }
 
 /**
