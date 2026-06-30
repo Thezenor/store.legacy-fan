@@ -19,9 +19,9 @@ export function AccountTabs({ items }: { items: AccountTab[] }) {
 
   return (
     <div className="mt-8 grid gap-6 md:grid-cols-[210px_1fr]">
-      {/* Móvil/tablet: chips horizontales (siempre visibles) */}
-      <div className="-mx-4 md:hidden">
-        <div className="flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Móvil/tablet: chips horizontales (siempre visibles, scroll interno) */}
+      <div className="min-w-0 max-w-full overflow-x-auto pb-2 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
+        <div className="flex w-max gap-2">
           {items.map((it) => (
             <button
               key={it.id}
