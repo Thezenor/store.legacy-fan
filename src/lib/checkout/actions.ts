@@ -86,6 +86,17 @@ export async function startFullPaymentAction(
 
 type Locale = 'es' | 'en' | 'fr' | 'it';
 
+/**
+ * Comprueba en tiempo real si un correo ya existe en el sistema (para que el
+ * checkout pida solo la contraseña). Producto: la UX prima sobre la no-enumeración.
+ */
+export async function checkEmailExistsAction(email: string): Promise<boolean> {
+  const e = String(email ?? '').trim().toLowerCase();
+  if (!e || e.length > 200 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return false;
+  const user = await prisma.user.findUnique({ where: { email: e }, select: { id: true } });
+  return !!user;
+}
+
 export type CheckoutSubmitResult =
   | { ok: true; approveUrl: string }
   | { ok: false; code: string; fieldErrors?: Record<string, string> };
@@ -233,6 +244,18 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
   } catch (e) {
     if (e instanceof Error && e.message === 'already_member') {
       return { ok: false, code: 'already_member' };
+    }
+    // Pasarela no configurada/activada o sin credenciales/plan: mensaje claro.
+    if (e instanceof Error) {
+      const m = e.message;
+      if (
+        m === 'gateway_disabled' ||
+        m.includes('no está habilitada') ||
+        m.includes('sin credenciales') ||
+        m.startsWith('Sin plan')
+      ) {
+        return { ok: false, code: 'gateway_unconfigured' };
+      }
     }
     return { ok: false, code: 'error' };
   }

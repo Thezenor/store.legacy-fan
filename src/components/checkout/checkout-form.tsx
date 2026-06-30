@@ -1,13 +1,17 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { checkoutSubmitAction } from '@/lib/checkout/actions';
-import { inputClass, Field, Alert } from '@/components/auth/ui';
+import { checkoutSubmitAction, checkEmailExistsAction } from '@/lib/checkout/actions';
+import { inputClass, Alert } from '@/components/auth/ui';
 import { COUNTRIES } from '@/lib/countries';
 
 type Selected = 'reserve' | 'full';
 type Mode = 'register' | 'login';
+
+const STORE_KEY = 'lf-checkout';
+// Datos memorizados (no se guarda la contraseña por seguridad).
+type Stored = { email: string; firstName: string; lastName: string; phone: string; country: string };
 
 export function CheckoutForm({
   club,
@@ -33,6 +37,70 @@ export function CheckoutForm({
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Campos controlados (para memorizarlos y comprobar el email en tiempo real).
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [country, setCountry] = useState('ES');
+
+  const [emailExists, setEmailExists] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const manualMode = useRef(false); // el usuario forzó el modo con el enlace
+
+  // Restaurar datos memorizados (no la contraseña).
+  useEffect(() => {
+    if (isLoggedIn) return;
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        const s = JSON.parse(raw) as Partial<Stored>;
+        if (s.email) setEmail(s.email);
+        if (s.firstName) setFirstName(s.firstName);
+        if (s.lastName) setLastName(s.lastName);
+        if (s.phone) setPhone(s.phone);
+        if (s.country) setCountry(s.country);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [isLoggedIn]);
+
+  // Memorizar datos ante posibles errores (sin contraseña).
+  useEffect(() => {
+    if (isLoggedIn) return;
+    const data: Stored = { email, firstName, lastName, phone, country };
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    } catch {
+      /* ignore */
+    }
+  }, [isLoggedIn, email, firstName, lastName, phone, country]);
+
+  // Comprobar en tiempo real si el correo ya está registrado (debounce).
+  useEffect(() => {
+    if (isLoggedIn) return;
+    const e = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) {
+      setEmailExists(false);
+      if (!manualMode.current) setMode('register');
+      return;
+    }
+    setChecking(true);
+    const t = setTimeout(async () => {
+      try {
+        const exists = await checkEmailExistsAction(e);
+        setEmailExists(exists);
+        // Auto-cambio a "iniciar sesión" si ya existe (salvo override manual).
+        if (!manualMode.current) setMode(exists ? 'login' : 'register');
+      } finally {
+        setChecking(false);
+      }
+    }, 450);
+    return () => clearTimeout(t);
+  }, [email, isLoggedIn]);
+
   function fieldMsg(code: string): string {
     return ta.has(`errors.${code}`) ? ta(`errors.${code}`) : code;
   }
@@ -47,6 +115,11 @@ export function CheckoutForm({
     startTransition(async () => {
       const res = await checkoutSubmitAction(formData);
       if (res.ok) {
+        try {
+          localStorage.removeItem(STORE_KEY);
+        } catch {
+          /* ignore */
+        }
         window.location.href = res.approveUrl;
         return;
       }
@@ -58,6 +131,9 @@ export function CheckoutForm({
       setError(tc.has(`errors.${res.code}`) ? tc(`errors.${res.code}`) : tc('errors.error'));
     });
   }
+
+  // En login mostramos solo email + contraseña; en registro, datos completos.
+  const showRegisterFields = mode === 'register' && !emailExists;
 
   return (
     <form action={onSubmit} className="space-y-6">
@@ -84,7 +160,6 @@ export function CheckoutForm({
         />
       </div>
 
-      {/* Datos: registro (por defecto) o acceso si ya es cliente */}
       {!isLoggedIn ? (
         <div className="rounded-card border border-border bg-surface p-5">
           <div className="flex items-baseline justify-between gap-3">
@@ -92,6 +167,7 @@ export function CheckoutForm({
             <button
               type="button"
               onClick={() => {
+                manualMode.current = true;
                 setMode((m) => (m === 'register' ? 'login' : 'register'));
                 setError(null);
                 setFieldErrors({});
@@ -102,51 +178,97 @@ export function CheckoutForm({
             </button>
           </div>
           <p className="mt-1 text-sm text-muted">
-            {mode === 'register' ? tc('registerHint') : tc('loginHint')}
+            {mode === 'login' ? tc('loginHint') : tc('registerHint')}
           </p>
 
           {refCode ? <input type="hidden" name="ref" value={refCode} /> : null}
 
-          {mode === 'register' ? (
-            <div className="mt-4 space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={ta('firstNameLabel')} name="firstName" required error={fieldErrors.firstName} />
-                <Field label={ta('lastNameLabel')} name="lastName" required error={fieldErrors.lastName} />
-              </div>
-              <Field label={ta('phoneLabel')} name="phone" type="tel" autoComplete="tel" error={fieldErrors.phone} />
-              <label className="block">
-                <span className="mb-1 block text-sm text-muted">{ta('countryLabel')}</span>
-                <select name="country" required className={inputClass} defaultValue="ES">
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <Field label={ta('emailLabel')} name="email" type="email" required autoComplete="email" error={fieldErrors.email} />
-              <Field
-                label={ta('passwordLabel')}
+          {/* 1º correo electrónico (con comprobación en tiempo real) */}
+          <div className="mt-4 space-y-4">
+            <label className="block">
+              <span className="mb-1 block text-sm text-muted">{ta('emailLabel')}</span>
+              <input
+                className={inputClass}
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={!!fieldErrors.email}
+              />
+              {checking ? <span className="mt-1 block text-xs text-faint">{tc('checking')}</span> : null}
+              {fieldErrors.email ? (
+                <span className="mt-1 block text-xs text-red-400">{fieldErrors.email}</span>
+              ) : null}
+            </label>
+
+            {emailExists && mode === 'login' ? (
+              <p className="rounded border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-foreground">
+                {tc('emailKnown')}
+              </p>
+            ) : null}
+
+            {/* 2º contraseña */}
+            <label className="block">
+              <span className="mb-1 block text-sm text-muted">{ta('passwordLabel')}</span>
+              <input
+                className={inputClass}
                 name="password"
                 type="password"
                 required
-                autoComplete="new-password"
-                error={fieldErrors.password}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={!!fieldErrors.password}
               />
-              <label className="flex items-start gap-2 text-sm text-muted">
-                <input type="checkbox" name="acceptTerms" className="mt-1" required />
-                <span>{ta('termsLabel')}</span>
-              </label>
-              {fieldErrors.acceptTerms ? (
-                <span className="block text-xs text-red-400">{fieldErrors.acceptTerms}</span>
+              {showRegisterFields ? (
+                <span className="mt-1 block text-xs text-faint">{tc('passwordHint')}</span>
               ) : null}
-            </div>
-          ) : (
-            <div className="mt-4 space-y-4">
-              <Field label={ta('emailLabel')} name="email" type="email" required autoComplete="email" />
-              <Field label={ta('passwordLabel')} name="password" type="password" required autoComplete="current-password" />
-            </div>
-          )}
+              {fieldErrors.password ? (
+                <span className="mt-1 block text-xs text-red-400">{fieldErrors.password}</span>
+              ) : null}
+            </label>
+
+            {/* 3º resto de datos, solo al crear cuenta nueva */}
+            {showRegisterFields ? (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="mb-1 block text-sm text-muted">{ta('firstNameLabel')}</span>
+                    <input className={inputClass} name="firstName" required value={firstName} onChange={(e) => setFirstName(e.target.value)} aria-invalid={!!fieldErrors.firstName} />
+                    {fieldErrors.firstName ? <span className="mt-1 block text-xs text-red-400">{fieldErrors.firstName}</span> : null}
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm text-muted">{ta('lastNameLabel')}</span>
+                    <input className={inputClass} name="lastName" required value={lastName} onChange={(e) => setLastName(e.target.value)} aria-invalid={!!fieldErrors.lastName} />
+                    {fieldErrors.lastName ? <span className="mt-1 block text-xs text-red-400">{fieldErrors.lastName}</span> : null}
+                  </label>
+                </div>
+                <label className="block">
+                  <span className="mb-1 block text-sm text-muted">{ta('phoneLabel')}</span>
+                  <input className={inputClass} name="phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-sm text-muted">{ta('countryLabel')}</span>
+                  <select name="country" required className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)}>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex items-start gap-2 text-sm text-muted">
+                  <input type="checkbox" name="acceptTerms" className="mt-1" required />
+                  <span>{ta('termsLabel')}</span>
+                </label>
+                {fieldErrors.acceptTerms ? (
+                  <span className="block text-xs text-red-400">{fieldErrors.acceptTerms}</span>
+                ) : null}
+              </>
+            ) : null}
+          </div>
         </div>
       ) : null}
 

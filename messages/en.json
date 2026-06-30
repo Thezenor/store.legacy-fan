@@ -200,6 +200,9 @@
     "haveAccount": "I already have an account",
     "needAccount": "Create a new account",
     "loginHint": "Sign in with your account.",
+    "passwordHint": "At least 8 characters, with an uppercase, a lowercase and a number.",
+    "emailKnown": "You already have an account with this email. Enter your password to continue.",
+    "checking": "Checking…",
     "continue": "Continue to PayPal",
     "processing": "Redirecting to PayPal…",
     "back": "Back to plans",
@@ -213,6 +216,7 @@
       "validation": "Please check the form fields.",
       "terms_required": "You must accept the terms and conditions.",
       "rate_limited": "Too many attempts. Please wait a few minutes.",
+      "gateway_unconfigured": "Payment isn't available yet: the gateway needs to be configured. Please try again shortly.",
       "error": "Could not start the payment. Please try again."
     }
   },

@@ -200,6 +200,9 @@
     "haveAccount": "Ya estoy registrado",
     "needAccount": "Crear una cuenta nueva",
     "loginHint": "Accede con tu cuenta.",
+    "passwordHint": "Mínimo 8 caracteres, con mayúscula, minúscula y número.",
+    "emailKnown": "Ya tienes cuenta con este correo. Escribe tu contraseña para continuar.",
+    "checking": "Comprobando…",
     "continue": "Continuar a PayPal",
     "processing": "Redirigiendo a PayPal…",
     "back": "Volver a los planes",
@@ -213,6 +216,7 @@
       "validation": "Revisa los datos del formulario.",
       "terms_required": "Debes aceptar los términos y condiciones.",
       "rate_limited": "Demasiados intentos. Espera unos minutos.",
+      "gateway_unconfigured": "El pago no está disponible todavía: falta configurar la pasarela. Inténtalo en unos minutos.",
       "error": "No se pudo iniciar el pago. Inténtalo de nuevo."
     }
   },

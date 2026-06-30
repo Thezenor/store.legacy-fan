@@ -1,7 +1,7 @@
 import type { Currency } from '@prisma/client';
 type ClubType = string;
 import { prisma } from '../prisma';
-import { getPaymentProvider } from '../payments';
+import { getPaymentProviderUnchecked, isGatewayEnabled } from '../payments';
 import { getClubPricing, getClubLaunchDate } from '../commerce';
 import { getSetting, getNumber } from '../commerce/settings';
 import { activateMembershipTx } from '../members/membership';
@@ -42,6 +42,8 @@ export async function startFullPayment(opts: {
     orderBy: { createdAt: 'desc' },
   });
 
+  if (!(await isGatewayEnabled('PAYPAL'))) throw new Error('gateway_disabled');
+
   // No mutamos la reserva existente hasta tener la orden de PayPal confirmada,
   // para no corromper una reserva pagada si el proveedor falla.
   const reusing = !!reservation;
@@ -64,7 +66,7 @@ export async function startFullPayment(opts: {
   const remaining = Math.max(0, fullCents - alreadyPaid);
 
   try {
-    const provider = getPaymentProvider('PAYPAL');
+    const provider = getPaymentProviderUnchecked('PAYPAL');
     const order = await provider.createPayment({
       amountCents: remaining,
       currency: opts.currency,
@@ -222,7 +224,7 @@ export async function captureFullPaymentByOrder(orderId: string): Promise<string
   if (!payment || !payment.reservationId) return null;
   if (payment.status === 'PAGO_COMPLETO') return payment.reservationId;
 
-  const provider = getPaymentProvider('PAYPAL');
+  const provider = getPaymentProviderUnchecked('PAYPAL');
   const result = await provider.capturePayment(orderId);
   if (result.status !== 'COMPLETED') return 'pending'; // PENDING/FAILED: no activar ni fingir éxito
 

@@ -200,6 +200,9 @@
     "haveAccount": "J'ai déjà un compte",
     "needAccount": "Créer un nouveau compte",
     "loginHint": "Connectez-vous à votre compte.",
+    "passwordHint": "Au moins 8 caractères, avec une majuscule, une minuscule et un chiffre.",
+    "emailKnown": "Vous avez déjà un compte avec cet e-mail. Saisissez votre mot de passe pour continuer.",
+    "checking": "Vérification…",
     "continue": "Continuer vers PayPal",
     "processing": "Redirection vers PayPal…",
     "back": "Retour aux offres",
@@ -213,6 +216,7 @@
       "validation": "Vérifiez les champs du formulaire.",
       "terms_required": "Vous devez accepter les conditions générales.",
       "rate_limited": "Trop de tentatives. Patientez quelques minutes.",
+      "gateway_unconfigured": "Le paiement n'est pas encore disponible : la passerelle doit être configurée. Réessayez dans quelques minutes.",
       "error": "Impossible de démarrer le paiement. Réessayez."
     }
   },

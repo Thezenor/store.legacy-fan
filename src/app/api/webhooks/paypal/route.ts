@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getPaymentProvider } from '@/lib/payments';
+import { getPaymentProviderUnchecked } from '@/lib/payments';
 import { reconcileReservationPaid } from '@/lib/checkout/reservation';
 import { reconcileFullPaymentPaid } from '@/lib/checkout/full-payment';
 import {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   });
 
   try {
-    const provider = getPaymentProvider('PAYPAL');
+    const provider = getPaymentProviderUnchecked('PAYPAL');
     const result = await provider.verifyWebhook(headers, body);
     if (!result.verified) {
       return NextResponse.json({ ok: false, reason: 'unverified' }, { status: 400 });

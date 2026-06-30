@@ -1,7 +1,7 @@
 import type { Currency } from '@prisma/client';
 type ClubType = string;
 import { prisma } from '../prisma';
-import { getPaymentProvider } from '../payments';
+import { getPaymentProviderUnchecked, isGatewayEnabled } from '../payments';
 import { getClubPricing, getReservationTerms } from '../commerce';
 import { getSetting } from '../commerce/settings';
 
@@ -58,10 +58,15 @@ export async function startReservation(opts: {
     },
   });
 
+  if (!(await isGatewayEnabled('PAYPAL'))) {
+    await prisma.reservation.delete({ where: { id: reservation.id } }).catch(() => {});
+    throw new Error('gateway_disabled');
+  }
+
   // Si PayPal falla (sin credenciales, error de red…), revertimos la reserva
   // para no dejar filas huérfanas que bloqueen futuros intentos del usuario.
   try {
-    const provider = getPaymentProvider('PAYPAL');
+    const provider = getPaymentProviderUnchecked('PAYPAL');
     const order = await provider.createPayment({
       amountCents: terms.amountCents,
       currency: opts.currency,
@@ -104,7 +109,7 @@ export async function captureReservationByOrder(orderId: string): Promise<string
   if (!payment || !payment.reservationId) return null;
   if (payment.status === 'PAGO_COMPLETO') return payment.reservationId; // ya procesado
 
-  const provider = getPaymentProvider('PAYPAL');
+  const provider = getPaymentProviderUnchecked('PAYPAL');
   const result = await provider.capturePayment(orderId);
   if (result.status !== 'COMPLETED') return payment.reservationId;
 

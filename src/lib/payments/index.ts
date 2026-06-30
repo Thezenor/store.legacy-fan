@@ -1,4 +1,5 @@
 import type { PaymentProvider, SubscriptionProvider } from './types';
+import { prisma } from '../prisma';
 import { PayPalProvider } from './paypal';
 import { StripeProvider } from './stripe';
 
@@ -18,13 +19,33 @@ export function getEnabledPaymentProviders(): PaymentProvider[] {
   return Object.values(registry).filter((p) => p.isEnabled());
 }
 
-/** Obtiene un proveedor de pago por clave; lanza si está deshabilitado. */
+/** Obtiene un proveedor de pago por clave; lanza si está deshabilitado (env). */
 export function getPaymentProvider(key: 'PAYPAL' | 'STRIPE'): PaymentProvider {
   const provider = registry[key];
   if (!provider || !provider.isEnabled()) {
     throw new Error(`La pasarela ${key} no está habilitada.`);
   }
   return provider;
+}
+
+/** Proveedor de pago SIN gating de env (el gate real son las credenciales). */
+export function getPaymentProviderUnchecked(key: 'PAYPAL' | 'STRIPE'): PaymentProvider {
+  const provider = registry[key];
+  if (!provider) throw new Error(`Pasarela ${key} desconocida.`);
+  return provider;
+}
+
+/**
+ * ¿La pasarela está habilitada? El interruptor del PANEL (SystemSetting
+ * `payments.{gw}.enabled`) manda; si no existe, cae a la variable de entorno
+ * `PAYMENTS_{GW}_ENABLED`. Así el superadmin puede activarla sin tocar el entorno.
+ */
+export async function isGatewayEnabled(key: 'PAYPAL' | 'STRIPE'): Promise<boolean> {
+  const row = await prisma.systemSetting.findUnique({
+    where: { key: `payments.${key.toLowerCase()}.enabled` },
+  });
+  if (row && row.value !== null && typeof row.value !== 'undefined') return Boolean(row.value);
+  return process.env[`PAYMENTS_${key}_ENABLED`] === 'true';
 }
 
 /** Obtiene un proveedor de SUSCRIPCIÓN por clave; lanza si está deshabilitado. */
