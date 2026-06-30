@@ -32,8 +32,8 @@ function mapPayPalSubStatus(s?: string): SubscriptionRemoteStatus {
 // Lee una credencial: BD (panel admin) con respaldo a variable de entorno.
 async function cred(key: string, envName: string): Promise<string | undefined> {
   const row = await prisma.systemSetting.findUnique({ where: { key } });
-  const dbVal = row?.value ? String(row.value) : '';
-  return dbVal || process.env[envName];
+  const dbVal = row?.value ? String(row.value).trim() : '';
+  return dbVal || process.env[envName]?.trim();
 }
 
 // Lee una credencial por modo (sandbox/live): primero la clave específica del modo
@@ -45,7 +45,7 @@ async function credForMode(
   envName: string,
 ): Promise<string | undefined> {
   const row = await prisma.systemSetting.findUnique({ where: { key: `paypal.${mode}.${field}` } });
-  if (row?.value) return String(row.value);
+  if (row?.value) return String(row.value).trim();
   return cred(`paypal.${field}`, envName); // respaldo: clave heredada + variable de entorno
 }
 
@@ -78,11 +78,20 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
   /** Valida las credenciales del modo activo pidiendo un token OAuth. */
   async verifyCredentials(): Promise<{ ok: boolean; detail: string }> {
     const mode = await this.mode();
+    let id: string, secret: string;
+    try {
+      ({ id, secret } = await this.credentials());
+    } catch (e) {
+      return { ok: false, detail: e instanceof Error ? e.message : `Sin credenciales (modo ${mode}).` };
+    }
+    const idMask = id.length <= 12 ? id : `${id.slice(0, 6)}…${id.slice(-4)}`;
+    const info = `modo ${mode} · Client ID ${idMask} (${id.length} car.) · Secret ${secret.length} car.`;
     try {
       await this.accessToken();
-      return { ok: true, detail: `Conexión correcta (modo ${mode}).` };
+      return { ok: true, detail: `Conexión correcta — ${info}.` };
     } catch (e) {
-      return { ok: false, detail: e instanceof Error ? e.message : `Error en modo ${mode}.` };
+      const base = e instanceof Error ? e.message : 'Error OAuth';
+      return { ok: false, detail: `${base} · ${info}` };
     }
   }
 
