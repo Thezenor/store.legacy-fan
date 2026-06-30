@@ -22,6 +22,17 @@
     "legalPrivacy": "Privacidad",
     "legalCookies": "Cookies"
   },
+  "clubIntro": {
+    "eyebrow": "ÚNETE AL LEGADO",
+    "title": "El metal se hereda. La pertenencia se elige.",
+    "lead": "Legacy Fan no es una tienda: es un círculo de coleccionistas que valoran la plata y el cobre .999 como lo que son, arte que perdura. Ser socio es acceder primero, poseer lo que pocos tendrán y formar parte de algo que trasciende la pieza.",
+    "reasons": [
+      { "title": "Artesanía que perdura", "body": "Cada pieza en plata y cobre .999 nace del oficio, la precisión y el cuidado por el detalle que distinguen a una colección de un simple objeto." },
+      { "title": "Acceso antes que nadie", "body": "Los socios entran primero: preventas anticipadas, ediciones limitadas y lanzamientos reservados a quienes pertenecen al círculo." },
+      { "title": "Una comunidad, un legado", "body": "Un número de socio, una comunidad privada y la certeza de coleccionar junto a quienes comparten la misma pasión por el detalle." }
+    ],
+    "closing": "Elige cómo quieres empezar tu legado."
+  },
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Coleccionismo premium en metales preciosos para quienes llegan primero.",

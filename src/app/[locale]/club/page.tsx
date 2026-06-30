@@ -51,8 +51,11 @@ export default async function ClubPage({
       getTranslations({ locale, namespace: 'faq' }),
     ]);
   const pricingT = await getTranslations({ locale, namespace: 'pricing' });
+  const introT = await getTranslations({ locale, namespace: 'clubIntro' });
 
   if (!primePricing || !prestigePricing) return null;
+
+  const introReasons = introT.raw('reasons') as { title: string; body: string }[];
 
   const labelsBase = {
     from: pricingT('from'),
@@ -89,10 +92,31 @@ export default async function ClubPage({
     <>
       <JsonLd data={jsonLd} />
       <section className="animate-fade-in">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <h1 className="font-display text-3xl font-bold text-metal-gold sm:text-4xl">
-            {c('comparePlans')}
+        {/* Por qué hacerse socio (copy de marca, antes de la comparativa) */}
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="eyebrow text-gold-light">{introT('eyebrow')}</p>
+          <h1 className="mt-2 font-display text-3xl font-bold text-metal-gold sm:text-4xl">
+            {introT('title')}
           </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base text-foreground sm:text-lg">{introT('lead')}</p>
+        </div>
+
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {introReasons.map((r) => (
+            <div key={r.title} className="bevel border border-border bg-surface p-5">
+              <h3 className="font-display text-lg text-gold-light">{r.title}</h3>
+              <p className="mt-2 text-sm text-muted">{r.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-8 text-center text-sm uppercase tracking-[0.18em] text-faint">{introT('closing')}</p>
+
+        {/* Comparativa de planes */}
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-10 sm:flex-row sm:items-center">
+          <h2 className="font-display text-2xl font-bold text-metal-gold sm:text-3xl">
+            {c('comparePlans')}
+          </h2>
           <CurrencySwitcher current={currency} />
         </div>
 

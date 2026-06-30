@@ -22,6 +22,17 @@
     "legalPrivacy": "Privacy",
     "legalCookies": "Cookie"
   },
+  "clubIntro": {
+    "eyebrow": "UNISCITI AL LASCITO",
+    "title": "Il metallo si eredita. L'appartenenza si sceglie.",
+    "lead": "Legacy Fan non è un negozio: è un circolo di collezionisti che apprezzano l'argento e il rame .999 per ciò che sono davvero, arte che perdura. Diventare socio significa accedere per primi, possedere ciò che in pochi avranno e appartenere a qualcosa che trascende la singola pezza.",
+    "reasons": [
+      { "title": "Maestria che perdura", "body": "Ogni pezzo in argento e rame .999 nasce dal mestiere, dalla precisione e da una cura del dettaglio che distingue una vera collezione da un semplice oggetto." },
+      { "title": "Accesso prima di tutti", "body": "I soci entrano per primi: prevendite anticipate, edizioni limitate e lanci riservati a chi appartiene al circolo." },
+      { "title": "Una comunità, un lascito", "body": "Un numero di socio, una comunità privata e la certezza di collezionare accanto a chi condivide la stessa passione per il dettaglio." }
+    ],
+    "closing": "Scegli come desideri iniziare il tuo lascito."
+  },
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Collezionismo premium in metalli preziosi per chi arriva per primo.",

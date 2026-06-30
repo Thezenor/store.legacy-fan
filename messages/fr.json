@@ -22,6 +22,17 @@
     "legalPrivacy": "Confidentialité",
     "legalCookies": "Cookies"
   },
+  "clubIntro": {
+    "eyebrow": "REJOIGNEZ LE LEGS",
+    "title": "Le métal s'hérite. L'appartenance se choisit.",
+    "lead": "Legacy Fan n'est pas une boutique : c'est un cercle de collectionneurs qui apprécient l'argent et le cuivre .999 pour ce qu'ils sont vraiment, un art qui perdure. Devenir membre, c'est accéder en premier, posséder ce que peu détiendront et appartenir à plus grand que la pièce elle-même.",
+    "reasons": [
+      { "title": "Un savoir-faire qui perdure", "body": "Chaque pièce en argent et cuivre .999 naît du métier, de la précision et d'un soin du détail qui distingue une véritable collection d'un simple objet." },
+      { "title": "L'accès avant tous les autres", "body": "Les membres entrent en premier : préventes anticipées, éditions limitées et lancements réservés à ceux qui appartiennent au cercle." },
+      { "title": "Une communauté, un legs", "body": "Un numéro de membre, une communauté privée et la certitude de collectionner aux côtés de ceux qui partagent la même passion du détail." }
+    ],
+    "closing": "Choisissez comment vous souhaitez commencer votre legs."
+  },
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Collection premium en métaux précieux pour ceux qui arrivent les premiers.",

@@ -22,6 +22,17 @@
     "legalPrivacy": "Privacy",
     "legalCookies": "Cookies"
   },
+  "clubIntro": {
+    "eyebrow": "JOIN THE LEGACY",
+    "title": "Metal is inherited. Belonging is chosen.",
+    "lead": "Legacy Fan is not a store: it is a circle of collectors who value silver and copper .999 for what they truly are, art that endures. Membership means accessing first, owning what few will hold and belonging to something greater than any single piece.",
+    "reasons": [
+      { "title": "Craftsmanship that endures", "body": "Every piece in silver and copper .999 is born of craft, precision and an attention to detail that sets a true collection apart from a mere object." },
+      { "title": "Access before anyone else", "body": "Members enter first: early presales, limited editions and launches reserved for those who belong to the circle." },
+      { "title": "One community, one legacy", "body": "A member number, a private community and the certainty of collecting alongside those who share the same passion for detail." }
+    ],
+    "closing": "Choose how you wish to begin your legacy."
+  },
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Premium precious-metal collecting for those who arrive first.",
