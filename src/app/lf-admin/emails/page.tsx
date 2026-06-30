@@ -1,5 +1,15 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { updateEmailTemplateAction, sendTestEmailAction } from '@/lib/admin-actions';
+
+const LABEL: Record<string, string> = {
+  'account.welcome': 'Cuenta · Bienvenida',
+  'reservation.received': 'Reserva · Recibida',
+  'reservation.reminder': 'Reserva · Recordatorio',
+  'payment.confirmed': 'Pago · Confirmado (socio)',
+  'community.welcome': 'Comunidad · Bienvenida',
+  'points.added': 'Puntos · Saldo añadido',
+};
 
 // Gestor de plantillas de email (doc 09/10): editar asunto/cuerpo por idioma,
 // activar/desactivar y enviar test. Variables disponibles: {{firstName}}, {{amount}},
@@ -23,15 +33,19 @@ export default async function AdminEmails() {
       <div className="mt-6 space-y-6">
         {templates.map((tpl) => (
           <div key={tpl.id} className="rounded-card border border-border bg-surface p-4">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-sm text-gold-light">{tpl.key}</span>
-              <form action={sendTestEmailAction}>
-                <input type="hidden" name="key" value={tpl.key} />
-                <input type="hidden" name="locale" value="es" />
-                <button type="submit" className="rounded border border-border px-3 py-1.5 text-xs text-muted hover:text-foreground">
-                  Enviar test (ES)
-                </button>
-              </form>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span className="font-display text-base text-foreground">{LABEL[tpl.key] ?? tpl.key}</span>
+                <span className="ml-2 font-mono text-[11px] text-faint">{tpl.key}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href={`/lf-admin/emails/preview/${tpl.key}?locale=es`} className="rounded border border-border px-3 py-1.5 text-xs text-muted hover:text-foreground">Vista previa</Link>
+                <form action={sendTestEmailAction}>
+                  <input type="hidden" name="key" value={tpl.key} />
+                  <input type="hidden" name="locale" value="es" />
+                  <button type="submit" className="rounded border border-border px-3 py-1.5 text-xs text-muted hover:text-foreground">Enviar test (ES)</button>
+                </form>
+              </div>
             </div>
             <div className="mt-3 grid gap-3 md:grid-cols-2">
               {tpl.translations.map((tr) => (

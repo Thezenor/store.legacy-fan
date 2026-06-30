@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin';
+import { AdminNav } from '@/components/admin/admin-nav';
 import '../globals.css';
 import '@fontsource/spectral/400.css';
 import '@fontsource/spectral/600.css';
@@ -44,17 +44,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               LEGACY FAN
             </div>
             <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-faint">Superadmin</p>
-            <nav className="mt-6 flex max-h-40 flex-wrap gap-2 overflow-y-auto md:max-h-none md:flex-col md:gap-1 md:overflow-visible">
-              {NAV.map((n) => (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  className="rounded px-3 py-2 text-sm text-muted transition hover:bg-surface-elevated hover:text-foreground"
-                >
-                  {n.label}
-                </Link>
-              ))}
-            </nav>
+            <AdminNav items={NAV} />
           </aside>
 
           {/* Contenido */}

@@ -77,6 +77,16 @@
 - `MainNav` reescrito: soporta ítems internos, externos y desplegables (desktop hover/focus, móvil expandible).
 - **Página pública `/colecciones`** con las colecciones (World Peace, Sacred Blessings, Legends of War, Top Sports), cada una con su moneda y estado; sitemap ampliado.
 
+### Superadmin v2 (tanda 1) — usabilidad y control
+- **Sidebar** resalta la sección activa (borde + fondo oro).
+- **Ficha de socio** completa: datos personales/dirección, pagos (con **ID de PayPal**) e factura, reservas, pedidos+envíos, histórico de puntos, referidos, y acciones (club/estado, ajuste de saldo, reset contraseña, bloqueo).
+- **Reservas y pagos**: el email enlaza a la ficha del socio; columna **ID de pago (PayPal)**.
+- **Numeración**: formulario de **alta manual** del socio reservado en la propia sección.
+- **Legal**: maestro-detalle (lista → editar una página) en vez de todo en una página.
+- **Dashboard**: más KPIs (productos, colecciones), **gráfico de ventas** (6 meses) y socios recientes enlazados.
+- **Emails**: títulos legibles por sección + **vista previa** del email tal como lo recibe el cliente (ES/EN/FR/IT).
+- **Pedidos**: lista + **detalle por pedido** (nº, datos del cliente, dirección de envío, gestión de estados y envío con tracking).
+
 ### Fase 1 · Módulo 10 — Superadmin completo
 - **Detalle de socio** `/lf-admin/socios/[id]`: cambiar club/estado, ajustar saldo/puntos (transacción auditada), restablecer contraseña, ver datos relacionados.
 - **Reembolsos** en pagos (estado interno + auditoría; devolución PayPal real al activar pasarela).
