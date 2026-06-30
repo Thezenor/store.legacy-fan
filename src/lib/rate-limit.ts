@@ -55,4 +55,5 @@ export const RL = {
   register: (id: string) => rateLimit(`register:${id}`, 3, 60 * 60 * 1000), // 3 / h
   forgot: (id: string) => rateLimit(`forgot:${id}`, 3, 60 * 60 * 1000), // 3 / h
   verifyResend: (id: string) => rateLimit(`verify:${id}`, 3, 60 * 60 * 1000),
+  emailCheck: (id: string) => rateLimit(`emailcheck:${id}`, 30, 10 * 60 * 1000), // 30 / 10 min
 };

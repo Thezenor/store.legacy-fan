@@ -23,6 +23,7 @@ export function CheckoutForm({
   listFormatted,
   refCode,
   upsell = null,
+  subscriptionMode = false,
 }: {
   club: string;
   isLoggedIn: boolean;
@@ -31,6 +32,7 @@ export function CheckoutForm({
   listFormatted: string | null;
   refCode?: string;
   upsell?: UpsellData | null;
+  subscriptionMode?: boolean;
 }) {
   const tc = useTranslations('checkout');
   const ta = useTranslations('auth');
@@ -297,6 +299,13 @@ export function CheckoutForm({
             ) : null}
           </div>
         </div>
+      ) : null}
+
+      {/* Divulgación de cobro recurrente antes de pagar la membresía */}
+      {subscriptionMode && selected === 'full' ? (
+        <p className="rounded-card border border-gold/40 bg-gold/10 px-4 py-3 text-xs text-foreground">
+          {tc('recurringNotice', { price: fullFormatted })}
+        </p>
       ) : null}
 
       {error ? <Alert kind="error">{error}</Alert> : null}

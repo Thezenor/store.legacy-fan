@@ -153,7 +153,7 @@ export default async function ClubPage({
         </div>
 
         {/* Clubs adicionales creados desde el admin */}
-        <ExtraClubs />
+        <ExtraClubs viewLabel={c('viewClub')} />
 
         <FaqSection title={faqT('title')} items={faqItems} />
       </section>
@@ -162,7 +162,7 @@ export default async function ClubPage({
 }
 
 // Clubs extra (creados en admin) que no son los built-in Prime/Prestige.
-async function ExtraClubs() {
+async function ExtraClubs({ viewLabel }: { viewLabel: string }) {
   const extra = (await listActiveClubs()).filter((p) => p.club !== 'PRIME' && p.club !== 'PRESTIGE');
   if (extra.length === 0) return null;
   return (
@@ -175,7 +175,7 @@ async function ExtraClubs() {
         >
           <h2 className="font-display text-2xl uppercase text-gold-light">{p.name}</h2>
           {p.tagline ? <p className="mt-2 text-sm text-muted">{p.tagline}</p> : null}
-          <span className="mt-4 inline-block text-xs uppercase tracking-wider text-gold">Ver club →</span>
+          <span className="mt-4 inline-block text-xs uppercase tracking-wider text-gold">{viewLabel} →</span>
         </Link>
       ))}
     </div>

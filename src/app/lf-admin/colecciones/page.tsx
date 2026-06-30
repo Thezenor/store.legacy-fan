@@ -5,6 +5,7 @@ import {
   uploadCollectionImageAction,
   assignProductCollectionAction,
 } from '@/lib/admin-actions';
+import { ConfirmButton } from '@/components/admin/confirm-button';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -64,7 +65,12 @@ export default async function AdminColecciones() {
                   <select name="status" defaultValue={c.status} className={`text-sm ${inp}`}>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
                   <button className="border border-gold/40 px-3 py-1.5 text-xs uppercase tracking-wider text-gold-light hover:bg-surface-elevated">Guardar</button>
                   {c._count.products === 0 ? (
-                    <button formAction={deleteCollectionAction} className="border border-red-500/40 px-3 py-1.5 text-xs uppercase tracking-wider text-red-400">Borrar</button>
+                    <ConfirmButton
+                      action={deleteCollectionAction}
+                      label="Borrar"
+                      confirmText={`¿Borrar la colección «${c.name}»? No se puede deshacer.`}
+                      className="border border-red-500/40 px-3 py-1.5 text-xs uppercase tracking-wider text-red-400 hover:bg-red-500/10"
+                    />
                   ) : null}
                 </form>
 

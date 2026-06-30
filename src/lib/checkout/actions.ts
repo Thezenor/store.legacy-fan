@@ -95,6 +95,8 @@ type Locale = 'es' | 'en' | 'fr' | 'it';
 export async function checkEmailExistsAction(email: string): Promise<boolean> {
   const e = String(email ?? '').trim().toLowerCase();
   if (!e || e.length > 200 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return false;
+  // Rate limit por IP para evitar enumeración masiva de cuentas.
+  if (!RL.emailCheck(await clientIp()).success) return false;
   const user = await prisma.user.findUnique({ where: { email: e }, select: { id: true } });
   return !!user;
 }

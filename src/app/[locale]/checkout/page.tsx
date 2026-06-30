@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { getClubPricing, getReservationTerms, getPlan } from '@/lib/commerce';
 import { getSecondCoinUpsell } from '@/lib/commerce/upsell';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
+import { getSetting } from '@/lib/commerce/settings';
 import { hasActiveReservationOrMembership } from '@/lib/checkout/reservation';
 import { CheckoutForm } from '@/components/checkout/checkout-form';
 import { Link } from '@/i18n/navigation';
@@ -35,6 +36,7 @@ export default async function CheckoutPage({
   if (!plan || !plan.active || !pricing) notFound();
   const reservation = await getReservationTerms(currency, locale, club);
   const upsell = await getSecondCoinUpsell(club, currency, locale);
+  const subscriptionMode = (await getSetting<string>('billing.mode')) === 'subscription';
 
   const session = await auth();
   const isLoggedIn = !!session?.user?.id;
@@ -49,7 +51,7 @@ export default async function CheckoutPage({
         <div className="mt-6 rounded-card border border-gold/40 bg-gold/10 p-6">
           <p className="text-sm text-foreground">{t('errors.already_active')}</p>
           <Link href="/account" className="mt-3 inline-block text-sm text-gold hover:underline">
-            {locale === 'es' ? 'Ir a mi cuenta' : 'Go to my account'} →
+            {t('goToAccount')} →
           </Link>
         </div>
       ) : (
@@ -60,6 +62,7 @@ export default async function CheckoutPage({
             reserveFormatted={reservation.amountFormatted}
             fullFormatted={pricing.priceFormatted}
             listFormatted={pricing.listPriceFormatted}
+            subscriptionMode={subscriptionMode}
             refCode={ref}
             upsell={
               upsell
