@@ -176,7 +176,22 @@ export async function loginAction(
   }
 
   const locale = (formData.get('locale') as string) || 'es';
-  const dest = locale === 'es' ? '/account' : `/${locale}/account`;
+
+  // Los administradores entran directos al panel; el resto, a su cuenta.
+  const email = parsed.data.email.toLowerCase();
+  const supers = (process.env.SUPERADMIN_EMAILS ?? '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  let isAdmin = supers.includes(email);
+  if (!isAdmin) {
+    const u = await prisma.user.findUnique({
+      where: { email },
+      include: { roles: { include: { role: true } } },
+    });
+    isAdmin = !!u?.roles.some((r) => r.role.key === 'admin' || r.role.key === 'superadmin');
+  }
+  const dest = isAdmin ? '/lf-admin' : locale === 'es' ? '/account' : `/${locale}/account`;
 
   try {
     // Patrón canónico Auth.js v5: redirectTo lanza NEXT_REDIRECT al tener éxito

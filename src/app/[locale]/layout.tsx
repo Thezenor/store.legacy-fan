@@ -57,10 +57,11 @@ export default async function LocaleLayout({
   const t = await getTranslations({ locale, namespace: 'common' });
   const messages = await getMessages();
   const session = await auth();
+  const adminInfo = session?.user?.id ? await getAdminSession() : null;
+  const isAdmin = !!adminInfo;
   // Modo mantenimiento (doc 09): si está activo, solo los admin ven la web.
   const maintenance = await getBool('system.maintenance_mode');
-  const adminOk = maintenance ? await getAdminSession() : null;
-  const showMaintenance = maintenance && !adminOk;
+  const showMaintenance = maintenance && !isAdmin;
 
   return (
     // Modo oscuro por defecto: sin clase `.light` en el render inicial.
@@ -105,7 +106,9 @@ export default async function LocaleLayout({
               <div className="flex flex-none items-center gap-2 sm:gap-4">
                 <AuthNav
                   isLoggedIn={!!session?.user?.id}
+                  isAdmin={isAdmin}
                   accountLabel={t('account')}
+                  adminLabel={t('adminPanel')}
                   loginLabel={t('login')}
                   logoutLabel={t('logout')}
                 />
