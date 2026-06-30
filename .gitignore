@@ -40,5 +40,8 @@ yarn-error.log*
 logs
 *.log
 
+# uploads locales (en prod se usa un Railway Volume)
+/uploads
+
 # coverage / tests
 /coverage

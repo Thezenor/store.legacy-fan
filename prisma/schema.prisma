@@ -412,6 +412,14 @@ model Product {
   premiumEurCents Int      @default(0) // base para puntos/descuentos
   premiumUsdCents Int      @default(0)
   spotBaseCents   Int? // valor spot/base si aplica
+  // Ficha técnica de la pieza (doc 05)
+  metal           String? // plata .999 / oro .999 / cobre .999
+  weightLabel     String? // p.ej. "2 oz"
+  finish          String? // p.ej. "Antiqued · Ultra High Relief"
+  diameter        String? // p.ej. "50 mm"
+  editionSize     Int? // tirada
+  mintYear        Int? // año de acuñación
+  history         String? // historia / lore de la pieza
   launchDate      DateTime?
   available       Boolean  @default(true)
   visible         Boolean  @default(true)

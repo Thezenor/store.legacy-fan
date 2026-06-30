@@ -77,6 +77,12 @@
 - `MainNav` reescrito: soporta ítems internos, externos y desplegables (desktop hover/focus, móvil expandible).
 - **Página pública `/colecciones`** con las colecciones (World Peace, Sacred Blessings, Legends of War, Top Sports), cada una con su moneda y estado; sitemap ampliado.
 
+### Superadmin v2 (tanda 3) — builder de productos
+- Migración `product_fields`: Product con metal, peso, acabado, diámetro, tirada, año e historia.
+- **Builder de producto** `/lf-admin/productos/[id]`: ficha completa (datos, historia, ficha técnica, precios/premium, opciones: incluido en Prime/Prestige, inaugural, certificado, QR, disponible/visible) + **galería con subida de fotos** y borrado.
+- **Almacenamiento de ficheros** propio: `saveUpload`/`readMedia` + ruta `/api/media/[name]` (sirve imágenes); en producción usa un **Railway Volume** (`UPLOAD_DIR=/data/uploads`).
+- Lista de productos con miniatura y enlace al detalle.
+
 ### Superadmin v2 (tanda 2) — clubs y pasarelas
 - **Gestión de Clubs** `/lf-admin/clubs`: activar/desactivar (muestra u oculta el club en la web), editar nombre/lema, y **lanzamiento y reserva propios por club** (con respaldo a los globales). Migración `club_config` aplicada.
 - El motor comercial usa la **reserva y el lanzamiento por club**; las páginas Prime/Prestige y la comparativa **ocultan los clubs inactivos**.

@@ -13,6 +13,36 @@ import { prisma } from './prisma';
 import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
 import { sendTemplatedEmail } from './email/templates';
+import { saveUpload } from './storage';
+
+// Lee campos opcionales de ficha técnica del producto desde un formulario.
+function productSpecFields(formData: FormData) {
+  const intOrNull = (v: FormDataEntryValue | null) => {
+    const n = parseInt(String(v ?? ''), 10);
+    return Number.isFinite(n) ? n : null;
+  };
+  return {
+    description: String(formData.get('description') ?? '') || null,
+    history: String(formData.get('history') ?? '') || null,
+    metal: String(formData.get('metal') ?? '') || null,
+    weightLabel: String(formData.get('weightLabel') ?? '') || null,
+    finish: String(formData.get('finish') ?? '') || null,
+    diameter: String(formData.get('diameter') ?? '') || null,
+    editionSize: intOrNull(formData.get('editionSize')),
+    mintYear: intOrNull(formData.get('mintYear')),
+    priceEurCents: eurosToCents(formData.get('priceEur')),
+    priceUsdCents: eurosToCents(formData.get('priceUsd')),
+    premiumEurCents: eurosToCents(formData.get('premiumEur')),
+    premiumUsdCents: eurosToCents(formData.get('premiumUsd')),
+    includedInPrime: formData.get('includedInPrime') === 'on',
+    includedInPrestige: formData.get('includedInPrestige') === 'on',
+    isInauguralCoin: formData.get('isInauguralCoin') === 'on',
+    certificateRequired: formData.get('certificateRequired') === 'on',
+    hasAuthenticityQr: formData.get('hasAuthenticityQr') === 'on',
+    available: formData.get('available') === 'on',
+    visible: formData.get('visible') === 'on',
+  };
+}
 
 function slugify(input: string): string {
   return input
@@ -136,21 +166,7 @@ export async function createProductAction(formData: FormData): Promise<void> {
   const slug = String(formData.get('slug') ?? '').trim() || slugify(name);
   const collectionId = String(formData.get('collectionId') ?? '') || null;
   const created = await prisma.product.create({
-    data: {
-      name,
-      slug,
-      collectionId,
-      description: String(formData.get('description') ?? '') || null,
-      priceEurCents: eurosToCents(formData.get('priceEur')),
-      priceUsdCents: eurosToCents(formData.get('priceUsd')),
-      premiumEurCents: eurosToCents(formData.get('premiumEur')),
-      premiumUsdCents: eurosToCents(formData.get('premiumUsd')),
-      includedInPrime: formData.get('includedInPrime') === 'on',
-      includedInPrestige: formData.get('includedInPrestige') === 'on',
-      isInauguralCoin: formData.get('isInauguralCoin') === 'on',
-      available: formData.get('available') === 'on',
-      visible: formData.get('visible') === 'on',
-    },
+    data: { name, slug, collectionId, ...productSpecFields(formData) },
   });
   await audit(admin.id, admin.email, 'product.create', 'Product', created.id, null, { name, slug });
   revalidatePath('/lf-admin/productos');
@@ -162,22 +178,44 @@ export async function updateProductAction(formData: FormData): Promise<void> {
   const id = String(formData.get('id'));
   const before = await prisma.product.findUnique({ where: { id } });
   if (!before) return;
+  const name = String(formData.get('name') ?? '').trim();
+  const collectionId = String(formData.get('collectionId') ?? '') || null;
   await prisma.product.update({
     where: { id },
     data: {
-      priceEurCents: eurosToCents(formData.get('priceEur')),
-      priceUsdCents: eurosToCents(formData.get('priceUsd')),
-      premiumEurCents: eurosToCents(formData.get('premiumEur')),
-      premiumUsdCents: eurosToCents(formData.get('premiumUsd')),
-      includedInPrime: formData.get('includedInPrime') === 'on',
-      includedInPrestige: formData.get('includedInPrestige') === 'on',
-      isInauguralCoin: formData.get('isInauguralCoin') === 'on',
-      available: formData.get('available') === 'on',
-      visible: formData.get('visible') === 'on',
+      ...(name ? { name } : {}),
+      collectionId,
+      ...productSpecFields(formData),
     },
   });
   await audit(admin.id, admin.email, 'product.update', 'Product', id, null, { id });
   revalidatePath('/lf-admin/productos');
+  revalidatePath(`/lf-admin/productos/${id}`);
+}
+
+/** Sube una imagen y la asocia al producto (galería). */
+export async function uploadProductImageAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const productId = String(formData.get('productId'));
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return;
+  const { url } = await saveUpload(file);
+  const count = await prisma.productImage.count({ where: { productId } });
+  await prisma.productImage.create({
+    data: { productId, url, alt: String(formData.get('alt') ?? '') || null, sortOrder: count },
+  });
+  await audit(admin.id, admin.email, 'product.image_add', 'Product', productId, null, { url });
+  revalidatePath(`/lf-admin/productos/${productId}`);
+}
+
+export async function deleteProductImageAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('imageId'));
+  const img = await prisma.productImage.findUnique({ where: { id } });
+  if (!img) return;
+  await prisma.productImage.delete({ where: { id } });
+  await audit(admin.id, admin.email, 'product.image_delete', 'ProductImage', id, null, null);
+  revalidatePath(`/lf-admin/productos/${img.productId}`);
 }
 
 export type ManualMemberResult =

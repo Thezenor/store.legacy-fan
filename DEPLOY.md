@@ -44,7 +44,18 @@ RESEND_API_KEY=
 EMAIL_FROM=Legacy Fan <no-reply@legacy-fan.com>
 
 RATE_LIMIT_ENABLED=true
+
+# Subida de imágenes de producto (apunta al Volume montado, ver paso 6)
+UPLOAD_DIR=/data/uploads
 ```
+
+## 6. Almacenamiento de imágenes (Railway Volume)
+Las fotos de producto se guardan en disco y se sirven por `/api/media/...`.
+Para que persistan entre despliegues:
+1. Servicio de la app → **Settings → Volumes → New Volume**.
+2. Mount path: **`/data`**.
+3. Variable `UPLOAD_DIR=/data/uploads` (ya incluida arriba).
+Sin volumen, las imágenes se pierden en cada redeploy.
 
 > `AUTH_SECRET` de arriba es un valor recién generado; puedes cambiarlo por otro
 > (`openssl rand -base64 32`). `AUTH_TRUST_HOST=true` es necesario detrás del proxy de Railway.

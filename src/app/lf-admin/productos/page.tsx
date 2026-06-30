@@ -1,94 +1,62 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { createProductAction, updateProductAction, deleteProductAction } from '@/lib/admin-actions';
+import { createProductAction } from '@/lib/admin-actions';
+
+const inp = 'mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground';
 
 export default async function AdminProductos() {
   const [products, collections] = await Promise.all([
-    prisma.product.findMany({ orderBy: { createdAt: 'desc' }, take: 100 }),
+    prisma.product.findMany({ orderBy: { createdAt: 'desc' }, take: 200, include: { collection: true, images: { take: 1, orderBy: { sortOrder: 'asc' } } } }),
     prisma.collection.findMany({ orderBy: { name: 'asc' } }),
   ]);
 
-  const checkboxes = [
-    { name: 'includedInPrime', label: 'Prime' },
-    { name: 'includedInPrestige', label: 'Prestige' },
-    { name: 'isInauguralCoin', label: 'Inaugural' },
-    { name: 'available', label: 'Disponible' },
-    { name: 'visible', label: 'Visible' },
-  ] as const;
-
   return (
-    <div>
+    <div className="max-w-3xl">
       <h1 className="font-display text-3xl font-bold text-foreground">Productos</h1>
-      <p className="mt-1 text-sm text-muted">
-        Precios y premium en EUR/USD. “Incluido” genera el producto en el pedido del socio (M6);
-        “Inaugural” lo habilita para el upsell (Prestige).
-      </p>
+      <p className="mt-1 text-sm text-muted">Crea una pieza y entra en ella para completar ficha, fotos e historia.</p>
 
-      {/* Crear */}
-      <form action={createProductAction} className="mt-4 space-y-3 rounded-card border border-border bg-surface p-4">
-        <div className="flex flex-wrap gap-3">
-          <label className="block"><span className="text-xs text-muted">Nombre</span>
-            <input name="name" required className="mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground sm:w-56" /></label>
-          <label className="block"><span className="text-xs text-muted">Slug (opcional)</span>
-            <input name="slug" className="mt-1 w-40 rounded border border-border bg-background px-2 py-1.5 text-foreground" /></label>
-          <label className="block"><span className="text-xs text-muted">Colección</span>
-            <select name="collectionId" className="mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground">
-              <option value="">—</option>
-              {collections.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select></label>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {(['priceEur', 'priceUsd', 'premiumEur', 'premiumUsd'] as const).map((f) => (
-            <label key={f} className="block"><span className="text-xs text-muted">{f}</span>
-              <input name={f} type="number" step="0.01" defaultValue="0" className="mt-1 w-28 rounded border border-border bg-background px-2 py-1.5 text-foreground" /></label>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-4">
-          {checkboxes.map((c) => (
-            <label key={c.name} className="flex items-center gap-2 text-sm text-muted">
-              <input type="checkbox" name={c.name} defaultChecked={c.name === 'available' || c.name === 'visible'} /> {c.label}
-            </label>
-          ))}
-        </div>
-        <button type="submit" className="rounded bg-gold-grad px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#160f02]">
-          Crear producto
-        </button>
+      {/* Alta rápida */}
+      <form action={createProductAction} className="mt-4 flex flex-wrap items-end gap-3 rounded-card border border-border bg-surface p-4">
+        <label className="block"><span className="text-xs text-muted">Nombre</span>
+          <input name="name" required className={`${inp} w-full sm:w-56`} /></label>
+        <label className="block"><span className="text-xs text-muted">Slug (opcional)</span>
+          <input name="slug" className={`${inp} w-40`} /></label>
+        <label className="block"><span className="text-xs text-muted">Colección</span>
+          <select name="collectionId" className={inp}>
+            <option value="">—</option>
+            {collections.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select></label>
+        {/* visible por defecto al crear */}
+        <input type="hidden" name="visible" value="on" />
+        <input type="hidden" name="available" value="on" />
+        <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Crear pieza</button>
       </form>
 
-      {/* Listado editable */}
-      <div className="mt-6 space-y-3">
-        {products.length === 0 ? (
-          <p className="text-sm text-muted">Aún no hay productos.</p>
-        ) : (
-          products.map((p) => (
-            <form key={p.id} action={updateProductAction} className="space-y-2 rounded-card border border-border bg-surface p-4">
-              <input type="hidden" name="id" value={p.id} />
-              <div className="flex items-center justify-between">
-                <span className="text-foreground">{p.name} <span className="font-mono text-[11px] text-faint">/{p.slug}</span></span>
-                <div className="flex gap-2">
-                  <button type="submit" className="border border-gold/40 px-3 py-1.5 text-xs uppercase tracking-wider text-gold-light hover:bg-surface-elevated">Guardar</button>
-                  <button type="submit" formAction={deleteProductAction} className="border border-red-500/40 px-3 py-1.5 text-xs uppercase tracking-wider text-red-400 hover:bg-surface-elevated">Borrar</button>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <label className="block"><span className="text-xs text-muted">priceEur</span>
-                  <input name="priceEur" type="number" step="0.01" defaultValue={(p.priceEurCents/100).toFixed(2)} className="mt-1 w-24 rounded border border-border bg-background px-2 py-1 text-foreground" /></label>
-                <label className="block"><span className="text-xs text-muted">priceUsd</span>
-                  <input name="priceUsd" type="number" step="0.01" defaultValue={(p.priceUsdCents/100).toFixed(2)} className="mt-1 w-24 rounded border border-border bg-background px-2 py-1 text-foreground" /></label>
-                <label className="block"><span className="text-xs text-muted">premiumEur</span>
-                  <input name="premiumEur" type="number" step="0.01" defaultValue={(p.premiumEurCents/100).toFixed(2)} className="mt-1 w-24 rounded border border-border bg-background px-2 py-1 text-foreground" /></label>
-                <label className="block"><span className="text-xs text-muted">premiumUsd</span>
-                  <input name="premiumUsd" type="number" step="0.01" defaultValue={(p.premiumUsdCents/100).toFixed(2)} className="mt-1 w-24 rounded border border-border bg-background px-2 py-1 text-foreground" /></label>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                {checkboxes.map((c) => (
-                  <label key={c.name} className="flex items-center gap-2 text-sm text-muted">
-                    <input type="checkbox" name={c.name} defaultChecked={(p as Record<string, unknown>)[c.name] as boolean} /> {c.label}
-                  </label>
-                ))}
-              </div>
-            </form>
-          ))
-        )}
+      {/* Listado */}
+      <div className="mt-6 overflow-x-auto rounded-card border border-border">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-surface text-xs uppercase tracking-wider text-faint">
+            <tr><th className="px-4 py-3">Pieza</th><th className="px-4 py-3">Colección</th><th className="px-4 py-3">Metal</th><th className="px-4 py-3">Estado</th></tr>
+          </thead>
+          <tbody>
+            {products.length === 0 ? (
+              <tr><td colSpan={4} className="px-4 py-6 text-center text-muted">Aún no hay productos.</td></tr>
+            ) : products.map((p) => (
+              <tr key={p.id} className="border-t border-border transition hover:bg-surface-elevated">
+                <td className="px-4 py-3">
+                  <Link href={`/lf-admin/productos/${p.id}`} className="flex items-center gap-2 text-gold-light hover:underline">
+                    {/* miniatura si hay imagen */}
+                    {p.images[0] ? <span className="h-6 w-6 overflow-hidden rounded-full border border-border"><img src={p.images[0].url} alt="" className="h-full w-full object-cover" /></span> : null}
+                    {p.name}
+                  </Link>
+                </td>
+                <td className="px-4 py-3 text-muted">{p.collection?.name ?? '—'}</td>
+                <td className="px-4 py-3 text-muted">{p.metal ?? '—'}</td>
+                <td className="px-4 py-3 text-xs text-muted">{p.visible ? 'visible' : 'oculto'}{p.available ? '' : ' · no disp.'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
