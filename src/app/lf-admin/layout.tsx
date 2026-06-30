@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { requireAdmin } from '@/lib/admin';
 import { AdminNav } from '@/components/admin/admin-nav';
+import { AdminBottomNav } from '@/components/admin/admin-bottom-nav';
 import '../globals.css';
 import '@fontsource/spectral/400.css';
 import '@fontsource/spectral/600.css';
@@ -40,12 +41,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <body className="font-sans antialiased">
         <div className="grid min-h-screen grid-cols-1 md:grid-cols-[248px_1fr]">
           {/* Sidebar */}
-          <aside className="border-b border-border bg-surface p-5 md:border-b-0 md:border-r">
+          <aside className="flex flex-col border-b border-border bg-surface p-5 md:border-b-0 md:border-r">
             <div className="font-display text-lg font-semibold tracking-[0.16em] text-metal-gold">
               LEGACY FAN
             </div>
             <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-faint">Superadmin</p>
             <AdminNav items={NAV} />
+            <AdminBottomNav />
           </aside>
 
           {/* Contenido */}
