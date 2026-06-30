@@ -29,6 +29,17 @@ export const registerSchema = z
     path: ['confirmPassword'],
   });
 
+// Registro simplificado dentro del checkout (sin repetir contraseña): datos básicos.
+export const checkoutRegisterSchema = z.object({
+  firstName: z.string().trim().min(1).max(80),
+  lastName: z.string().trim().min(1).max(80),
+  phone: z.string().trim().max(30).optional().or(z.literal('')),
+  country: z.string().trim().length(2),
+  email,
+  password,
+  acceptTerms: z.literal(true, { errorMap: () => ({ message: 'terms_required' }) }),
+});
+
 export const loginSchema = z.object({
   email,
   password: z.string().min(1),

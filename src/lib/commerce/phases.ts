@@ -73,6 +73,9 @@ export interface ClubPricing {
   currency: Currency;
   priceCents: number;
   priceFormatted: string;
+  /** PVP oficial (tachado) si está definido y es mayor que el precio actual. */
+  listPriceCents: number | null;
+  listPriceFormatted: string | null;
   freeShipping: boolean;
   freeShippingCountries: string[];
   promoText: string | null;
@@ -87,6 +90,12 @@ export async function getClubPricing(
   const phase = await getActivePhase(club);
   if (!phase) return null;
   const priceCents = pickPrice(phase, currency);
+
+  // PVP oficial del club (precio tachado), solo si supera el precio actual.
+  const plan = await getPlan(club);
+  const listRaw = currency === 'USD' ? plan?.listPriceUsdCents ?? null : plan?.listPriceEurCents ?? null;
+  const listPriceCents = listRaw != null && listRaw > priceCents ? listRaw : null;
+
   return {
     club,
     phaseKey: phase.key,
@@ -94,6 +103,8 @@ export async function getClubPricing(
     currency,
     priceCents,
     priceFormatted: formatMoney(priceCents, currency, locale),
+    listPriceCents,
+    listPriceFormatted: listPriceCents != null ? formatMoney(listPriceCents, currency, locale) : null,
     freeShipping: phase.freeShipping,
     freeShippingCountries: phase.freeShippingCountries,
     promoText: phase.promoText,

@@ -1,7 +1,8 @@
 import { Link } from '@/i18n/navigation';
 import type { ClubPricing } from '@/lib/commerce';
 
-// Tarjeta de plan para la comparativa (doc 12: tarjetas elegantes, jerarquía clara).
+// Tarjeta de plan para la comparativa: reserva destacada, PVP tachado + precio
+// actual, un único botón "Reservar". Sin referencias a "Fases" (doc usuario).
 export function PlanCard({
   title,
   tagline,
@@ -19,11 +20,10 @@ export function PlanCard({
   includes: string[];
   labels: {
     from: string;
-    currentPhase: string;
-    reservation: string;
+    reserveFrom: string;
+    fullPrice: string;
     includesTitle: string;
     reserve: string;
-    join: string;
   };
   accent: 'silver' | 'gold';
   featured?: boolean;
@@ -43,17 +43,18 @@ export function PlanCard({
       <p className="mt-2 text-sm font-medium text-foreground">{tagline}</p>
 
       <div className="mt-4">
-        <p className="eyebrow">
-          {labels.currentPhase} · {pricing.phaseName}
+        {/* Reserva: el foco principal */}
+        <p className="eyebrow text-gold-light">{labels.reserveFrom}</p>
+        <p className="mt-1 font-display text-3xl font-bold tabular-nums text-metal-gold sm:text-4xl">
+          {reservationFormatted}
         </p>
-        <p className="mt-2 flex items-baseline gap-2">
-          <span className="text-xs uppercase tracking-wider text-muted">{labels.from}</span>
-          <span className="text-3xl font-semibold tabular-nums text-foreground sm:text-4xl">
-            {pricing.priceFormatted}
-          </span>
-        </p>
-        <p className="mt-1 text-sm text-muted">
-          {labels.reservation}: <span className="serial">{reservationFormatted}</span>
+        {/* Pago completo secundario, con PVP tachado */}
+        <p className="mt-2 flex items-baseline gap-2 text-sm">
+          <span className="text-xs uppercase tracking-wider text-faint">{labels.fullPrice}:</span>
+          {pricing.listPriceFormatted ? (
+            <span className="text-faint line-through">{pricing.listPriceFormatted}</span>
+          ) : null}
+          <span className="font-semibold tabular-nums text-foreground">{pricing.priceFormatted}</span>
         </p>
       </div>
 
@@ -67,16 +68,10 @@ export function PlanCard({
         ))}
       </ul>
 
-      <div className="mt-6 flex flex-col gap-2">
+      <div className="mt-6">
         <Link
-          href={`/checkout?club=${club}&type=join`}
-          className="bevel bg-gold px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408] transition hover:bg-gold-light"
-        >
-          {labels.join}
-        </Link>
-        <Link
-          href={`/checkout?club=${club}&type=reserve`}
-          className="border border-gold/40 px-5 py-3 text-center text-xs font-medium uppercase tracking-[0.16em] text-gold-light transition hover:bg-surface-elevated"
+          href={`/checkout?club=${club}`}
+          className="bevel block bg-gold px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408] transition hover:bg-gold-light"
         >
           {labels.reserve}
         </Link>

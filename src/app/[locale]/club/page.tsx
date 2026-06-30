@@ -56,8 +56,8 @@ export default async function ClubPage({
 
   const labelsBase = {
     from: pricingT('from'),
-    currentPhase: pricingT('currentPhase'),
-    reservation: pricingT('reservation'),
+    reserveFrom: pricingT('reserveFrom'),
+    fullPrice: pricingT('fullPrice'),
     includesTitle: pricingT('includes'),
   };
   const faqItems = faqT.raw('items') as { q: string; a: string }[];
@@ -104,7 +104,7 @@ export default async function ClubPage({
               pricing={primePricing}
               reservationFormatted={primeRes.amountFormatted}
               includes={prime.raw('includes') as string[]}
-              labels={{ ...labelsBase, reserve: prime('ctaReserve'), join: prime('ctaJoin') }}
+              labels={{ ...labelsBase, reserve: prime('ctaReserve') }}
               accent="silver"
             />
           ) : null}
@@ -115,7 +115,7 @@ export default async function ClubPage({
               pricing={prestigePricing}
               reservationFormatted={prestigeRes.amountFormatted}
               includes={prestige.raw('includes') as string[]}
-              labels={{ ...labelsBase, reserve: prestige('ctaReserve'), join: prestige('ctaJoin') }}
+              labels={{ ...labelsBase, reserve: prestige('ctaReserve') }}
               accent="gold"
               featured
             />

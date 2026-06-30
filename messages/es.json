@@ -97,7 +97,10 @@
     "reservation": "Reserva",
     "reservationNote": "La reserva no asigna número de socio y se descuenta del pago completo.",
     "freeShippingEs": "Envío gratis en España",
-    "includes": "Qué incluye"
+    "includes": "Qué incluye",
+    "officialPrice": "Precio oficial",
+    "fullPrice": "Pago completo del club",
+    "reserveFrom": "Reserva tu plaza por"
   },
   "account": {
     "reservationTitle": "Tu reserva",
@@ -145,12 +148,22 @@
   "checkout": {
     "title": "Finalizar tu acceso",
     "plan": "Plan elegido",
+    "summary": "Tu pedido",
     "typeReserve": "Reserva",
     "typeJoin": "Pago completo",
     "amount": "Importe",
-    "comingSoon": "El pago completo se habilitará en breve. De momento puedes dejar tu reserva.",
-    "payReserve": "Pagar reserva con PayPal",
-    "payFull": "Pagar y unirme con PayPal",
+    "optionReserve": "Reserva tu plaza",
+    "optionReserveDesc": "Depósito reembolsable. Se descuenta del pago total.",
+    "optionFull": "Pago completo",
+    "optionFullDesc": "Hazte socio ya: número de socio y acceso inmediato.",
+    "selected": "Seleccionado",
+    "choose": "Elegir",
+    "account": "Tus datos",
+    "registerHint": "Crea tu cuenta para completar la compra.",
+    "haveAccount": "Ya estoy registrado",
+    "needAccount": "Crear una cuenta nueva",
+    "loginHint": "Accede con tu cuenta.",
+    "continue": "Continuar a PayPal",
     "processing": "Redirigiendo a PayPal…",
     "back": "Volver a los planes",
     "errors": {
@@ -158,6 +171,11 @@
       "unverified": "Verifica tu correo antes de reservar.",
       "already_active": "Ya tienes una reserva o membresía activa. Revisa tu cuenta.",
       "already_member": "Ya eres socio. Revisa tu cuenta.",
+      "invalid_credentials": "Correo o contraseña incorrectos.",
+      "email_taken": "Ya existe una cuenta con este correo. Pulsa «Ya estoy registrado».",
+      "validation": "Revisa los datos del formulario.",
+      "terms_required": "Debes aceptar los términos y condiciones.",
+      "rate_limited": "Demasiados intentos. Espera unos minutos.",
       "error": "No se pudo iniciar el pago. Inténtalo de nuevo."
     }
   },

@@ -1,105 +1,71 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { requireVerifiedUser } from '@/lib/session';
+import { auth } from '@/lib/auth';
 import { getClubPricing, getReservationTerms, getPlan } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { hasActiveReservationOrMembership } from '@/lib/checkout/reservation';
-import { ReserveButton } from '@/components/checkout/reserve-button';
-import { FullPaymentButton } from '@/components/checkout/full-payment-button';
+import { CheckoutForm } from '@/components/checkout/checkout-form';
 import { Link } from '@/i18n/navigation';
 
+export const dynamic = 'force-dynamic';
+
 /**
- * Stub de checkout (Módulo 3). Demuestra el gating de compra (M1: requiere
- * usuario con email verificado) y el resumen de precio (M2). El flujo real de
- * pago (reserva / pago completo con PayPal) se implementa en los Módulos 4 y 6.
+ * Checkout unificado (doc usuario): el visitante elige reserva (50 €/$) o pago
+ * completo y, si no tiene cuenta, se registra o inicia sesión en el mismo paso.
+ * Tras aceptar términos pasa a PayPal. No exige verificación previa de email.
  */
 export default async function CheckoutPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ club?: string; type?: string }>;
+  searchParams: Promise<{ club?: string; type?: string; ref?: string }>;
 }) {
   const { locale } = await params;
-  const { club, type } = await searchParams;
+  const { club, ref } = await searchParams;
   setRequestLocale(locale);
 
-  if (!club || (type !== 'reserve' && type !== 'join')) {
-    notFound();
-  }
-
-  // Gating de compra (D-009): sin sesión → /login; sin verificar → /verify-email.
-  const session = await requireVerifiedUser(locale);
+  if (!club) notFound();
 
   const currency = await getDisplayCurrency();
   const t = await getTranslations({ locale, namespace: 'checkout' });
-  const clubKey = club;
-  // Solo clubs existentes y activos.
-  const [plan, pricing] = await Promise.all([getPlan(clubKey), getClubPricing(clubKey, currency, locale)]);
+
+  const [plan, pricing] = await Promise.all([getPlan(club), getClubPricing(club, currency, locale)]);
   if (!plan || !plan.active || !pricing) notFound();
-  const reservation = await getReservationTerms(currency, locale, clubKey);
+  const reservation = await getReservationTerms(currency, locale, club);
 
-  const amount = type === 'reserve' ? reservation.amountFormatted : pricing.priceFormatted;
-  const clubName = plan.name;
-  const alreadyActive = await hasActiveReservationOrMembership(session.user.id);
-
-  const errors = {
-    unauthenticated: t('errors.unauthenticated'),
-    unverified: t('errors.unverified'),
-    already_active: t('errors.already_active'),
-    already_member: t('errors.already_member'),
-    error: t('errors.error'),
-  };
+  const session = await auth();
+  const isLoggedIn = !!session?.user?.id;
+  const alreadyActive = isLoggedIn ? await hasActiveReservationOrMembership(session!.user.id) : false;
 
   return (
-    <section className="mx-auto max-w-lg animate-fade-in">
-      <h1 className="font-display text-3xl font-bold text-metal-gold">{t('title')}</h1>
-      <div className="mt-6 space-y-3 rounded-card border border-border bg-surface p-6">
-        <Row label={t('plan')} value={clubName} />
-        <Row label="" value={type === 'reserve' ? t('typeReserve') : t('typeJoin')} />
-        <Row label={t('amount')} value={amount} highlight />
-      </div>
+    <section className="mx-auto max-w-xl animate-fade-in">
+      <p className="eyebrow text-gold-light">{plan.name}</p>
+      <h1 className="mt-1 font-display text-3xl font-bold text-metal-gold">{t('title')}</h1>
 
-      <div className="mt-6">
-        {type === 'reserve' ? (
-          alreadyActive ? (
-            <p className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-foreground">
-              {t('errors.already_active')}
-            </p>
-          ) : (
-            // Pago completo (join) llega en el Módulo 6; aquí va la reserva (50 €/$).
-            <ReserveButton
-              club={clubKey}
-              label={t('payReserve')}
-              pendingLabel={t('processing')}
-              errors={errors}
-            />
-          )
-        ) : (
-          // Pago completo (join): asigna club, número de socio, productos, factura, puntos.
-          <FullPaymentButton
-            club={clubKey}
-            label={t('payFull')}
-            pendingLabel={t('processing')}
-            errors={errors}
+      {alreadyActive ? (
+        <div className="mt-6 rounded-card border border-gold/40 bg-gold/10 p-6">
+          <p className="text-sm text-foreground">{t('errors.already_active')}</p>
+          <Link href="/account" className="mt-3 inline-block text-sm text-gold hover:underline">
+            {locale === 'es' ? 'Ir a mi cuenta' : 'Go to my account'} →
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-6">
+          <CheckoutForm
+            club={club}
+            isLoggedIn={isLoggedIn}
+            reserveFormatted={reservation.amountFormatted}
+            fullFormatted={pricing.priceFormatted}
+            listFormatted={pricing.listPriceFormatted}
+            refCode={ref}
           />
-        )}
-      </div>
+        </div>
+      )}
 
-      <Link href="/club" className="mt-4 inline-block text-sm text-gold hover:underline">
+      <Link href="/club" className="mt-6 inline-block text-sm text-gold hover:underline">
         ← {t('back')}
       </Link>
     </section>
-  );
-}
-
-function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="min-w-0 text-sm text-muted">{label}</span>
-      <span className={`shrink-0 text-right ${highlight ? 'font-display text-2xl font-bold text-metal-gold' : 'text-foreground'}`}>
-        {value}
-      </span>
-    </div>
   );
 }

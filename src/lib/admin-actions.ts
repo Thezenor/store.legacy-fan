@@ -646,6 +646,8 @@ export async function createClubAction(formData: FormData): Promise<void> {
 
   const priceEur = Math.round(parseFloat(String(formData.get('priceEur') ?? '0').replace(',', '.')) * 100) || 0;
   const priceUsd = Math.round(parseFloat(String(formData.get('priceUsd') ?? '0').replace(',', '.')) * 100) || 0;
+  const listEur = String(formData.get('listPriceEur') ?? '').trim();
+  const listUsd = String(formData.get('listPriceUsd') ?? '').trim();
 
   const plan = await prisma.membershipPlan.create({
     data: {
@@ -654,6 +656,8 @@ export async function createClubAction(formData: FormData): Promise<void> {
       slug,
       active: formData.get('active') === 'on',
       tagline: String(formData.get('tagline') ?? '') || null,
+      listPriceEurCents: listEur ? Math.round(parseFloat(listEur.replace(',', '.')) * 100) : null,
+      listPriceUsdCents: listUsd ? Math.round(parseFloat(listUsd.replace(',', '.')) * 100) : null,
       phases: {
         create: { key: 'FASE_0', name: 'Fase 0', priceEurCents: priceEur, priceUsdCents: priceUsd, isActive: true, sortOrder: 0 },
       },
@@ -670,6 +674,8 @@ export async function updateClubAction(formData: FormData): Promise<void> {
   const id = String(formData.get('id'));
   const eur = String(formData.get('reservationEur') ?? '').trim();
   const usd = String(formData.get('reservationUsd') ?? '').trim();
+  const listEur = String(formData.get('listPriceEur') ?? '').trim();
+  const listUsd = String(formData.get('listPriceUsd') ?? '').trim();
   const launch = String(formData.get('launchDate') ?? '').trim();
   const data = {
     name: String(formData.get('name') ?? '').trim() || undefined,
@@ -678,6 +684,8 @@ export async function updateClubAction(formData: FormData): Promise<void> {
     launchDate: launch ? new Date(launch) : null,
     reservationEurCents: eur ? Math.round(parseFloat(eur.replace(',', '.')) * 100) : null,
     reservationUsdCents: usd ? Math.round(parseFloat(usd.replace(',', '.')) * 100) : null,
+    listPriceEurCents: listEur ? Math.round(parseFloat(listEur.replace(',', '.')) * 100) : null,
+    listPriceUsdCents: listUsd ? Math.round(parseFloat(listUsd.replace(',', '.')) * 100) : null,
   };
   await prisma.membershipPlan.update({ where: { id }, data });
   await audit(admin.id, admin.email, 'club.update', 'MembershipPlan', id, null, { name: data.name, active: data.active });

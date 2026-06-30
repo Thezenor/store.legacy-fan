@@ -97,7 +97,10 @@
     "reservation": "Prenotazione",
     "reservationNote": "La prenotazione non assegna un numero di socio e viene detratta dal pagamento completo.",
     "freeShippingEs": "Spedizione gratuita in Spagna",
-    "includes": "Cosa include"
+    "includes": "Cosa include",
+    "officialPrice": "Prezzo ufficiale",
+    "fullPrice": "Prezzo completo del club",
+    "reserveFrom": "Prenota il tuo posto per"
   },
   "account": {
     "reservationTitle": "La tua prenotazione",
@@ -145,12 +148,22 @@
   "checkout": {
     "title": "Completa il tuo accesso",
     "plan": "Piano scelto",
+    "summary": "Il tuo ordine",
     "typeReserve": "Prenotazione",
     "typeJoin": "Pagamento completo",
     "amount": "Importo",
-    "comingSoon": "Il pagamento completo sarà presto disponibile. Per ora puoi effettuare la tua prenotazione.",
-    "payReserve": "Paga la prenotazione con PayPal",
-    "payFull": "Paga e iscriviti con PayPal",
+    "optionReserve": "Prenota il tuo posto",
+    "optionReserveDesc": "Deposito rimborsabile. Detratto dal pagamento completo.",
+    "optionFull": "Pagamento completo",
+    "optionFullDesc": "Diventa socio ora: numero di socio e accesso immediato.",
+    "selected": "Selezionato",
+    "choose": "Scegli",
+    "account": "I tuoi dati",
+    "registerHint": "Crea il tuo account per completare l'acquisto.",
+    "haveAccount": "Ho già un account",
+    "needAccount": "Crea un nuovo account",
+    "loginHint": "Accedi con il tuo account.",
+    "continue": "Continua su PayPal",
     "processing": "Reindirizzamento a PayPal…",
     "back": "Torna ai piani",
     "errors": {
@@ -158,6 +171,11 @@
       "unverified": "Verifica la tua email prima di prenotare.",
       "already_active": "Hai già una prenotazione o un abbonamento attivo. Controlla il tuo account.",
       "already_member": "Sei già socio. Controlla il tuo account.",
+      "invalid_credentials": "Email o password non corretti.",
+      "email_taken": "Esiste già un account con questa email. Tocca «Ho già un account».",
+      "validation": "Controlla i campi del modulo.",
+      "terms_required": "Devi accettare i termini e le condizioni.",
+      "rate_limited": "Troppi tentativi. Attendi qualche minuto.",
       "error": "Impossibile avviare il pagamento. Riprova."
     }
   },

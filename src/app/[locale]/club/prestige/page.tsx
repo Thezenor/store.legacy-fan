@@ -77,16 +77,10 @@ export default async function PrestigePage({
           ))}
         </ul>
 
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-6">
           <Link
-            href="/checkout?club=PRESTIGE&type=join"
-            className="rounded bg-gold-grad px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider text-[#160f02] transition hover:brightness-110"
-          >
-            {t('ctaJoin')}
-          </Link>
-          <Link
-            href="/checkout?club=PRESTIGE&type=reserve"
-            className="rounded border border-gold/40 px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-gold-light transition hover:bg-surface-elevated"
+            href="/checkout?club=PRESTIGE"
+            className="block rounded bg-gold-grad px-6 py-4 text-center text-sm font-semibold uppercase tracking-wider text-[#160f02] transition hover:brightness-110 sm:inline-block sm:min-w-[18rem]"
           >
             {t('ctaReserve')}
           </Link>

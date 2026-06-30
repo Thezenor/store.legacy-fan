@@ -97,7 +97,10 @@
     "reservation": "Reservation",
     "reservationNote": "The reservation does not assign a member number and is deducted from the full payment.",
     "freeShippingEs": "Free shipping in Spain",
-    "includes": "What's included"
+    "includes": "What's included",
+    "officialPrice": "Official price",
+    "fullPrice": "Full club price",
+    "reserveFrom": "Reserve your spot for"
   },
   "account": {
     "reservationTitle": "Your reservation",
@@ -145,12 +148,22 @@
   "checkout": {
     "title": "Complete your access",
     "plan": "Chosen plan",
+    "summary": "Your order",
     "typeReserve": "Reservation",
     "typeJoin": "Full payment",
     "amount": "Amount",
-    "comingSoon": "Full payment will be enabled shortly. For now you can place your reservation.",
-    "payReserve": "Pay reservation with PayPal",
-    "payFull": "Pay and join with PayPal",
+    "optionReserve": "Reserve your spot",
+    "optionReserveDesc": "Refundable deposit. Deducted from the full payment.",
+    "optionFull": "Full payment",
+    "optionFullDesc": "Become a member now: member number and instant access.",
+    "selected": "Selected",
+    "choose": "Choose",
+    "account": "Your details",
+    "registerHint": "Create your account to complete the purchase.",
+    "haveAccount": "I already have an account",
+    "needAccount": "Create a new account",
+    "loginHint": "Sign in with your account.",
+    "continue": "Continue to PayPal",
     "processing": "Redirecting to PayPal…",
     "back": "Back to plans",
     "errors": {
@@ -158,6 +171,11 @@
       "unverified": "Verify your email before reserving.",
       "already_active": "You already have an active reservation or membership. Check your account.",
       "already_member": "You are already a member. Check your account.",
+      "invalid_credentials": "Incorrect email or password.",
+      "email_taken": "An account with this email already exists. Tap “I already have an account”.",
+      "validation": "Please check the form fields.",
+      "terms_required": "You must accept the terms and conditions.",
+      "rate_limited": "Too many attempts. Please wait a few minutes.",
       "error": "Could not start the payment. Please try again."
     }
   },

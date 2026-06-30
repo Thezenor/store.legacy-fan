@@ -24,10 +24,14 @@ export default async function AdminClubs() {
           <input name="code" placeholder="FOUNDERS" className={`${inp} w-32`} /></label>
         <label className="block flex-1"><span className="text-xs text-muted">Lema</span>
           <input name="tagline" className={`${inp} w-full`} /></label>
-        <label className="block"><span className="text-xs text-muted">Precio EUR</span>
+        <label className="block"><span className="text-xs text-muted">Precio actual EUR</span>
           <input name="priceEur" type="number" step="0.01" defaultValue="0" className={`${inp} w-24`} /></label>
-        <label className="block"><span className="text-xs text-muted">Precio USD</span>
+        <label className="block"><span className="text-xs text-muted">Precio actual USD</span>
           <input name="priceUsd" type="number" step="0.01" defaultValue="0" className={`${inp} w-24`} /></label>
+        <label className="block"><span className="text-xs text-muted">PVP oficial EUR</span>
+          <input name="listPriceEur" type="number" step="0.01" placeholder="tachado" className={`${inp} w-24`} /></label>
+        <label className="block"><span className="text-xs text-muted">PVP oficial USD</span>
+          <input name="listPriceUsd" type="number" step="0.01" placeholder="tachado" className={`${inp} w-24`} /></label>
         <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="active" /> Activo</label>
         <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Crear club</button>
       </form>
@@ -55,6 +59,13 @@ export default async function AdminClubs() {
                 <input name="reservationEur" type="number" step="0.01" defaultValue={money(p.reservationEurCents)} className={`${inp} w-28`} /></label>
               <label className="block"><span className="text-xs text-muted">Reserva USD</span>
                 <input name="reservationUsd" type="number" step="0.01" defaultValue={money(p.reservationUsdCents)} className={`${inp} w-28`} /></label>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-4">
+              <label className="block"><span className="text-xs text-muted">PVP oficial EUR (tachado)</span>
+                <input name="listPriceEur" type="number" step="0.01" defaultValue={money(p.listPriceEurCents)} className={`${inp} w-28`} /></label>
+              <label className="block"><span className="text-xs text-muted">PVP oficial USD (tachado)</span>
+                <input name="listPriceUsd" type="number" step="0.01" defaultValue={money(p.listPriceUsdCents)} className={`${inp} w-28`} /></label>
+              <p className="self-end text-xs text-faint">Si el PVP supera el precio actual, se muestra tachado.</p>
             </div>
             <button className="bevel mt-4 bg-gold px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Guardar club</button>
           </form>

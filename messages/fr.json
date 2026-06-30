@@ -97,7 +97,10 @@
     "reservation": "Réservation",
     "reservationNote": "La réservation n'attribue pas de numéro de membre et est déduite du paiement complet.",
     "freeShippingEs": "Livraison gratuite en Espagne",
-    "includes": "Ce qui est inclus"
+    "includes": "Ce qui est inclus",
+    "officialPrice": "Prix officiel",
+    "fullPrice": "Prix complet du club",
+    "reserveFrom": "Réservez votre place pour"
   },
   "account": {
     "reservationTitle": "Votre réservation",
@@ -145,12 +148,22 @@
   "checkout": {
     "title": "Finaliser votre accès",
     "plan": "Offre choisie",
+    "summary": "Votre commande",
     "typeReserve": "Réservation",
     "typeJoin": "Paiement complet",
     "amount": "Montant",
-    "comingSoon": "Le paiement complet sera bientôt disponible. Pour l'instant, vous pouvez effectuer votre réservation.",
-    "payReserve": "Payer la réservation avec PayPal",
-    "payFull": "Payer et rejoindre avec PayPal",
+    "optionReserve": "Réservez votre place",
+    "optionReserveDesc": "Acompte remboursable. Déduit du paiement complet.",
+    "optionFull": "Paiement complet",
+    "optionFullDesc": "Devenez membre maintenant : numéro de membre et accès immédiat.",
+    "selected": "Sélectionné",
+    "choose": "Choisir",
+    "account": "Vos informations",
+    "registerHint": "Créez votre compte pour finaliser l'achat.",
+    "haveAccount": "J'ai déjà un compte",
+    "needAccount": "Créer un nouveau compte",
+    "loginHint": "Connectez-vous à votre compte.",
+    "continue": "Continuer vers PayPal",
     "processing": "Redirection vers PayPal…",
     "back": "Retour aux offres",
     "errors": {
@@ -158,6 +171,11 @@
       "unverified": "Vérifiez votre e-mail avant de réserver.",
       "already_active": "Vous avez déjà une réservation ou un abonnement actif. Consultez votre compte.",
       "already_member": "Vous êtes déjà membre. Consultez votre compte.",
+      "invalid_credentials": "E-mail ou mot de passe incorrect.",
+      "email_taken": "Un compte avec cet e-mail existe déjà. Cliquez sur « J'ai déjà un compte ».",
+      "validation": "Vérifiez les champs du formulaire.",
+      "terms_required": "Vous devez accepter les conditions générales.",
+      "rate_limited": "Trop de tentatives. Patientez quelques minutes.",
       "error": "Impossible de démarrer le paiement. Réessayez."
     }
   },

@@ -36,18 +36,12 @@ export default async function ClubDinamicoPage({
 
       <PriceBlock club={code} currency="EUR" locale={locale} />
 
-      <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+      <div className="mt-6">
         <Link
-          href={`/checkout?club=${code}&type=join`}
-          className="bevel bg-gold px-6 py-3 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408] transition hover:bg-gold-light"
+          href={`/checkout?club=${code}`}
+          className="bevel inline-block bg-gold px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408] transition hover:bg-gold-light"
         >
-          Unirme
-        </Link>
-        <Link
-          href={`/checkout?club=${code}&type=reserve`}
-          className="border border-gold/40 px-6 py-3 text-center text-xs font-medium uppercase tracking-[0.16em] text-gold-light transition hover:bg-surface-elevated"
-        >
-          Reservar
+          Reservar {plan.name}
         </Link>
       </div>
     </section>
