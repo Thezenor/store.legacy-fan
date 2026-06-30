@@ -1,4 +1,5 @@
-import type { ClubType, Currency, Prisma } from '@prisma/client';
+import type { Currency, Prisma } from '@prisma/client';
+type ClubType = string;
 
 /**
  * Crea el pedido interno con los productos incluidos del club (doc 03/05):
@@ -10,8 +11,13 @@ export async function createIncludedOrder(
   tx: Prisma.TransactionClient,
   opts: { userId: string; club: ClubType; currency: Currency; reservationId?: string | null },
 ) {
+  // Productos incluidos por club. Los clubs nuevos no usan estos flags todavía.
   const includedFilter =
-    opts.club === 'PRIME' ? { includedInPrime: true } : { includedInPrestige: true };
+    opts.club === 'PRIME'
+      ? { includedInPrime: true }
+      : opts.club === 'PRESTIGE'
+        ? { includedInPrestige: true }
+        : { id: '__none__' };
 
   const products = await tx.product.findMany({
     where: { ...includedFilter, visible: true },

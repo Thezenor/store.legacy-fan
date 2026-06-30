@@ -1,4 +1,4 @@
-import type { ClubType } from '@prisma/client';
+type ClubType = string;
 import { getTranslations } from 'next-intl/server';
 import { getClubPricing, getReservationTerms, type Currency } from '@/lib/commerce';
 

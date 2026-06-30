@@ -1,5 +1,8 @@
 import { cache } from 'react';
-import type { ClubType, MembershipPhase, MembershipPlan } from '@prisma/client';
+import type { MembershipPhase, MembershipPlan } from '@prisma/client';
+
+// El club es un código libre (PRIME, PRESTIGE o nuevos creados en admin).
+type ClubType = string;
 import { prisma } from '../prisma';
 import { getDate, getNumber } from './settings';
 import { formatMoney, pickPrice, type Currency } from './money';

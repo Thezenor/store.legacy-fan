@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { PlanCard } from '@/components/commerce/plan-card';
 import { FaqSection } from '@/components/commerce/faq-section';
 import { CurrencySwitcher } from '@/components/commerce/currency-switcher';
 import { JsonLd } from '@/components/seo/json-ld';
-import { getClubPricing, getReservationTerms, isClubActive } from '@/lib/commerce';
+import { getClubPricing, getReservationTerms, isClubActive, listActiveClubs } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { productOffer, faqPage, breadcrumb } from '@/lib/seo/structured-data';
 
@@ -121,8 +122,32 @@ export default async function ClubPage({
           ) : null}
         </div>
 
+        {/* Clubs adicionales creados desde el admin */}
+        <ExtraClubs />
+
         <FaqSection title={faqT('title')} items={faqItems} />
       </section>
     </>
+  );
+}
+
+// Clubs extra (creados en admin) que no son los built-in Prime/Prestige.
+async function ExtraClubs() {
+  const extra = (await listActiveClubs()).filter((p) => p.club !== 'PRIME' && p.club !== 'PRESTIGE');
+  if (extra.length === 0) return null;
+  return (
+    <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {extra.map((p) => (
+        <Link
+          key={p.id}
+          href={`/club/${p.club}`}
+          className="bevel block border border-gold/40 bg-surface p-6 transition hover:border-gold/60"
+        >
+          <h2 className="font-display text-2xl uppercase text-gold-light">{p.name}</h2>
+          {p.tagline ? <p className="mt-2 text-sm text-muted">{p.tagline}</p> : null}
+          <span className="mt-4 inline-block text-xs uppercase tracking-wider text-gold">Ver club →</span>
+        </Link>
+      ))}
+    </div>
   );
 }

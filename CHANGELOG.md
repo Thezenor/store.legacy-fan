@@ -77,6 +77,11 @@
 - `MainNav` reescrito: soporta ítems internos, externos y desplegables (desktop hover/focus, móvil expandible).
 - **Página pública `/colecciones`** con las colecciones (World Peace, Sacred Blessings, Legends of War, Top Sports), cada una con su moneda y estado; sitemap ampliado.
 
+### Superadmin v2 (tanda 5) — clubs dinámicos
+- **Crear clubs nuevos** desde `/lf-admin/clubs` (además de Prime/Prestige): nombre, código, lema, precio inicial, activo. Crea el plan + fase inicial.
+- Migración `club_string`: `club` pasa de enum a **texto libre** (no destructiva; conserva PRIME/PRESTIGE) en MembershipPlan, Membership y Reservation. Refactor de tipos a `string` en commerce/checkout/miembros.
+- **Web dinámica**: página `/club/[club]` para clubs creados; la **comparativa lista los clubs activos** adicionales; el checkout acepta cualquier club activo. Activar/desactivar un club lo muestra u oculta en la web.
+
 ### Superadmin v2 (tanda 4) — control fino
 - **Dashboard**: ingresos en **EUR y USD**.
 - **Socio**: datos del cliente **editables** (nombre, contacto, dirección); observaciones en cambios de membresía (se registran con el operador en auditoría).

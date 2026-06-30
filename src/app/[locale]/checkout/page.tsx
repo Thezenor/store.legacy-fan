@@ -1,8 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import type { ClubType } from '@prisma/client';
 import { requireVerifiedUser } from '@/lib/session';
-import { getClubPricing, getReservationTerms } from '@/lib/commerce';
+import { getClubPricing, getReservationTerms, getPlan } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { hasActiveReservationOrMembership } from '@/lib/checkout/reservation';
 import { ReserveButton } from '@/components/checkout/reserve-button';
@@ -25,7 +24,7 @@ export default async function CheckoutPage({
   const { club, type } = await searchParams;
   setRequestLocale(locale);
 
-  if ((club !== 'PRIME' && club !== 'PRESTIGE') || (type !== 'reserve' && type !== 'join')) {
+  if (!club || (type !== 'reserve' && type !== 'join')) {
     notFound();
   }
 
@@ -34,13 +33,14 @@ export default async function CheckoutPage({
 
   const currency = await getDisplayCurrency();
   const t = await getTranslations({ locale, namespace: 'checkout' });
-  const clubKey = club as ClubType;
-  const pricing = await getClubPricing(clubKey, currency, locale);
+  const clubKey = club;
+  // Solo clubs existentes y activos.
+  const [plan, pricing] = await Promise.all([getPlan(clubKey), getClubPricing(clubKey, currency, locale)]);
+  if (!plan || !plan.active || !pricing) notFound();
   const reservation = await getReservationTerms(currency, locale, clubKey);
-  if (!pricing) notFound();
 
   const amount = type === 'reserve' ? reservation.amountFormatted : pricing.priceFormatted;
-  const clubName = clubKey === 'PRIME' ? 'Legacy Prime Club' : 'Legacy Prestige Club';
+  const clubName = plan.name;
   const alreadyActive = await hasActiveReservationOrMembership(session.user.id);
 
   const errors = {

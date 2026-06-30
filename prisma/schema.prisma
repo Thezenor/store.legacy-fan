@@ -264,7 +264,7 @@ model VerificationToken {
 
 model MembershipPlan {
   id        String   @id @default(cuid())
-  club      ClubType @unique
+  club      String   @unique // código del club (PRIME, PRESTIGE, o nuevos)
   name      String
   slug      String   @unique
   active    Boolean  @default(true)
@@ -304,7 +304,7 @@ model MembershipPhase {
 model Membership {
   id           String       @id @default(cuid())
   userId       String       @unique
-  club         ClubType
+  club         String
   status       MemberStatus @default(CUENTA_CREADA)
   memberNumber MemberNumber?
   startsAt     DateTime?
@@ -335,7 +335,7 @@ model Reservation {
   id            String          @id @default(cuid())
   userId        String
   type          ReservationType @default(RESERVA)
-  club          ClubType? // null hasta confirmar en pago completo
+  club          String? // código de club; null hasta confirmar en pago completo
   status        PaymentStatus   @default(RESERVA_PENDIENTE)
   currency      Currency
   amountPaidCents Int           @default(0) // 50€/$ en reserva

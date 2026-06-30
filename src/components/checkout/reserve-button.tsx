@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useLocale } from 'next-intl';
-import type { ClubType } from '@prisma/client';
+type ClubType = string;
 import { startReservationAction } from '@/lib/checkout/actions';
 import { Alert } from '@/components/auth/ui';
 

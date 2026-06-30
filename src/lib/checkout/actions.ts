@@ -1,6 +1,6 @@
 'use server';
 
-import type { ClubType } from '@prisma/client';
+type ClubType = string;
 import { auth } from '../auth';
 import { getDisplayCurrency } from '../commerce/currency';
 import { startReservation, hasActiveReservationOrMembership } from './reservation';

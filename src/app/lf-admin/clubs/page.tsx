@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { updateClubAction } from '@/lib/admin-actions';
+import { updateClubAction, createClubAction } from '@/lib/admin-actions';
 
 const inp = 'mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground';
 
@@ -15,6 +15,22 @@ export default async function AdminClubs() {
         Activa/desactiva un club (se muestra u oculta en la web) y configura su lanzamiento y reserva
         propios. Los precios por fase están en “Fases y precios”.
       </p>
+
+      {/* Crear club nuevo */}
+      <form action={createClubAction} className="mt-4 flex flex-wrap items-end gap-3 rounded-card border border-gold/30 bg-surface p-4">
+        <label className="block"><span className="text-xs text-muted">Nombre del club</span>
+          <input name="name" required className={`${inp} w-48`} /></label>
+        <label className="block"><span className="text-xs text-muted">Código (opcional)</span>
+          <input name="code" placeholder="FOUNDERS" className={`${inp} w-32`} /></label>
+        <label className="block flex-1"><span className="text-xs text-muted">Lema</span>
+          <input name="tagline" className={`${inp} w-full`} /></label>
+        <label className="block"><span className="text-xs text-muted">Precio EUR</span>
+          <input name="priceEur" type="number" step="0.01" defaultValue="0" className={`${inp} w-24`} /></label>
+        <label className="block"><span className="text-xs text-muted">Precio USD</span>
+          <input name="priceUsd" type="number" step="0.01" defaultValue="0" className={`${inp} w-24`} /></label>
+        <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="active" /> Activo</label>
+        <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Crear club</button>
+      </form>
 
       <div className="mt-6 space-y-4">
         {plans.map((p) => (

@@ -1,4 +1,5 @@
-import type { ClubType, Currency } from '@prisma/client';
+import type { Currency } from '@prisma/client';
+type ClubType = string;
 import { prisma } from '../prisma';
 import { getPaymentProvider } from '../payments';
 import { getClubPricing, getReservationTerms } from '../commerce';

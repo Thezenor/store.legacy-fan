@@ -1,4 +1,5 @@
-import type { ClubType, Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+type ClubType = string;
 import { prisma } from '../prisma';
 import { getDate } from '../commerce/settings';
 import { assignMemberNumber } from './numbering';

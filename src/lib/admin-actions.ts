@@ -630,6 +630,40 @@ export async function saveGatewayAction(formData: FormData): Promise<void> {
   revalidatePath('/lf-admin/config');
 }
 
+/** Crea un club nuevo (MembershipPlan) con una fase inicial de precio. */
+export async function createClubAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const name = String(formData.get('name') ?? '').trim();
+  if (!name) return;
+  const code =
+    (String(formData.get('code') ?? '').trim() || name)
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .slice(0, 24) || 'CLUB';
+  if (await prisma.membershipPlan.findUnique({ where: { club: code } })) return; // ya existe
+  let slug = slugify(name) || code.toLowerCase();
+  if (await prisma.membershipPlan.findUnique({ where: { slug } })) slug = `${slug}-${code.toLowerCase()}`;
+
+  const priceEur = Math.round(parseFloat(String(formData.get('priceEur') ?? '0').replace(',', '.')) * 100) || 0;
+  const priceUsd = Math.round(parseFloat(String(formData.get('priceUsd') ?? '0').replace(',', '.')) * 100) || 0;
+
+  const plan = await prisma.membershipPlan.create({
+    data: {
+      club: code,
+      name,
+      slug,
+      active: formData.get('active') === 'on',
+      tagline: String(formData.get('tagline') ?? '') || null,
+      phases: {
+        create: { key: 'FASE_0', name: 'Fase 0', priceEurCents: priceEur, priceUsdCents: priceUsd, isActive: true, sortOrder: 0 },
+      },
+    },
+  });
+  await audit(admin.id, admin.email, 'club.create', 'MembershipPlan', plan.id, null, { code, name });
+  revalidatePath('/lf-admin/clubs');
+  revalidatePath('/club');
+}
+
 /** Edita un club: nombre, tagline, activo, lanzamiento y reserva propios. */
 export async function updateClubAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
