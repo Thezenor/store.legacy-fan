@@ -677,6 +677,12 @@ export async function updateClubAction(formData: FormData): Promise<void> {
   const listEur = String(formData.get('listPriceEur') ?? '').trim();
   const listUsd = String(formData.get('listPriceUsd') ?? '').trim();
   const launch = String(formData.get('launchDate') ?? '').trim();
+  // Listas (un elemento por línea) para beneficios y condiciones.
+  const toLines = (v: FormDataEntryValue | null) =>
+    String(v ?? '')
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
   const data = {
     name: String(formData.get('name') ?? '').trim() || undefined,
     tagline: String(formData.get('tagline') ?? '') || null,
@@ -686,6 +692,11 @@ export async function updateClubAction(formData: FormData): Promise<void> {
     reservationUsdCents: usd ? Math.round(parseFloat(usd.replace(',', '.')) * 100) : null,
     listPriceEurCents: listEur ? Math.round(parseFloat(listEur.replace(',', '.')) * 100) : null,
     listPriceUsdCents: listUsd ? Math.round(parseFloat(listUsd.replace(',', '.')) * 100) : null,
+    body: String(formData.get('body') ?? '').trim() || null,
+    slogan: String(formData.get('slogan') ?? '').trim() || null,
+    renewalNote: String(formData.get('renewalNote') ?? '').trim() || null,
+    benefits: toLines(formData.get('benefits')),
+    conditions: toLines(formData.get('conditions')),
   };
   await prisma.membershipPlan.update({ where: { id }, data });
   await audit(admin.id, admin.email, 'club.update', 'MembershipPlan', id, null, { name: data.name, active: data.active });

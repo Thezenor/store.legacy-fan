@@ -5,7 +5,7 @@ import { PriceBlock } from '@/components/commerce/price-block';
 import { FaqSection } from '@/components/commerce/faq-section';
 import { CurrencySwitcher } from '@/components/commerce/currency-switcher';
 import { JsonLd } from '@/components/seo/json-ld';
-import { getClubPricing, isClubActive } from '@/lib/commerce';
+import { getClubPricing, isClubActive, getPlan } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { notFound } from 'next/navigation';
 import { productOffer, breadcrumb } from '@/lib/seo/structured-data';
@@ -37,7 +37,13 @@ export default async function PrimePage({
   const faqT = await getTranslations({ locale, namespace: 'faq' });
   const currency = await getDisplayCurrency();
   const pricing = await getClubPricing('PRIME', currency, locale);
-  const includes = t.raw('includes') as string[];
+  const plan = await getPlan('PRIME');
+  // Contenido editable desde el superadmin (respaldo: textos i18n).
+  const body = plan?.body || t('body');
+  const slogan = plan?.slogan || t('slogan');
+  const renewalNote = plan?.renewalNote || t('renewalNote');
+  const includes = plan?.benefits?.length ? plan.benefits : (t.raw('includes') as string[]);
+  const conditions = plan?.conditions?.length ? plan.conditions : (t.raw('conditions') as string[]);
   const faqItems = faqT.raw('items') as { q: string; a: string }[];
 
   const jsonLd = [
@@ -63,8 +69,8 @@ export default async function PrimePage({
           <CurrencySwitcher current={currency} />
         </div>
         <p className="mt-3 text-lg text-foreground">{t('tagline')}</p>
-        <p className="mt-4 text-sm text-muted">{t('body')}</p>
-        <p className="mt-4 text-xs uppercase tracking-[0.18em] text-gold-light">{t('slogan')}</p>
+        <p className="mt-4 text-sm text-muted">{body}</p>
+        <p className="mt-4 text-xs uppercase tracking-[0.18em] text-gold-light">{slogan}</p>
 
         <PriceBlock club="PRIME" currency={currency} locale={locale} />
 
@@ -85,8 +91,22 @@ export default async function PrimePage({
           >
             {t('ctaReserve')}
           </Link>
-          <p className="mt-3 text-xs text-faint">{t('renewalNote')}</p>
+          <p className="mt-3 text-xs text-faint">{renewalNote}</p>
         </div>
+
+        {conditions.length ? (
+          <div className="mt-10 border-t border-border pt-6">
+            <h2 className="text-sm font-semibold text-foreground">{pricingT('conditionsTitle')}</h2>
+            <ul className="mt-3 space-y-1.5 text-xs text-faint">
+              {conditions.map((c) => (
+                <li key={c} className="flex gap-2">
+                  <span className="text-gold/60">·</span>
+                  <span>{c}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <FaqSection title={faqT('title')} items={faqItems} />
       </section>

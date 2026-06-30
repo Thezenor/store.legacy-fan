@@ -69,24 +69,44 @@
       "Tirages de surclassement et points sur les achats",
       "Possibilité de passer à une catégorie supérieure",
       "Programme de parrainage"
+    ],
+    "conditions": [
+      "Abonnement annuel renouvelable ; le statut et le numéro de membre sont permanents.",
+      "Remises et promotions spéciales réservées aux membres actifs.",
+      "Le contenu des Mystery Box conserve l'effet de surprise, avec un minimum garanti.",
+      "Les points, promotions et remises s'appliquent sur le premium, jamais sur la valeur spot du métal.",
+      "Priorité sur le grand public ; après les catégories supérieures lors des préventes limitées.",
+      "Expéditions, fiscalité, retours et disponibilité soumis à confirmation légale par juridiction."
     ]
   },
   "prestige": {
     "title": "Prestige Club",
-    "tagline": "L'accès premium à l'univers Legacy Fan.",
-    "body": "Recevez une pièce inaugurale de 3 oz en argent .999, une pièce exclusive de 1 kg en cuivre .999 colorisé, des Mystery Boxes en argent et cuivre, une certification nominale, un packaging Prestige et une priorité supérieure sur les collections futures.",
+    "tagline": "Des pièces uniques et des privilèges réservés à ceux qui arrivent les premiers.",
+    "body": "Legacy Prestige Club réunit les pièces inaugurales, la numérotation la plus basse et les privilèges de membre les plus élevés de l'écosystème Legacy Fan.",
     "ctaReserve": "Réserver Prestige Club",
     "ctaJoin": "Rejoindre Prestige Club",
+    "slogan": "Pièces inaugurales · Numérotation la plus basse · Privilèges de membre",
+    "renewalNote": "Abonnement annuel renouvelable · numéro de membre permanent",
     "includes": [
-      "Pièce inaugurale 3 oz en argent .999",
-      "Pièce exclusive 1 kg en cuivre .999 colorisé",
-      "Mystery Box en argent et cuivre .999",
-      "Certification nominale et packaging premium avec QR",
-      "Accès anticipé 48–72 h et prix membre (5% toujours + 10% la 1re année)",
-      "Vote sur les designs et drops cachés",
-      "Newsletter, YouTube exclusif et événements en ligne",
-      "Points, tirages et programme de parrainage",
-      "Accès au Slab MS70/PF70 et invitation au Founders Circle"
+      "Pièce inaugurale 3 oz argent .999",
+      "Cadeau supplémentaire : 1 kg cuivre .999 colorisé",
+      "Mystery Box en argent .999 et en cuivre .999",
+      "Carte ID Member et certification nominale",
+      "Packaging Legacy Prestige Club signé",
+      "Prix membre : −5% en permanence",
+      "Priorité 48–72 h et blocage du prix",
+      "Éditions spéciales et aperçus des futurs lancements",
+      "Canal privé Telegram/Discord, newsletter et YouTube exclusif",
+      "Événements en ligne et accès au Slab MS70/PF70",
+      "Tirages de surclassement et points sur les achats",
+      "Programme de parrainage et passage à Founders"
+    ],
+    "conditions": [
+      "Abonnement annuel renouvelable ; le statut et le numéro de membre sont permanents.",
+      "Montant de la réservation déductible du paiement final ; le solde est dû à la clôture.",
+      "Frais d'expédition à prix fixe.",
+      "Le contenu des Mystery Box conserve l'effet de surprise, avec un minimum garanti.",
+      "Les remises et promotions s'appliquent sur le premium, jamais sur la valeur spot du métal."
     ]
   },
   "faq": {
@@ -115,7 +135,8 @@
     "includes": "Ce qui est inclus",
     "officialPrice": "Prix officiel",
     "fullPrice": "Prix complet du club",
-    "reserveFrom": "Réservez votre place pour"
+    "reserveFrom": "Réservez votre place pour",
+    "conditionsTitle": "Modèle et conditions"
   },
   "account": {
     "reservationTitle": "Votre réservation",

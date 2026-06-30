@@ -5,7 +5,7 @@ import { PlanCard } from '@/components/commerce/plan-card';
 import { FaqSection } from '@/components/commerce/faq-section';
 import { CurrencySwitcher } from '@/components/commerce/currency-switcher';
 import { JsonLd } from '@/components/seo/json-ld';
-import { getClubPricing, getReservationTerms, isClubActive, listActiveClubs } from '@/lib/commerce';
+import { getClubPricing, getReservationTerms, isClubActive, listActiveClubs, getPlan } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { productOffer, faqPage, breadcrumb } from '@/lib/seo/structured-data';
 
@@ -52,10 +52,16 @@ export default async function ClubPage({
     ]);
   const pricingT = await getTranslations({ locale, namespace: 'pricing' });
   const introT = await getTranslations({ locale, namespace: 'clubIntro' });
+  const [primePlan, prestigePlan] = await Promise.all([getPlan('PRIME'), getPlan('PRESTIGE')]);
 
   if (!primePricing || !prestigePricing) return null;
 
   const introReasons = introT.raw('reasons') as { title: string; body: string }[];
+  // Beneficios desde el superadmin si los hay; si no, los textos i18n.
+  const primeIncludes = primePlan?.benefits?.length ? primePlan.benefits : (prime.raw('includes') as string[]);
+  const prestigeIncludes = prestigePlan?.benefits?.length
+    ? prestigePlan.benefits
+    : (prestige.raw('includes') as string[]);
 
   const labelsBase = {
     from: pricingT('from'),
@@ -127,7 +133,7 @@ export default async function ClubPage({
               tagline={prime('tagline')}
               pricing={primePricing}
               reservationFormatted={primeRes.amountFormatted}
-              includes={prime.raw('includes') as string[]}
+              includes={primeIncludes}
               labels={{ ...labelsBase, reserve: prime('ctaReserve') }}
               accent="silver"
             />
@@ -138,7 +144,7 @@ export default async function ClubPage({
               tagline={prestige('tagline')}
               pricing={prestigePricing}
               reservationFormatted={prestigeRes.amountFormatted}
-              includes={prestige.raw('includes') as string[]}
+              includes={prestigeIncludes}
               labels={{ ...labelsBase, reserve: prestige('ctaReserve') }}
               accent="gold"
               featured

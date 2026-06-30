@@ -69,24 +69,44 @@
       "Sorteos de upgrade y puntos por compras",
       "Posibilidad de upgrade a categoría superior",
       "Programa de referidos"
+    ],
+    "conditions": [
+      "Membresía anual renovable; el estatus y número de socio es permanente.",
+      "Descuentos y promociones especiales solo para socios activos.",
+      "El contenido de las Mystery Box mantiene el factor sorpresa, con un mínimo garantizado.",
+      "Los puntos, promociones y descuentos se aplican sobre el premium, nunca sobre el valor spot del metal.",
+      "Prioridad sobre el público general; por detrás de categorías superiores en preventas limitadas.",
+      "Envíos, fiscalidad, devoluciones y disponibilidad sujetos a confirmación legal por jurisdicción."
     ]
   },
   "prestige": {
     "title": "Prestige Club",
-    "tagline": "El acceso premium al universo Legacy Fan.",
-    "body": "Recibe una pieza inaugural de 3 oz en plata .999, una pieza exclusiva de 1 kg en cobre .999 colorized, Mystery Boxes de plata y cobre, certificación nominal, packaging Prestige y prioridad superior en futuras colecciones.",
+    "tagline": "Piezas únicas y privilegios reservados a quienes llegan primero.",
+    "body": "Legacy Prestige Club reúne las piezas inaugurales, la numeración más baja y los privilegios de socio más altos del ecosistema Legacy Fan.",
     "ctaReserve": "Reservar Prestige Club",
     "ctaJoin": "Unirme a Prestige Club",
+    "slogan": "Piezas inaugurales · Numeración más baja · Privilegios de socio",
+    "renewalNote": "Membresía anual renovable · número de socio permanente",
     "includes": [
       "Moneda inaugural 3 oz plata .999",
-      "Regalo exclusivo 1 kg cobre .999 colorized",
-      "Mystery Box de plata y cobre .999",
-      "Certificación nominal y packaging premium con QR",
-      "Adelanto 48–72 h y precio de socio (5% siempre + 10% primer año)",
-      "Voto en diseños y drops ocultos",
-      "Newsletter, YouTube exclusivo y eventos online",
-      "Puntos, sorteos y programa de referidos",
-      "Acceso a Slab MS70/PF70 e invitación a Founders Circle"
+      "Regalo adicional: 1 kg cobre .999 colorized",
+      "Mystery Box de plata .999 y de cobre .999",
+      "Carnet ID Member y certificación nominal",
+      "Packaging Legacy Prestige Club firmado",
+      "Precio de socio: −5% permanente",
+      "Prioridad 48–72 h y bloqueo de precio",
+      "Ediciones especiales y visiones de futuros lanzamientos",
+      "Canal privado Telegram/Discord, newsletter y YouTube exclusivo",
+      "Eventos online y acceso a Slab MS70/PF70",
+      "Sorteos de upgrade y puntos por compras",
+      "Programa de referidos y upgrade a Founders"
+    ],
+    "conditions": [
+      "Membresía anual renovable; el estatus y número de socio es permanente.",
+      "Importe de reserva deducible del pago final; el resto se abona al cierre.",
+      "Gastos de envío a precio cerrado.",
+      "El contenido de las Mystery Box mantiene el factor sorpresa, con un mínimo garantizado.",
+      "Los descuentos y promociones se aplican sobre el premium, nunca sobre el valor spot del metal."
     ]
   },
   "faq": {
@@ -115,7 +135,8 @@
     "includes": "Qué incluye",
     "officialPrice": "Precio oficial",
     "fullPrice": "Pago completo del club",
-    "reserveFrom": "Reserva tu plaza por"
+    "reserveFrom": "Reserva tu plaza por",
+    "conditionsTitle": "Modelo y condiciones"
   },
   "account": {
     "reservationTitle": "Tu reserva",

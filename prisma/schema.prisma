@@ -276,6 +276,12 @@ model MembershipPlan {
   // Precio oficial (PVP) que se muestra tachado sobre el precio actual de la fase.
   listPriceEurCents   Int?
   listPriceUsdCents   Int?
+  // Contenido de marketing editable desde el superadmin (respaldo: textos i18n).
+  body         String?
+  slogan       String?
+  renewalNote  String?
+  benefits     String[] @default([]) // "qué incluye"
+  conditions   String[] @default([]) // modelo y condiciones
   phases    MembershipPhase[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

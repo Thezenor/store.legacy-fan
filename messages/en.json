@@ -69,24 +69,44 @@
       "Upgrade raffles and points on purchases",
       "Option to upgrade to a higher tier",
       "Referral program"
+    ],
+    "conditions": [
+      "Renewable annual membership; member status and number are permanent.",
+      "Special discounts and promotions for active members only.",
+      "Mystery Box contents keep the element of surprise, with a guaranteed minimum.",
+      "Points, promotions and discounts apply to the premium, never to the metal spot value.",
+      "Priority over the general public; behind higher tiers in limited pre-sales.",
+      "Shipping, taxes, returns and availability subject to legal confirmation per jurisdiction."
     ]
   },
   "prestige": {
     "title": "Prestige Club",
-    "tagline": "Premium access to the Legacy Fan universe.",
-    "body": "Receive a 3 oz .999 silver inaugural piece, an exclusive 1 kg .999 colorized copper piece, silver and copper Mystery Boxes, nominal certification, Prestige packaging and superior priority on future collections.",
+    "tagline": "Unique pieces and privileges reserved for those who arrive first.",
+    "body": "Legacy Prestige Club brings together the inaugural pieces, the lowest numbering and the highest member privileges of the Legacy Fan ecosystem.",
     "ctaReserve": "Reserve Prestige Club",
     "ctaJoin": "Join Prestige Club",
+    "slogan": "Inaugural pieces · Lowest numbering · Member privileges",
+    "renewalNote": "Renewable annual membership · permanent member number",
     "includes": [
       "3 oz .999 silver inaugural coin",
-      "Exclusive 1 kg .999 colorized copper piece",
+      "Additional gift: 1 kg .999 colorized copper piece",
       ".999 silver and copper Mystery Boxes",
-      "Nominal certification and premium packaging with QR",
-      "48–72 h early access and member pricing (5% always + 10% first year)",
-      "Vote on designs and hidden drops",
-      "Newsletter, exclusive YouTube and online events",
-      "Points, raffles and referral program",
-      "Access to MS70/PF70 Slab and Founders Circle invitation"
+      "Member ID card and nominal certification",
+      "Signed Legacy Prestige Club packaging",
+      "Member pricing: −5% permanently",
+      "48–72 h priority and price lock",
+      "Special editions and previews of upcoming launches",
+      "Private Telegram/Discord channel, newsletter and exclusive YouTube",
+      "Online events and access to MS70/PF70 Slab",
+      "Upgrade raffles and points on purchases",
+      "Referral program and upgrade to Founders"
+    ],
+    "conditions": [
+      "Renewable annual membership; member status and number are permanent.",
+      "Reservation amount deductible from the final payment; balance due at closing.",
+      "Shipping at a fixed price.",
+      "Mystery Box contents keep the element of surprise, with a guaranteed minimum.",
+      "Discounts and promotions apply to the premium, never to the metal spot value."
     ]
   },
   "faq": {
@@ -115,7 +135,8 @@
     "includes": "What's included",
     "officialPrice": "Official price",
     "fullPrice": "Full club price",
-    "reserveFrom": "Reserve your spot for"
+    "reserveFrom": "Reserve your spot for",
+    "conditionsTitle": "Model and conditions"
   },
   "account": {
     "reservationTitle": "Your reservation",

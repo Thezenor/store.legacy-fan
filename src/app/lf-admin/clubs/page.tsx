@@ -67,6 +67,26 @@ export default async function AdminClubs() {
                 <input name="listPriceUsd" type="number" step="0.01" defaultValue={money(p.listPriceUsdCents)} className={`${inp} w-28`} /></label>
               <p className="self-end text-xs text-faint">Si el PVP supera el precio actual, se muestra tachado.</p>
             </div>
+
+            {/* Contenido de marketing (vacío = usa el texto por defecto traducido) */}
+            <div className="mt-4 border-t border-border pt-4">
+              <p className="text-xs uppercase tracking-wider text-faint">Contenido de la página (vacío = texto por defecto)</p>
+              <label className="mt-2 block"><span className="text-xs text-muted">Descripción</span>
+                <textarea name="body" rows={2} defaultValue={p.body ?? ''} className={`${inp} w-full`} /></label>
+              <div className="mt-2 flex flex-wrap gap-4">
+                <label className="block flex-1"><span className="text-xs text-muted">Lema (3 conceptos · separados)</span>
+                  <input name="slogan" defaultValue={p.slogan ?? ''} className={`${inp} w-full`} /></label>
+                <label className="block flex-1"><span className="text-xs text-muted">Nota de renovación</span>
+                  <input name="renewalNote" defaultValue={p.renewalNote ?? ''} className={`${inp} w-full`} /></label>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-4">
+                <label className="block flex-1"><span className="text-xs text-muted">Beneficios (uno por línea)</span>
+                  <textarea name="benefits" rows={6} defaultValue={p.benefits.join('\n')} className={`${inp} w-full`} /></label>
+                <label className="block flex-1"><span className="text-xs text-muted">Condiciones (una por línea)</span>
+                  <textarea name="conditions" rows={6} defaultValue={p.conditions.join('\n')} className={`${inp} w-full`} /></label>
+              </div>
+            </div>
+
             <button className="bevel mt-4 bg-gold px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Guardar club</button>
           </form>
         ))}
