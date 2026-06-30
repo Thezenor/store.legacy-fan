@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import type {
   ClubType,
@@ -143,6 +144,14 @@ export async function updateLegalAction(formData: FormData): Promise<void> {
 }
 
 /** Crea una colección (doc 05). */
+// Revalida admin + web pública (todas las locales) al cambiar colecciones.
+function revalidateCollections() {
+  revalidatePath('/lf-admin/colecciones');
+  revalidatePath('/[locale]/colecciones', 'page');
+  revalidatePath('/[locale]/colecciones/[slug]', 'page');
+  revalidatePath('/[locale]', 'page');
+}
+
 export async function createCollectionAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const name = String(formData.get('name') ?? '').trim();
@@ -151,7 +160,7 @@ export async function createCollectionAction(formData: FormData): Promise<void> 
   const status = (String(formData.get('status') ?? 'BORRADOR')) as CollectionStatus;
   const created = await prisma.collection.create({ data: { name, slug, status } });
   await audit(admin.id, admin.email, 'collection.create', 'Collection', created.id, null, { name, slug, status });
-  revalidatePath('/lf-admin/colecciones');
+  revalidateCollections();
 }
 
 /** Actualiza el estado de una colección. */
@@ -161,7 +170,7 @@ export async function updateCollectionAction(formData: FormData): Promise<void> 
   const status = String(formData.get('status')) as CollectionStatus;
   await prisma.collection.update({ where: { id }, data: { status } });
   await audit(admin.id, admin.email, 'collection.update', 'Collection', id, null, { status });
-  revalidatePath('/lf-admin/colecciones');
+  revalidateCollections();
 }
 
 /** Crea un producto con los campos clave (doc 05). */
@@ -176,6 +185,8 @@ export async function createProductAction(formData: FormData): Promise<void> {
   });
   await audit(admin.id, admin.email, 'product.create', 'Product', created.id, null, { name, slug });
   revalidatePath('/lf-admin/productos');
+  // Vuelve a la lista de productos con aviso de guardado.
+  redirect('/lf-admin/productos?saved=1');
 }
 
 /** Actualiza un producto existente. */
@@ -654,7 +665,7 @@ export async function uploadCollectionImageAction(formData: FormData): Promise<v
   const { url } = await saveUpload(file);
   await prisma.collection.update({ where: { id }, data: { imageUrl: url } });
   await audit(admin.id, admin.email, 'collection.image', 'Collection', id, null, { url });
-  revalidatePath('/lf-admin/colecciones');
+  revalidateCollections();
 }
 
 /** Asigna (o quita) un producto a una colección. */
@@ -664,7 +675,7 @@ export async function assignProductCollectionAction(formData: FormData): Promise
   const collectionId = String(formData.get('collectionId') ?? '') || null;
   await prisma.product.update({ where: { id: productId }, data: { collectionId } });
   await audit(admin.id, admin.email, 'product.assign_collection', 'Product', productId, null, { collectionId });
-  revalidatePath('/lf-admin/colecciones');
+  revalidateCollections();
   revalidatePath(`/lf-admin/productos/${productId}`);
 }
 
@@ -947,7 +958,7 @@ export async function deleteCollectionAction(formData: FormData): Promise<void> 
   if (count > 0) return;
   await prisma.collection.delete({ where: { id } }).catch(() => {});
   await audit(admin.id, admin.email, 'collection.delete', 'Collection', id, null, null);
-  revalidatePath('/lf-admin/colecciones');
+  revalidateCollections();
 }
 
 /** Crea un envío con tracking para un pedido y marca sus items como enviados. */

@@ -47,8 +47,9 @@ export async function getSecondCoinUpsell(
   ]);
 
   const secondCents = toCents(priceRaw);
-  // Necesitamos las dos imágenes y un precio para poder ofrecerlo.
-  if (!aImg || !bImg || secondCents <= 0) return null;
+  // Basta con un precio (con descuento) para ofrecer la 2ª moneda. Las imágenes
+  // son opcionales: si faltan, la UI muestra un placeholder (no bloquea el upsell).
+  if (secondCents <= 0) return null;
 
   const listCents = toCents(listRaw);
   const showList = listCents > secondCents ? listCents : null;

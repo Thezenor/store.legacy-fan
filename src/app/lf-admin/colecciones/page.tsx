@@ -7,6 +7,8 @@ import {
 } from '@/lib/admin-actions';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const STATUSES = ['BORRADOR', 'PROXIMA', 'ACTIVA', 'AGOTADA', 'OCULTA', 'PRIVADA_DROP'];
 const inp = 'rounded border border-border bg-background px-2 py-1.5 text-foreground';
 

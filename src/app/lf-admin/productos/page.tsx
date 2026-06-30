@@ -4,7 +4,12 @@ import { createProductAction, toggleProductFlagAction } from '@/lib/admin-action
 
 const inp = 'mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground';
 
-export default async function AdminProductos() {
+export default async function AdminProductos({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
+  const { saved } = await searchParams;
   const [products, collections, soldGroups] = await Promise.all([
     prisma.product.findMany({ orderBy: { createdAt: 'desc' }, take: 200, include: { collection: true, images: { take: 1, orderBy: { sortOrder: 'asc' } } } }),
     prisma.collection.findMany({ orderBy: { name: 'asc' } }),
@@ -16,6 +21,12 @@ export default async function AdminProductos() {
     <div className="max-w-3xl">
       <h1 className="font-display text-3xl font-bold text-foreground">Productos</h1>
       <p className="mt-1 text-sm text-muted">Crea una pieza y entra en ella para completar ficha, fotos e historia.</p>
+
+      {saved ? (
+        <p className="mt-3 rounded border border-green-500/40 bg-green-500/10 px-3 py-2 text-sm text-green-300">
+          ✓ Producto guardado correctamente.
+        </p>
+      ) : null}
 
       {/* Alta rápida */}
       <form action={createProductAction} className="mt-4 flex flex-wrap items-end gap-3 rounded-card border border-border bg-surface p-4">
