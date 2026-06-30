@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { saveConfigAction } from '@/lib/admin-actions';
+import { GatewayConfig } from '@/components/admin/gateway-config';
 
 const inp = 'mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground';
 
@@ -46,16 +47,8 @@ export default async function AdminConfig() {
           <Field label="Fecha de lanzamiento"><input type="date" name="launch.date" defaultValue={dateVal('launch.date')} className={inp} /></Field>
         </Group>
 
-        <Group title="Pasarelas de pago">
-          <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="payments.paypal.enabled" defaultChecked={bool('payments.paypal.enabled')} /> PayPal activo</label>
-          <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="payments.stripe.enabled" defaultChecked={bool('payments.stripe.enabled')} /> Stripe activo</label>
-          <Field label="Modo"><select name="payments.mode" defaultValue={str('payments.mode') || 'test'} className={inp}><option value="test">test</option><option value="live">live</option></select></Field>
-          <div className="w-full text-xs text-muted">
-            <p className="mb-1 text-faint">Credenciales (variables de entorno — Railway):</p>
-            <p>PAYPAL_CLIENT_ID: <span className={process.env.PAYPAL_CLIENT_ID ? 'text-state-green' : 'text-red-400'}>{process.env.PAYPAL_CLIENT_ID ? 'configurada' : 'sin configurar'}</span></p>
-            <p>PAYPAL_CLIENT_SECRET: <span className={process.env.PAYPAL_CLIENT_SECRET ? 'text-state-green' : 'text-red-400'}>{process.env.PAYPAL_CLIENT_SECRET ? 'configurada' : 'sin configurar'}</span></p>
-            <p>PAYPAL_WEBHOOK_ID: <span className={process.env.PAYPAL_WEBHOOK_ID ? 'text-state-green' : 'text-red-400'}>{process.env.PAYPAL_WEBHOOK_ID ? 'configurada' : 'sin configurar'}</span></p>
-          </div>
+        <Group title="Sistema · modo de pago global">
+          <Field label="Modo (test/live)"><select name="payments.mode" defaultValue={str('payments.mode') || 'test'} className={inp}><option value="test">test</option><option value="live">live</option></select></Field>
         </Group>
 
         <Group title="Reserva">
@@ -78,6 +71,23 @@ export default async function AdminConfig() {
 
         <button type="submit" className="bevel bg-gold px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Guardar configuración</button>
       </form>
+
+      {/* Pasarelas de pago (formulario propio, credenciales) */}
+      <div className="mt-4">
+        <GatewayConfig
+          values={{
+            'paypal.client_id': str('paypal.client_id'),
+            'paypal.client_secret': str('paypal.client_secret'),
+            'paypal.webhook_id': str('paypal.webhook_id'),
+            'paypal.mode': str('paypal.mode'),
+            'payments.paypal.enabled': bool('payments.paypal.enabled'),
+            'stripe.secret_key': str('stripe.secret_key'),
+            'stripe.publishable_key': str('stripe.publishable_key'),
+            'stripe.webhook_secret': str('stripe.webhook_secret'),
+            'payments.stripe.enabled': bool('payments.stripe.enabled'),
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -6,17 +6,20 @@ import { randomBytes } from 'node:crypto';
 // En local, por defecto ./uploads (persistente entre recargas de dev).
 const DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
 
-const EXT_OK = new Set(['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif']);
+const EXT_OK = new Set(['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'mp4', 'webm', 'mov']);
 const CONTENT_TYPE: Record<string, string> = {
   jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
   webp: 'image/webp', avif: 'image/avif', gif: 'image/gif',
+  mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime',
 };
+const VIDEO = new Set(['mp4', 'webm', 'mov']);
 
-/** Guarda un fichero subido y devuelve { name, url }. Solo imágenes. */
+/** Guarda un fichero subido (imagen o vídeo) y devuelve { name, url }. */
 export async function saveUpload(file: File): Promise<{ name: string; url: string }> {
   const ext = (file.name.split('.').pop() ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (!EXT_OK.has(ext)) throw new Error('Formato de imagen no soportado.');
-  if (file.size > 8 * 1024 * 1024) throw new Error('La imagen supera 8 MB.');
+  if (!EXT_OK.has(ext)) throw new Error('Formato no soportado.');
+  const maxMb = VIDEO.has(ext) ? 60 : 8;
+  if (file.size > maxMb * 1024 * 1024) throw new Error(`El archivo supera ${maxMb} MB.`);
 
   await mkdir(DIR, { recursive: true });
   const name = `${randomBytes(10).toString('hex')}.${ext}`;

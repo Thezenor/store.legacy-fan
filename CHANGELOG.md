@@ -77,6 +77,15 @@
 - `MainNav` reescrito: soporta ítems internos, externos y desplegables (desktop hover/focus, móvil expandible).
 - **Página pública `/colecciones`** con las colecciones (World Peace, Sacred Blessings, Legends of War, Top Sports), cada una con su moneda y estado; sitemap ampliado.
 
+### Superadmin v2 (tanda 4) — control fino
+- **Dashboard**: ingresos en **EUR y USD**.
+- **Socio**: datos del cliente **editables** (nombre, contacto, dirección); observaciones en cambios de membresía (se registran con el operador en auditoría).
+- **Numeración / alta manual**: campo de observaciones.
+- **Colecciones**: **imagen** (subida) + **asignar/quitar productos** a cada colección.
+- **Productos**: lista con **tirada, vendidas, stock** y toggles rápidos (visible/bloquear); en el detalle, **subida de vídeo** (además de fotos). Migración `collection_img_product_video`.
+- **FAQ**: preguntas iniciales sembradas (editables).
+- **Configuración · Pasarelas**: formulario dinámico (eliges pasarela → aparecen sus campos: PayPal client id/secret/webhook/modo, o Stripe), check para activar y guardar. Credenciales en BD; el proveedor PayPal las usa (respaldo a entorno).
+
 ### Superadmin v2 (tanda 3) — builder de productos
 - Migración `product_fields`: Product con metal, peso, acabado, diámetro, tirada, año e historia.
 - **Builder de producto** `/lf-admin/productos/[id]`: ficha completa (datos, historia, ficha técnica, precios/premium, opciones: incluido en Prime/Prestige, inaugural, certificado, QR, disponible/visible) + **galería con subida de fotos** y borrado.

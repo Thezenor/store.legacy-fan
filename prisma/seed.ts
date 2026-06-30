@@ -233,6 +233,23 @@ const COLLECTIONS: { slug: string; name: string; status: CollectionStatus; sortO
   { slug: 'top-sports', name: 'Top Sports', status: CollectionStatus.PROXIMA, sortOrder: 3 },
 ];
 
+// FAQ inicial (editable desde admin).
+const FAQS: { question: string; answer: string }[] = [
+  { question: '¿La reserva me asigna número de socio?', answer: 'No. El número de socio solo se asigna con el pago completo de la membresía. El importe de la reserva se descuenta del total.' },
+  { question: '¿Puedo elegir o cambiar de club al pagar?', answer: 'Sí. La reserva es genérica; eliges o confirmas tu club (Prime o Prestige) al completar el pago.' },
+  { question: '¿Cuándo recibiré mis piezas?', answer: 'Cada pieza tiene su fecha de producción y envío. Verás el estado de cada producto en tu cuenta; las Mystery Boxes se envían cuando recibimos y validamos la mercancía.' },
+  { question: '¿Los productos son una inversión?', answer: 'No. Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura.' },
+  { question: '¿Cómo funcionan los puntos?', answer: 'Acumulas saldo interno sobre el premium de tus compras, canjeable en la tienda. La caducidad y el ratio son configurables.' },
+];
+
+async function seedFaq() {
+  const count = await prisma.faqItem.count();
+  if (count > 0) return;
+  await prisma.faqItem.createMany({
+    data: FAQS.map((f, i) => ({ locale: Locale.es, question: f.question, answer: f.answer, sortOrder: i })),
+  });
+}
+
 async function seedCollections() {
   for (const c of COLLECTIONS) {
     await prisma.collection.upsert({
@@ -271,6 +288,7 @@ async function main() {
   await seedLegalPages();
   await seedEmailTemplates();
   await seedCollections();
+  await seedFaq();
   // Silencio en producción; útil en local.
   void ReferralRewardMode;
 }

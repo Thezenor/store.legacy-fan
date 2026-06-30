@@ -5,6 +5,14 @@ import type {
   PaymentProvider,
   WebhookVerificationResult,
 } from './types';
+import { prisma } from '../prisma';
+
+// Lee una credencial: BD (panel admin) con respaldo a variable de entorno.
+async function cred(key: string, envName: string): Promise<string | undefined> {
+  const row = await prisma.systemSetting.findUnique({ where: { key } });
+  const dbVal = row?.value ? String(row.value) : '';
+  return dbVal || process.env[envName];
+}
 
 /**
  * Proveedor PayPal — ACTIVO desde inicio (doc 03). Integración REST Orders v2.
@@ -21,17 +29,16 @@ export class PayPalProvider implements PaymentProvider {
     return process.env.PAYMENTS_PAYPAL_ENABLED === 'true';
   }
 
-  private baseUrl(): string {
-    return process.env.PAYPAL_MODE === 'live'
-      ? 'https://api-m.paypal.com'
-      : 'https://api-m.sandbox.paypal.com';
+  private async baseUrl(): Promise<string> {
+    const mode = (await cred('paypal.mode', 'PAYPAL_MODE')) ?? 'sandbox';
+    return mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
   }
 
-  private credentials(): { id: string; secret: string } {
-    const id = process.env.PAYPAL_CLIENT_ID;
-    const secret = process.env.PAYPAL_CLIENT_SECRET;
+  private async credentials(): Promise<{ id: string; secret: string }> {
+    const id = await cred('paypal.client_id', 'PAYPAL_CLIENT_ID');
+    const secret = await cred('paypal.client_secret', 'PAYPAL_CLIENT_SECRET');
     if (!id || !secret) {
-      throw new Error('PayPal sin credenciales: configura PAYPAL_CLIENT_ID y PAYPAL_CLIENT_SECRET.');
+      throw new Error('PayPal sin credenciales: configúralas en /lf-admin (Configuración) o en el entorno.');
     }
     return { id, secret };
   }
@@ -41,9 +48,9 @@ export class PayPalProvider implements PaymentProvider {
     if (this.tokenCache && this.tokenCache.expiresAt > now + 30_000) {
       return this.tokenCache.token;
     }
-    const { id, secret } = this.credentials();
+    const { id, secret } = await this.credentials();
     const auth = Buffer.from(`${id}:${secret}`).toString('base64');
-    const res = await fetch(`${this.baseUrl()}/v1/oauth2/token`, {
+    const res = await fetch(`${await this.baseUrl()}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
         Authorization: `Basic ${auth}`,
@@ -62,7 +69,7 @@ export class PayPalProvider implements PaymentProvider {
 
   async createPayment(input: CreatePaymentInput): Promise<CreatePaymentResult> {
     const token = await this.accessToken();
-    const res = await fetch(`${this.baseUrl()}/v2/checkout/orders`, {
+    const res = await fetch(`${await this.baseUrl()}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -99,7 +106,7 @@ export class PayPalProvider implements PaymentProvider {
 
   async capturePayment(providerRef: string): Promise<CapturePaymentResult> {
     const token = await this.accessToken();
-    const res = await fetch(`${this.baseUrl()}/v2/checkout/orders/${providerRef}/capture`, {
+    const res = await fetch(`${await this.baseUrl()}/v2/checkout/orders/${providerRef}/capture`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -131,11 +138,11 @@ export class PayPalProvider implements PaymentProvider {
     body: string,
   ): Promise<WebhookVerificationResult> {
     const token = await this.accessToken();
-    const webhookId = process.env.PAYPAL_WEBHOOK_ID;
-    if (!webhookId) throw new Error('Falta PAYPAL_WEBHOOK_ID para verificar webhooks.');
+    const webhookId = await cred('paypal.webhook_id', 'PAYPAL_WEBHOOK_ID');
+    if (!webhookId) throw new Error('Falta el Webhook ID de PayPal (config o entorno).');
 
     const event = JSON.parse(body) as { event_type?: string; resource?: { custom_id?: string } };
-    const res = await fetch(`${this.baseUrl()}/v1/notifications/verify-webhook-signature`, {
+    const res = await fetch(`${await this.baseUrl()}/v1/notifications/verify-webhook-signature`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({

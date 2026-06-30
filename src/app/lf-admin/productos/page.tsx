@@ -1,14 +1,16 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { createProductAction } from '@/lib/admin-actions';
+import { createProductAction, toggleProductFlagAction } from '@/lib/admin-actions';
 
 const inp = 'mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground';
 
 export default async function AdminProductos() {
-  const [products, collections] = await Promise.all([
+  const [products, collections, soldGroups] = await Promise.all([
     prisma.product.findMany({ orderBy: { createdAt: 'desc' }, take: 200, include: { collection: true, images: { take: 1, orderBy: { sortOrder: 'asc' } } } }),
     prisma.collection.findMany({ orderBy: { name: 'asc' } }),
+    prisma.orderItem.groupBy({ by: ['productId'], _count: { _all: true }, where: { productId: { not: null } } }),
   ]);
+  const sold = new Map(soldGroups.map((g) => [g.productId, g._count._all]));
 
   return (
     <div className="max-w-3xl">
@@ -36,25 +38,48 @@ export default async function AdminProductos() {
       <div className="mt-6 overflow-x-auto rounded-card border border-border">
         <table className="w-full text-left text-sm">
           <thead className="bg-surface text-xs uppercase tracking-wider text-faint">
-            <tr><th className="px-4 py-3">Pieza</th><th className="px-4 py-3">Colección</th><th className="px-4 py-3">Metal</th><th className="px-4 py-3">Estado</th></tr>
+            <tr>
+              <th className="px-4 py-3">Pieza</th>
+              <th className="px-4 py-3">Colección</th>
+              <th className="px-4 py-3">Tirada</th>
+              <th className="px-4 py-3">Vendidas</th>
+              <th className="px-4 py-3">Stock</th>
+              <th className="px-4 py-3">Acciones</th>
+            </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
-              <tr><td colSpan={4} className="px-4 py-6 text-center text-muted">Aún no hay productos.</td></tr>
-            ) : products.map((p) => (
-              <tr key={p.id} className="border-t border-border transition hover:bg-surface-elevated">
-                <td className="px-4 py-3">
-                  <Link href={`/lf-admin/productos/${p.id}`} className="flex items-center gap-2 text-gold-light hover:underline">
-                    {/* miniatura si hay imagen */}
-                    {p.images[0] ? <span className="h-6 w-6 overflow-hidden rounded-full border border-border"><img src={p.images[0].url} alt="" className="h-full w-full object-cover" /></span> : null}
-                    {p.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-muted">{p.collection?.name ?? '—'}</td>
-                <td className="px-4 py-3 text-muted">{p.metal ?? '—'}</td>
-                <td className="px-4 py-3 text-xs text-muted">{p.visible ? 'visible' : 'oculto'}{p.available ? '' : ' · no disp.'}</td>
-              </tr>
-            ))}
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-muted">Aún no hay productos.</td></tr>
+            ) : products.map((p) => {
+              const vendidas = sold.get(p.id) ?? 0;
+              const stock = p.editionSize != null ? p.editionSize - vendidas : null;
+              return (
+                <tr key={p.id} className="border-t border-border">
+                  <td className="px-4 py-3">
+                    <Link href={`/lf-admin/productos/${p.id}`} className="flex items-center gap-2 text-gold-light hover:underline">
+                      {p.images[0] ? <span className="h-6 w-6 overflow-hidden rounded-full border border-border"><img src={p.images[0].url} alt="" className="h-full w-full object-cover" /></span> : null}
+                      {p.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-muted">{p.collection?.name ?? '—'}</td>
+                  <td className="px-4 py-3 text-muted">{p.editionSize ?? '—'}</td>
+                  <td className="px-4 py-3 text-foreground">{vendidas}</td>
+                  <td className={`px-4 py-3 ${stock != null && stock <= 0 ? 'text-red-400' : 'text-muted'}`}>{stock ?? '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <form action={toggleProductFlagAction}>
+                        <input type="hidden" name="id" value={p.id} /><input type="hidden" name="field" value="visible" />
+                        <button className={`text-[11px] uppercase ${p.visible ? 'text-state-green' : 'text-faint'} hover:underline`}>{p.visible ? 'visible' : 'oculto'}</button>
+                      </form>
+                      <form action={toggleProductFlagAction}>
+                        <input type="hidden" name="id" value={p.id} /><input type="hidden" name="field" value="available" />
+                        <button className={`text-[11px] uppercase ${p.available ? 'text-state-green' : 'text-red-400'} hover:underline`}>{p.available ? 'disp.' : 'bloqueada'}</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

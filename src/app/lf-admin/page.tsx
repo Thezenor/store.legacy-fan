@@ -5,12 +5,13 @@ import { formatMoney } from '@/lib/commerce/money';
 const fmtDate = (d: Date) => new Intl.DateTimeFormat('es', { dateStyle: 'short' }).format(d);
 
 export default async function AdminDashboard() {
-  const [members, reservations, paidCount, revenueAgg, products, collections, paidPayments, recentMembers] =
+  const [members, reservations, paidCount, revenueEurAgg, revenueUsdAgg, products, collections, paidPayments, recentMembers] =
     await Promise.all([
       prisma.membership.count({ where: { status: 'SOCIO_ACTIVO' } }),
       prisma.reservation.count({ where: { status: 'RESERVA_PENDIENTE' } }),
       prisma.payment.count({ where: { status: 'PAGO_COMPLETO' } }),
       prisma.payment.aggregate({ where: { status: 'PAGO_COMPLETO', currency: 'EUR' }, _sum: { amountCents: true } }),
+      prisma.payment.aggregate({ where: { status: 'PAGO_COMPLETO', currency: 'USD' }, _sum: { amountCents: true } }),
       prisma.product.count(),
       prisma.collection.count(),
       prisma.payment.findMany({ where: { status: 'PAGO_COMPLETO' }, orderBy: { createdAt: 'desc' }, take: 500, include: { user: true } }),
@@ -36,7 +37,11 @@ export default async function AdminDashboard() {
     { label: 'Socios activos', value: String(members), href: '/lf-admin/socios' },
     { label: 'Reservas activas', value: String(reservations), href: '/lf-admin/pagos' },
     { label: 'Pagos completados', value: String(paidCount), href: '/lf-admin/pagos' },
-    { label: 'Ingresos (EUR)', value: formatMoney(revenueAgg._sum.amountCents ?? 0, 'EUR', 'es'), href: '/lf-admin/pagos' },
+    {
+      label: 'Ingresos',
+      value: `${formatMoney(revenueEurAgg._sum.amountCents ?? 0, 'EUR', 'es')} · ${formatMoney(revenueUsdAgg._sum.amountCents ?? 0, 'USD', 'es')}`,
+      href: '/lf-admin/pagos',
+    },
     { label: 'Productos', value: String(products), href: '/lf-admin/productos' },
     { label: 'Colecciones', value: String(collections), href: '/lf-admin/colecciones' },
   ];

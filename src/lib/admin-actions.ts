@@ -68,6 +68,7 @@ async function audit(
   entityId: string,
   oldValue: unknown,
   newValue: unknown,
+  reason?: string | null,
 ) {
   await prisma.auditLog.create({
     data: {
@@ -78,6 +79,7 @@ async function audit(
       entityId,
       oldValue: oldValue as object,
       newValue: newValue as object,
+      reason: reason ?? null,
     },
   });
 }
@@ -234,6 +236,7 @@ export async function createManualMemberAction(
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const club = String(formData.get('club') ?? 'PRIME') as ClubType;
   const num = parseInt(String(formData.get('number') ?? ''), 10);
+  const observations = String(formData.get('observations') ?? '') || null;
 
   if (!email || !Number.isInteger(num) || num < 1 || num > 100) {
     return { ok: false, error: 'Datos inválidos (email y número 1–100).' };
@@ -270,6 +273,7 @@ export async function createManualMemberAction(
           entity: 'Membership',
           entityId: membership.id,
           newValue: { email, club, number: memberNumber.formatted },
+          reason: observations,
         },
       });
       return memberNumber.formatted;
@@ -333,8 +337,9 @@ export async function updateMembershipAction(formData: FormData): Promise<void> 
   const id = String(formData.get('membershipId'));
   const club = String(formData.get('club')) as ClubType;
   const status = String(formData.get('status')) as MemberStatus;
+  const observations = String(formData.get('observations') ?? '') || null;
   await prisma.membership.update({ where: { id }, data: { club, status } });
-  await audit(admin.id, admin.email, 'membership.update', 'Membership', id, null, { club, status });
+  await audit(admin.id, admin.email, 'membership.update', 'Membership', id, null, { club, status }, observations);
   revalidatePath(`/lf-admin/socios`);
 }
 
@@ -482,8 +487,7 @@ const CONFIG_FIELDS: { key: string; type: 'string' | 'number' | 'bool' | 'money'
   { key: 'fiscal.base_currency', type: 'string' },
   { key: 'fiscal.invoice_series', type: 'string' },
   { key: 'launch.date', type: 'date' },
-  { key: 'payments.paypal.enabled', type: 'bool' },
-  { key: 'payments.stripe.enabled', type: 'bool' },
+  // payments.*.enabled se gestionan en la sección Pasarelas (saveGatewayAction).
   { key: 'payments.mode', type: 'string' },
   { key: 'reservation.amount.eur', type: 'money' },
   { key: 'reservation.amount.usd', type: 'money' },
@@ -525,6 +529,104 @@ export async function saveConfigAction(formData: FormData): Promise<void> {
     });
   }
   await audit(admin.id, admin.email, 'config.save', 'SystemSetting', 'panel', null, { fields: CONFIG_FIELDS.length });
+  revalidatePath('/lf-admin/config');
+}
+
+/** Edita los datos personales/envío de un socio (doc 09). */
+export async function updateProfileAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId'));
+  const s = (k: string) => String(formData.get(k) ?? '') || null;
+  await prisma.userProfile.update({
+    where: { userId },
+    data: {
+      firstName: String(formData.get('firstName') ?? '').trim() || 'Socio',
+      lastName: String(formData.get('lastName') ?? '').trim() || '',
+      phone: s('phone'),
+      country: s('country'),
+      addressLine1: s('addressLine1'),
+      addressLine2: s('addressLine2'),
+      city: s('city'),
+      postalCode: s('postalCode'),
+    },
+  });
+  await audit(admin.id, admin.email, 'profile.update', 'UserProfile', userId, null, { byAdmin: true });
+  revalidatePath('/lf-admin/socios');
+}
+
+// ───────────────── Colecciones: imagen + asignar productos ─────────────────
+
+export async function uploadCollectionImageAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('collectionId'));
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return;
+  const { url } = await saveUpload(file);
+  await prisma.collection.update({ where: { id }, data: { imageUrl: url } });
+  await audit(admin.id, admin.email, 'collection.image', 'Collection', id, null, { url });
+  revalidatePath('/lf-admin/colecciones');
+}
+
+/** Asigna (o quita) un producto a una colección. */
+export async function assignProductCollectionAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const productId = String(formData.get('productId'));
+  const collectionId = String(formData.get('collectionId') ?? '') || null;
+  await prisma.product.update({ where: { id: productId }, data: { collectionId } });
+  await audit(admin.id, admin.email, 'product.assign_collection', 'Product', productId, null, { collectionId });
+  revalidatePath('/lf-admin/colecciones');
+  revalidatePath(`/lf-admin/productos/${productId}`);
+}
+
+// ───────────────── Producto: vídeo + toggles rápidos ─────────────────
+
+export async function uploadProductVideoAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const productId = String(formData.get('productId'));
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return;
+  const { url } = await saveUpload(file);
+  await prisma.product.update({ where: { id: productId }, data: { videoUrl: url } });
+  await audit(admin.id, admin.email, 'product.video', 'Product', productId, null, { url });
+  revalidatePath(`/lf-admin/productos/${productId}`);
+}
+
+/** Toggle rápido de visible/available desde la lista de productos. */
+export async function toggleProductFlagAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  const field = String(formData.get('field')); // 'visible' | 'available'
+  const product = await prisma.product.findUnique({ where: { id } });
+  if (!product || (field !== 'visible' && field !== 'available')) return;
+  await prisma.product.update({ where: { id }, data: { [field]: !product[field] } });
+  await audit(admin.id, admin.email, 'product.toggle', 'Product', id, null, { field });
+  revalidatePath('/lf-admin/productos');
+}
+
+// ───────────────── Pasarelas de pago (credenciales en BD) ─────────────────
+
+/** Guarda la configuración de una pasarela (credenciales + activo). */
+export async function saveGatewayAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const gateway = String(formData.get('gateway')); // 'paypal' | 'stripe'
+  const fields = gateway === 'stripe'
+    ? ['stripe.secret_key', 'stripe.publishable_key', 'stripe.webhook_secret']
+    : ['paypal.client_id', 'paypal.client_secret', 'paypal.webhook_id', 'paypal.mode'];
+  for (const key of fields) {
+    const value = String(formData.get(key) ?? '');
+    await prisma.systemSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value, group: 'payments' },
+    });
+  }
+  const enabledKey = gateway === 'stripe' ? 'payments.stripe.enabled' : 'payments.paypal.enabled';
+  await prisma.systemSetting.upsert({
+    where: { key: enabledKey },
+    update: { value: formData.get('enabled') === 'on' },
+    create: { key: enabledKey, value: formData.get('enabled') === 'on', group: 'payments' },
+  });
+  await audit(admin.id, admin.email, 'gateway.save', 'SystemSetting', gateway, null, { gateway });
   revalidatePath('/lf-admin/config');
 }
 

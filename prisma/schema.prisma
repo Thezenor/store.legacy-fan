@@ -394,6 +394,8 @@ model Collection {
   id        String           @id @default(cuid())
   slug      String           @unique
   name      String
+  description String?
+  imageUrl  String?
   status    CollectionStatus @default(BORRADOR)
   sortOrder Int              @default(0)
   products  Product[]
@@ -420,6 +422,7 @@ model Product {
   editionSize     Int? // tirada
   mintYear        Int? // año de acuñación
   history         String? // historia / lore de la pieza
+  videoUrl        String? // vídeo de la pieza (alojado en nuestro servidor)
   launchDate      DateTime?
   available       Boolean  @default(true)
   visible         Boolean  @default(true)

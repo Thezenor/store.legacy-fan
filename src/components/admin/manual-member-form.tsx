@@ -26,6 +26,10 @@ export function ManualMemberForm() {
         <span className="text-xs text-muted">Nº reservado (1–100)</span>
         <input name="number" type="number" min={1} max={100} required className="mt-1 w-28 rounded border border-border bg-background px-2 py-1.5 text-foreground" />
       </label>
+      <label className="block flex-1">
+        <span className="text-xs text-muted">Observaciones</span>
+        <input name="observations" placeholder="Motivo del alta…" className="mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground" />
+      </label>
       <button type="submit" disabled={pending} className="rounded bg-gold-grad px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#160f02] disabled:opacity-60">
         {pending ? '…' : 'Crear socio'}
       </button>

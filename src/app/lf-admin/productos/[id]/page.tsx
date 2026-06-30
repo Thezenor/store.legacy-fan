@@ -6,6 +6,7 @@ import {
   deleteProductAction,
   uploadProductImageAction,
   deleteProductImageAction,
+  uploadProductVideoAction,
 } from '@/lib/admin-actions';
 
 const inp = 'mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground';
@@ -63,6 +64,22 @@ export default async function ProductoDetalle({ params }: { params: Promise<{ id
           <label className="block flex-1"><span className="text-xs text-muted">Texto alternativo</span>
             <input name="alt" className={inp} /></label>
           <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Subir</button>
+        </form>
+      </section>
+
+      {/* Vídeo */}
+      <section className="mt-4 rounded-card border border-border bg-surface p-5">
+        <h2 className="font-display text-lg text-gold-light">Vídeo</h2>
+        {p.videoUrl ? (
+          <video src={p.videoUrl} controls className="mt-3 max-h-64 rounded border border-border" />
+        ) : (
+          <p className="mt-2 text-sm text-muted">Sin vídeo.</p>
+        )}
+        <form action={uploadProductVideoAction} className="mt-3 flex flex-wrap items-end gap-3 border-t border-border pt-3">
+          <input type="hidden" name="productId" value={p.id} />
+          <label className="block"><span className="text-xs text-muted">Subir vídeo (MP4/WebM, máx 60MB)</span>
+            <input type="file" name="file" accept="video/*" required className="mt-1 block text-sm text-muted" /></label>
+          <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Subir vídeo</button>
         </form>
       </section>
 

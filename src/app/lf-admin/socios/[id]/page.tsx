@@ -7,6 +7,7 @@ import {
   adjustPointsAction,
   resetUserPasswordAction,
   toggleUserBlockAction,
+  updateProfileAction,
 } from '@/lib/admin-actions';
 
 const STATUSES = [
@@ -67,18 +68,23 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
         </form>
       </div>
 
-      {/* Datos personales / envío */}
+      {/* Datos personales / envío (editables) */}
       <Card title="Datos del cliente">
-        <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-          <Row k="Nombre" v={p ? `${p.firstName} ${p.lastName}` : '—'} />
-          <Row k="Teléfono" v={p?.phone ?? '—'} />
-          <Row k="País" v={p?.country ?? '—'} />
-          <Row k="Idioma / divisa" v={`${p?.preferredLocale ?? '—'} / ${p?.preferredCurrency ?? '—'}`} />
-          <Row k="Dirección" v={[p?.addressLine1, p?.addressLine2].filter(Boolean).join(', ') || '—'} />
-          <Row k="Ciudad / CP" v={`${p?.city ?? '—'} ${p?.postalCode ?? ''}`.trim()} />
-          <Row k="Email verificado" v={u.emailVerified ? 'Sí' : 'No'} />
-          <Row k="Marketing" v={p?.marketingOptIn ? 'Sí' : 'No'} />
-        </dl>
+        <form action={updateProfileAction} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <input type="hidden" name="userId" value={u.id} />
+          <label className="block"><span className="text-xs text-muted">Nombre</span><input name="firstName" defaultValue={p?.firstName ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <label className="block"><span className="text-xs text-muted">Apellidos</span><input name="lastName" defaultValue={p?.lastName ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <label className="block"><span className="text-xs text-muted">Teléfono</span><input name="phone" defaultValue={p?.phone ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <label className="block"><span className="text-xs text-muted">País (ISO)</span><input name="country" defaultValue={p?.country ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <label className="block"><span className="text-xs text-muted">Dirección</span><input name="addressLine1" defaultValue={p?.addressLine1 ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <label className="block"><span className="text-xs text-muted">Dirección 2</span><input name="addressLine2" defaultValue={p?.addressLine2 ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <label className="block"><span className="text-xs text-muted">Ciudad</span><input name="city" defaultValue={p?.city ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <label className="block"><span className="text-xs text-muted">Código postal</span><input name="postalCode" defaultValue={p?.postalCode ?? ''} className={`mt-1 w-full ${inp}`} /></label>
+          <div className="sm:col-span-2 flex items-center justify-between">
+            <span className="text-xs text-faint">Verificado: {u.emailVerified ? 'Sí' : 'No'} · Idioma/divisa: {p?.preferredLocale ?? '—'}/{p?.preferredCurrency ?? '—'}</span>
+            <button className={btn}>Guardar datos</button>
+          </div>
+        </form>
       </Card>
 
       {/* Membresía (editable) */}
@@ -89,6 +95,8 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
             <select name="club" defaultValue={m.club} className={`mt-1 ${inp}`}><option value="PRIME">PRIME</option><option value="PRESTIGE">PRESTIGE</option></select></label>
           <label className="block"><span className="text-xs text-muted">Estado</span>
             <select name="status" defaultValue={m.status} className={`mt-1 ${inp}`}>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select></label>
+          <label className="block flex-1"><span className="text-xs text-muted">Observaciones (se registran con tu usuario)</span>
+            <input name="observations" placeholder="Motivo del cambio…" className={`mt-1 w-full ${inp}`} /></label>
           <span className="text-xs text-muted">Alta: {fmtDate(m.startsAt)} · Fin: {fmtDate(m.endsAt)}</span>
           <button className={btn}>Guardar</button>
         </form>
@@ -174,14 +182,5 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
         </form>
       </Card>
     </div>
-  );
-}
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <>
-      <dt className="text-muted">{k}</dt>
-      <dd className="text-foreground">{v}</dd>
-    </>
   );
 }
