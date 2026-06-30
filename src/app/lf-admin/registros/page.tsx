@@ -3,10 +3,10 @@ import { prisma } from '@/lib/prisma';
 import {
   toggleUserBlockAction,
   resetUserPasswordAction,
-  deleteUserAction,
   resendRegistrationEmailAction,
   createManualUserAction,
 } from '@/lib/admin-actions';
+import { DeleteUserButton } from '@/components/admin/delete-user-button';
 import { COUNTRIES } from '@/lib/countries';
 
 export const dynamic = 'force-dynamic';
@@ -194,12 +194,7 @@ export default async function AdminRegistros({
                               Reenviar correo
                             </button>
                           </form>
-                          <form action={deleteUserAction}>
-                            <input type="hidden" name="userId" value={u.id} />
-                            <button type="submit" className="rounded border border-red-500/40 px-2 py-1 text-xs text-red-400 hover:bg-red-500/10">
-                              Eliminar
-                            </button>
-                          </form>
+                          <DeleteUserButton userId={u.id} email={u.email} />
                         </div>
                         <form action={resetUserPasswordAction} className="flex items-center gap-1">
                           <input type="hidden" name="userId" value={u.id} />
