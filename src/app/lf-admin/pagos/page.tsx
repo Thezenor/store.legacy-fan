@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { formatMoney } from '@/lib/commerce/money';
+import { refundPaymentAction } from '@/lib/admin-actions';
 
 export default async function AdminPagos() {
   const payments = await prisma.payment.findMany({
@@ -21,12 +22,13 @@ export default async function AdminPagos() {
               <th className="px-4 py-3">Pasarela</th>
               <th className="px-4 py-3">Importe</th>
               <th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
             {payments.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted">
+                <td colSpan={6} className="px-4 py-6 text-center text-muted">
                   Aún no hay transacciones.
                 </td>
               </tr>
@@ -42,6 +44,14 @@ export default async function AdminPagos() {
                   </td>
                   <td className="px-4 py-3 text-gold-light">{formatMoney(p.amountCents, p.currency, 'es')}</td>
                   <td className="px-4 py-3 text-muted">{p.status.replaceAll('_', ' ').toLowerCase()}</td>
+                  <td className="px-4 py-3">
+                    {p.status === 'PAGO_COMPLETO' ? (
+                      <form action={refundPaymentAction}>
+                        <input type="hidden" name="paymentId" value={p.id} />
+                        <button type="submit" className="text-xs text-red-400 hover:underline">Reembolsar</button>
+                      </form>
+                    ) : null}
+                  </td>
                 </tr>
               ))
             )}

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { toggleUserBlockAction } from '@/lib/admin-actions';
 import { ManualMemberForm } from '@/components/admin/manual-member-form';
@@ -38,7 +39,11 @@ export default async function AdminSocios() {
             ) : (
               memberships.map((m) => (
                 <tr key={m.id} className="border-t border-border">
-                  <td className="px-4 py-3 text-gold-light">{m.memberNumber?.formatted ?? '—'}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/lf-admin/socios/${m.id}`} className="text-gold-light hover:underline">
+                      {m.memberNumber?.formatted ?? 'ver'}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3 text-foreground">
                     {m.user.profile ? `${m.user.profile.firstName} ${m.user.profile.lastName}` : '—'}
                   </td>

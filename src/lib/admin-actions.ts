@@ -1,7 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { ClubType, CollectionStatus, Locale } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import type {
+  ClubType,
+  CollectionStatus,
+  Locale,
+  MemberStatus,
+  OrderItemStatus,
+} from '@prisma/client';
 import { prisma } from './prisma';
 import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
@@ -278,4 +285,166 @@ export async function toggleUserBlockAction(formData: FormData): Promise<void> {
   await prisma.user.update({ where: { id: userId }, data: { isBlocked: !user.isBlocked } });
   await audit(admin.id, admin.email, 'user.block_toggle', 'User', userId, { isBlocked: user.isBlocked }, { isBlocked: !user.isBlocked });
   revalidatePath('/lf-admin/socios');
+}
+
+// ───────────────── Socio: editar membresía / puntos / contraseña ─────────────────
+
+/** Cambia club y/o estado de la membresía (doc 09). */
+export async function updateMembershipAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('membershipId'));
+  const club = String(formData.get('club')) as ClubType;
+  const status = String(formData.get('status')) as MemberStatus;
+  await prisma.membership.update({ where: { id }, data: { club, status } });
+  await audit(admin.id, admin.email, 'membership.update', 'Membership', id, null, { club, status });
+  revalidatePath(`/lf-admin/socios`);
+}
+
+/** Ajuste manual de saldo/puntos (positivo o negativo) con transacción auditada. */
+export async function adjustPointsAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId'));
+  const cents = Math.round(parseFloat(String(formData.get('amount') ?? '0').replace(',', '.')) * 100);
+  const reason = String(formData.get('reason') ?? 'Ajuste manual del admin');
+  if (!cents) return;
+  const wallet = await prisma.pointsWallet.upsert({
+    where: { userId },
+    update: { balanceCents: { increment: cents } },
+    create: { userId, balanceCents: cents, pendingCents: 0 },
+  });
+  await prisma.pointsTransaction.create({
+    data: { walletId: wallet.id, type: 'ADMIN_ADJUST', amountCents: cents, reason },
+  });
+  await audit(admin.id, admin.email, 'points.adjust', 'PointsWallet', wallet.id, null, { cents, reason });
+  revalidatePath('/lf-admin/socios');
+}
+
+/** Restablece la contraseña de un usuario (doc 09). */
+export async function resetUserPasswordAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId'));
+  const password = String(formData.get('password') ?? '');
+  if (password.length < 8) return;
+  const passwordHash = await bcrypt.hash(password, 12);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+  await audit(admin.id, admin.email, 'user.password_reset', 'User', userId, null, { byAdmin: true });
+  revalidatePath('/lf-admin/socios');
+}
+
+// ───────────────── Pagos: reembolso ─────────────────
+
+/** Marca un pago como reembolsado (estado interno + auditoría). La devolución
+ * real en PayPal requiere credenciales/API y se hará al activar la pasarela. */
+export async function refundPaymentAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('paymentId'));
+  const payment = await prisma.payment.findUnique({ where: { id } });
+  if (!payment || payment.status === 'REEMBOLSADO') return;
+  await prisma.payment.update({ where: { id }, data: { status: 'REEMBOLSADO' } });
+  if (payment.reservationId) {
+    await prisma.reservation.update({ where: { id: payment.reservationId }, data: { status: 'REEMBOLSADO' } });
+  }
+  await audit(admin.id, admin.email, 'payment.refund', 'Payment', id, { status: payment.status }, { status: 'REEMBOLSADO' });
+  revalidatePath('/lf-admin/pagos');
+}
+
+// ───────────────── Roles ─────────────────
+
+/** Asigna un rol a un usuario por email (doc 09). */
+export async function assignRoleAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const roleKey = String(formData.get('roleKey') ?? '');
+  const user = await prisma.user.findUnique({ where: { email } });
+  const role = await prisma.role.findUnique({ where: { key: roleKey } });
+  if (!user || !role) return;
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: user.id, roleId: role.id } },
+    update: {},
+    create: { userId: user.id, roleId: role.id },
+  });
+  await audit(admin.id, admin.email, 'role.assign', 'UserRole', `${user.id}/${role.id}`, null, { email, roleKey });
+  revalidatePath('/lf-admin/roles');
+}
+
+export async function removeRoleAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId'));
+  const roleId = String(formData.get('roleId'));
+  await prisma.userRole.delete({ where: { userId_roleId: { userId, roleId } } }).catch(() => {});
+  await audit(admin.id, admin.email, 'role.remove', 'UserRole', `${userId}/${roleId}`, null, null);
+  revalidatePath('/lf-admin/roles');
+}
+
+// ───────────────── FAQ ─────────────────
+
+export async function upsertFaqAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id') ?? '');
+  const locale = String(formData.get('locale') ?? 'es') as Locale;
+  const question = String(formData.get('question') ?? '');
+  const answer = String(formData.get('answer') ?? '');
+  if (!question) return;
+  if (id) {
+    await prisma.faqItem.update({ where: { id }, data: { question, answer, locale } });
+  } else {
+    await prisma.faqItem.create({ data: { question, answer, locale } });
+  }
+  await audit(admin.id, admin.email, 'faq.upsert', 'FaqItem', id || 'new', null, { question });
+  revalidatePath('/lf-admin/faq');
+}
+
+export async function deleteFaqAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  await prisma.faqItem.delete({ where: { id } }).catch(() => {});
+  await audit(admin.id, admin.email, 'faq.delete', 'FaqItem', id, null, null);
+  revalidatePath('/lf-admin/faq');
+}
+
+// ───────────────── SEO / GEO ─────────────────
+
+export async function upsertSeoAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const path = String(formData.get('path') ?? '').trim();
+  const locale = String(formData.get('locale') ?? 'es') as Locale;
+  if (!path) return;
+  const data = {
+    title: String(formData.get('title') ?? '') || null,
+    description: String(formData.get('description') ?? '') || null,
+    keywords: String(formData.get('keywords') ?? '') || null,
+  };
+  await prisma.seoMetadata.upsert({
+    where: { path_locale: { path, locale } },
+    update: data,
+    create: { path, locale, ...data },
+  });
+  await audit(admin.id, admin.email, 'seo.upsert', 'SeoMetadata', `${path}/${locale}`, null, data);
+  revalidatePath('/lf-admin/seo');
+}
+
+// ───────────────── Pedidos / envíos ─────────────────
+
+/** Cambia el estado logístico de un item de pedido (doc 07). */
+export async function updateOrderItemStatusAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('itemId'));
+  const status = String(formData.get('status')) as OrderItemStatus;
+  await prisma.orderItem.update({ where: { id }, data: { status } });
+  await audit(admin.id, admin.email, 'order_item.status', 'OrderItem', id, null, { status });
+  revalidatePath('/lf-admin/pedidos');
+}
+
+/** Crea un envío con tracking para un pedido y marca sus items como enviados. */
+export async function createShipmentAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const orderId = String(formData.get('orderId'));
+  const carrier = String(formData.get('carrier') ?? '') || null;
+  const trackingCode = String(formData.get('tracking') ?? '') || null;
+  await prisma.shipment.create({
+    data: { orderId, carrier, trackingCode, status: 'ENVIADO', shippedAt: new Date() },
+  });
+  await prisma.orderItem.updateMany({ where: { orderId }, data: { status: 'ENVIADO' } });
+  await audit(admin.id, admin.email, 'shipment.create', 'Order', orderId, null, { carrier, trackingCode });
+  revalidatePath('/lf-admin/pedidos');
 }

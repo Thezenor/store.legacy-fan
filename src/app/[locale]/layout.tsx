@@ -9,6 +9,8 @@ import { Wordmark } from '@/components/brand/wordmark';
 import { MainNav } from '@/components/brand/main-nav';
 import { Link } from '@/i18n/navigation';
 import { auth } from '@/lib/auth';
+import { getBool } from '@/lib/commerce/settings';
+import { getAdminSession } from '@/lib/admin';
 import '../globals.css';
 // Fuentes de marca auto-alojadas: Cinzel (display, capitales grabadas) + Spectral (texto)
 import '@fontsource/spectral/300.css';
@@ -55,12 +57,26 @@ export default async function LocaleLayout({
   const t = await getTranslations({ locale, namespace: 'common' });
   const messages = await getMessages();
   const session = await auth();
+  // Modo mantenimiento (doc 09): si está activo, solo los admin ven la web.
+  const maintenance = await getBool('system.maintenance_mode');
+  const adminOk = maintenance ? await getAdminSession() : null;
+  const showMaintenance = maintenance && !adminOk;
 
   return (
     // Modo oscuro por defecto: sin clase `.light` en el render inicial.
     <html lang={locale} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
+          {showMaintenance ? (
+            <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+              <Wordmark />
+              <h1 className="mt-8 font-display text-3xl uppercase text-foreground">En mantenimiento</h1>
+              <p className="mt-3 max-w-md text-sm text-muted">
+                Estamos preparando algo especial. Vuelve en unos minutos.
+              </p>
+            </div>
+          ) : (
+          <>
           <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
             <div className="mx-auto flex h-[74px] max-w-6xl items-center justify-between gap-3 px-4 sm:gap-5 sm:px-6">
               <Link href="/" aria-label={t('siteName')} className="flex-none">
@@ -108,6 +124,8 @@ export default async function LocaleLayout({
               </div>
             </div>
           </footer>
+          </>
+          )}
         </NextIntlClientProvider>
       </body>
     </html>
