@@ -60,7 +60,7 @@ export function AuthNav({
             router.refresh();
           })
         }
-        className="hidden min-h-[40px] items-center text-sm text-muted hover:text-foreground disabled:opacity-60 sm:inline-flex"
+        className="inline-flex min-h-[40px] items-center text-sm text-muted hover:text-foreground disabled:opacity-60"
       >
         {logoutLabel}
       </button>

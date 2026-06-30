@@ -56,9 +56,9 @@ export function SecondCoinUpsell({ data }: { data: UpsellData }) {
             >
               {c.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={c.image} alt={c.name} className="h-28 w-28 rounded object-cover" />
+                <img src={c.image} alt={c.name} className="mx-auto aspect-square w-full max-w-[8rem] rounded object-cover" />
               ) : (
-                <span className="flex h-28 w-28 items-center justify-center rounded bg-surface-elevated text-faint">
+                <span className="mx-auto flex aspect-square w-full max-w-[8rem] items-center justify-center rounded bg-surface-elevated text-faint">
                   ?
                 </span>
               )}
@@ -82,7 +82,7 @@ export function SecondCoinUpsell({ data }: { data: UpsellData }) {
           <div className="flex items-center gap-3">
             {other.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={other.image} alt={other.name} className="h-16 w-16 rounded object-cover" />
+              <img src={other.image} alt={other.name} className="h-16 w-16 shrink-0 rounded object-cover" />
             ) : null}
             <div>
               <h4 className="text-sm font-semibold text-foreground">{tc('secondTitle')}</h4>

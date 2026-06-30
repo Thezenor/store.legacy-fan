@@ -14,7 +14,15 @@ const baseLink = 'whitespace-nowrap transition';
 // Menú superior en Inter 16px (petición de marca).
 const linkStyle = { fontSize: '16px', fontFamily: INTER } as const;
 
-export function MainNav({ items, menuLabel }: { items: NavItem[]; menuLabel: string }) {
+export function MainNav({
+  items,
+  menuLabel,
+  mobileExtra,
+}: {
+  items: NavItem[];
+  menuLabel: string;
+  mobileExtra?: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -67,7 +75,7 @@ export function MainNav({ items, menuLabel }: { items: NavItem[]; menuLabel: str
         aria-label={menuLabel}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground md:hidden"
+        className="ml-auto flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground md:hidden"
       >
         <span className="text-lg leading-none">{open ? '✕' : '☰'}</span>
       </button>
@@ -76,6 +84,11 @@ export function MainNav({ items, menuLabel }: { items: NavItem[]; menuLabel: str
       {open ? (
         <div className="absolute inset-x-0 top-full z-40 max-h-[80vh] overflow-y-auto border-b border-border bg-background/95 backdrop-blur-md md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col px-4 py-2" style={{ fontFamily: INTER }}>
+            {mobileExtra ? (
+              <div className="flex flex-wrap items-center gap-4 border-b border-border/60 py-3" onClick={() => setOpen(false)}>
+                {mobileExtra}
+              </div>
+            ) : null}
             {items.map((it) => {
               if (it.kind === 'external') {
                 return (

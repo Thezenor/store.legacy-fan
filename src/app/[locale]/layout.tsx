@@ -91,6 +91,20 @@ export default async function LocaleLayout({
               </Link>
               <MainNav
                 menuLabel={t('menu')}
+                mobileExtra={
+                  <>
+                    <LocaleSwitcher />
+                    <AuthNav
+                      isLoggedIn={!!session?.user?.id}
+                      isAdmin={isAdmin}
+                      accountLabel={t('account')}
+                      adminLabel={t('adminPanel')}
+                      loginLabel={t('login')}
+                      logoutLabel={t('logout')}
+                    />
+                    <ThemeToggle label={t('toggleTheme')} />
+                  </>
+                }
                 items={[
                   {
                     kind: 'menu',
@@ -109,7 +123,9 @@ export default async function LocaleLayout({
                   { kind: 'external', href: 'https://legacy-fan.com/trabaja-con-nosotros/', label: t('navTrabaja') },
                 ]}
               />
-              <div className="flex flex-none items-center gap-2 sm:gap-4">
+              {/* Cluster derecho: en móvil va dentro del menú hamburguesa (evita
+                  desbordes); en escritorio se muestra aquí. */}
+              <div className="hidden flex-none items-center gap-2 md:flex sm:gap-4">
                 <AuthNav
                   isLoggedIn={!!session?.user?.id}
                   isAdmin={isAdmin}
