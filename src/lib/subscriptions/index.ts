@@ -3,7 +3,7 @@ type ClubType = string;
 import { prisma } from '../prisma';
 import { getSubscriptionProviderForAdmin, isGatewayEnabled } from '../payments';
 import { getSettingString } from '../commerce/settings';
-import { getClubPricing, getClubLaunchDate } from '../commerce';
+import { getClubPricing, getClubLaunchDate, getPlan } from '../commerce';
 import { activateMembershipTx, renewMembershipTx } from '../members/membership';
 
 const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
@@ -15,17 +15,67 @@ async function providerMode(key: 'PAYPAL' | 'STRIPE'): Promise<'sandbox' | 'live
 }
 
 /**
- * Id del plan/precio recurrente en la pasarela para (pasarela, modo, club, divisa).
- * Convención de clave en SystemSetting: `paypal.sandbox.plan.PRIME.EUR`.
- * Estos ids se crean en el panel de PayPal/Stripe y se pegan en el superadmin.
+ * Clave del plan de suscripción en SystemSetting. Incluye FASE e IMPORTE porque
+ * el precio depende de la fase y un plan de la pasarela tiene precio FIJO (no se
+ * puede editar): cada fase/precio tiene su propio plan.
+ * Ej.: `paypal.sandbox.plan.PRIME.EUR.FASE_1.14900`.
  */
-async function planIdFor(
+export function subscriptionPlanKey(
   key: 'PAYPAL' | 'STRIPE',
   mode: 'sandbox' | 'live',
   club: ClubType,
   currency: Currency,
-): Promise<string | null> {
-  return getSettingString(`${key.toLowerCase()}.${mode}.plan.${club}.${currency}`);
+  phaseKey: string,
+  amountCents: number,
+): string {
+  return `${key.toLowerCase()}.${mode}.plan.${club}.${currency}.${phaseKey}.${amountCents}`;
+}
+
+/**
+ * Resuelve (y crea si falta) el plan recurrente para la FASE y precio actuales.
+ * Así la suscripción siempre cobra el precio vigente de la fase; al cambiar de
+ * fase o de precio se usa/crea otro plan automáticamente.
+ */
+async function resolvePlanIdForCurrentPhase(opts: {
+  provider: ReturnType<typeof getSubscriptionProviderForAdmin>;
+  key: 'PAYPAL' | 'STRIPE';
+  mode: 'sandbox' | 'live';
+  club: ClubType;
+  currency: Currency;
+}): Promise<string> {
+  const pricing = await getClubPricing(opts.club, opts.currency);
+  const amountCents = pricing?.priceCents ?? 0;
+  const phaseKey = pricing?.phaseKey ?? 'NA';
+  if (amountCents <= 0) {
+    throw new Error(`Sin precio de club para ${opts.club}/${opts.currency} (suscripción).`);
+  }
+
+  const settingKey = subscriptionPlanKey(
+    opts.key,
+    opts.mode,
+    opts.club,
+    opts.currency,
+    phaseKey,
+    amountCents,
+  );
+  const existing = await getSettingString(settingKey);
+  if (existing) return existing;
+
+  // No existe plan para esta fase/precio: lo creamos con el precio vigente.
+  const plan = await getPlan(opts.club);
+  const created = await opts.provider.createSubscriptionPlan({
+    club: opts.club,
+    name: `${plan?.name ?? opts.club} — Anual (${phaseKey})`,
+    currency: opts.currency,
+    amountCents,
+    intervalMonths: 12,
+  });
+  await prisma.systemSetting.upsert({
+    where: { key: settingKey },
+    update: { value: created.planId },
+    create: { key: settingKey, value: created.planId, group: 'payments' },
+  });
+  return created.planId;
 }
 
 /**
@@ -49,12 +99,8 @@ export async function startSubscription(opts: {
         })();
   const provider = getSubscriptionProviderForAdmin(key);
   const mode = await providerMode(key);
-  const planId = await planIdFor(key, mode, opts.club, opts.currency);
-  if (!planId) {
-    throw new Error(
-      `Sin plan de suscripción configurado para ${key}/${mode}/${opts.club}/${opts.currency}.`,
-    );
-  }
+  // Plan de la FASE y precio actuales (se crea automáticamente si no existe).
+  const planId = await resolvePlanIdForCurrentPhase({ provider, key, mode, club: opts.club, currency: opts.currency });
 
   const pricing = await getClubPricing(opts.club, opts.currency);
   const amountCents = pricing?.priceCents ?? 0;

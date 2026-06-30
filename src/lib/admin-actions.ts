@@ -690,12 +690,14 @@ export async function createSubscriptionPlanAction(formData: FormData): Promise<
   try {
     const [pricing, plan] = await Promise.all([getClubPricing(club, currency), getPlan(club)]);
     const amountCents = pricing?.priceCents ?? 0;
+    const phaseKey = pricing?.phaseKey ?? 'NA';
     if (amountCents <= 0) {
       await setError('El club no tiene precio actual configurado.');
       revalidatePath('/lf-admin/config');
       return;
     }
-    const name = `${plan?.name ?? club} — Anual`;
+    // El plan se crea para la FASE y precio vigentes (clave por fase + importe).
+    const name = `${plan?.name ?? club} — Anual (${phaseKey})`;
     const provider = getSubscriptionProviderForAdmin(gateway.toUpperCase() as 'PAYPAL' | 'STRIPE');
     const { planId } = await provider.createSubscriptionPlan({
       club,
@@ -704,7 +706,7 @@ export async function createSubscriptionPlanAction(formData: FormData): Promise<
       amountCents,
       intervalMonths: 12,
     });
-    const key = `${gateway}.${mode}.plan.${club}.${currency}`;
+    const key = `${gateway}.${mode}.plan.${club}.${currency}.${phaseKey}.${amountCents}`;
     await prisma.systemSetting.upsert({
       where: { key },
       update: { value: planId },
@@ -716,6 +718,8 @@ export async function createSubscriptionPlanAction(formData: FormData): Promise<
       club,
       currency,
       mode,
+      phaseKey,
+      amountCents,
     });
   } catch (e) {
     await setError(e instanceof Error ? e.message : 'Error creando el plan.');

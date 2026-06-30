@@ -11,8 +11,10 @@ desactivado**, igual que el resto del proyecto.
      Con `one_time` se mantiene el pago único actual.
 2. En **`/lf-admin → Configuración → Pasarelas`** (PayPal):
    - Credenciales sandbox/live (ya existentes) + **Modo activo**.
-   - **Planes de suscripción**: pega los **Plan IDs** de PayPal (`P-XXXX`) para
-     Prime/Prestige × EUR/USD, **por modo**. Cada plan fija su importe anual y divisa.
+   - **Planes de suscripción**: el precio del plan es el de la **fase activa**. Como
+     PayPal no permite editar el importe de un plan, **cada fase/precio tiene su propio
+     plan**, que se **crea automáticamente al suscribirse** (o puedes pre-crearlo con el
+     botón). Se guarda en `paypal.{mode}.plan.{CLUB}.{CUR}.{FASE}.{importe}`.
 
 ## Flujo
 - Checkout (pago completo) → si `billing.mode=subscription`, `startSubscription()` crea la
@@ -36,11 +38,17 @@ currentPeriodEnd, cancelAtPeriodEnd. La renovación vive en `renewMembershipTx`.
   (eventos de suscripción: `BILLING.SUBSCRIPTION.*`, `PAYMENT.SALE.COMPLETED`).
 - Stripe (futuro): `https://store.legacy-fan.com/api/webhooks/stripe`.
 
+## Precio por fase
+El plan se crea con el **precio de la fase activa** (de `getClubPricing`, que resuelve la
+fase) y se cachea por `(modo, club, divisa, fase, importe)`. Al cambiar de fase (o de precio
+dentro de una fase), la siguiente suscripción usa/crea **otro plan** con el precio nuevo;
+las suscripciones ya activas conservan su plan (PayPal no permite cambiar su importe).
+
 ## Pasos que faltan para operarlo (no son código)
-1. **Crear los planes** en PayPal (Catalog Product + Billing Plan anual) por club y divisa,
-   y pegar sus IDs en el panel. (Opcional a futuro: acción admin que los cree por API.)
+1. Guardar **credenciales** PayPal (sandbox) y marcar "Usar PayPal". Los planes se crean
+   solos al suscribirse; opcionalmente pre-créalos con el botón por club/divisa.
 2. Suscribir el webhook de PayPal a los eventos `BILLING.SUBSCRIPTION.*` y `PAYMENT.SALE.COMPLETED`.
-3. Cambiar `billing.mode` a `subscription` cuando los planes estén listos.
+3. Cambiar `billing.mode` a `subscription`.
 4. Probar en **sandbox** el alta, una renovación y una cancelación.
 5. (Stripe) Implementar verificación de firma + creación de Checkout Session `mode=subscription`
    cuando se decida activarlo.

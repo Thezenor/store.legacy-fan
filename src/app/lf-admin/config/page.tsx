@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { saveConfigAction } from '@/lib/admin-actions';
 import { GatewayConfig } from '@/components/admin/gateway-config';
+import { getClubPricing } from '@/lib/commerce';
 
 const inp = 'mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground';
 
@@ -12,6 +13,29 @@ export default async function AdminConfig() {
   const money = (k: string) => (num(k) / 100).toFixed(2);
   const bool = (k: string) => Boolean(v(k));
   const str = (k: string) => String(v(k) ?? '');
+
+  // Estado de los planes de suscripción por club/divisa, según la FASE actual
+  // (el precio del plan depende de la fase; cada fase/precio tiene su plan).
+  const subPlanInfo: Record<
+    string,
+    { phaseKey: string; phaseName: string; price: string; sandbox: string; live: string; sandboxErr: string; liveErr: string }
+  > = {};
+  for (const club of ['PRIME', 'PRESTIGE'] as const) {
+    for (const cur of ['EUR', 'USD'] as const) {
+      const pricing = await getClubPricing(club, cur);
+      const phaseKey = pricing?.phaseKey ?? 'NA';
+      const cents = pricing?.priceCents ?? 0;
+      subPlanInfo[`${club}.${cur}`] = {
+        phaseKey,
+        phaseName: pricing?.phaseName ?? '',
+        price: pricing?.priceFormatted ?? '—',
+        sandbox: str(`paypal.sandbox.plan.${club}.${cur}.${phaseKey}.${cents}`),
+        live: str(`paypal.live.plan.${club}.${cur}.${phaseKey}.${cents}`),
+        sandboxErr: str(`paypal.sandbox.plan_error.${club}.${cur}`),
+        liveErr: str(`paypal.live.plan_error.${club}.${cur}`),
+      };
+    }
+  }
   const dateVal = (k: string) => {
     const d = v(k);
     return d ? new Date(String(d)).toISOString().slice(0, 10) : '';
@@ -85,30 +109,13 @@ export default async function AdminConfig() {
             'paypal.live.client_secret': str('paypal.live.client_secret'),
             'paypal.live.webhook_id': str('paypal.live.webhook_id'),
             'paypal.mode': str('paypal.mode'),
-            // IDs de plan de suscripción por modo (sandbox/live).
-            'paypal.sandbox.plan.PRIME.EUR': str('paypal.sandbox.plan.PRIME.EUR'),
-            'paypal.sandbox.plan.PRIME.USD': str('paypal.sandbox.plan.PRIME.USD'),
-            'paypal.sandbox.plan.PRESTIGE.EUR': str('paypal.sandbox.plan.PRESTIGE.EUR'),
-            'paypal.sandbox.plan.PRESTIGE.USD': str('paypal.sandbox.plan.PRESTIGE.USD'),
-            'paypal.live.plan.PRIME.EUR': str('paypal.live.plan.PRIME.EUR'),
-            'paypal.live.plan.PRIME.USD': str('paypal.live.plan.PRIME.USD'),
-            'paypal.live.plan.PRESTIGE.EUR': str('paypal.live.plan.PRESTIGE.EUR'),
-            'paypal.live.plan.PRESTIGE.USD': str('paypal.live.plan.PRESTIGE.USD'),
-            // Errores de creación de plan (si los hubo) por modo/club/divisa.
-            'paypal.sandbox.plan_error.PRIME.EUR': str('paypal.sandbox.plan_error.PRIME.EUR'),
-            'paypal.sandbox.plan_error.PRIME.USD': str('paypal.sandbox.plan_error.PRIME.USD'),
-            'paypal.sandbox.plan_error.PRESTIGE.EUR': str('paypal.sandbox.plan_error.PRESTIGE.EUR'),
-            'paypal.sandbox.plan_error.PRESTIGE.USD': str('paypal.sandbox.plan_error.PRESTIGE.USD'),
-            'paypal.live.plan_error.PRIME.EUR': str('paypal.live.plan_error.PRIME.EUR'),
-            'paypal.live.plan_error.PRIME.USD': str('paypal.live.plan_error.PRIME.USD'),
-            'paypal.live.plan_error.PRESTIGE.EUR': str('paypal.live.plan_error.PRESTIGE.EUR'),
-            'paypal.live.plan_error.PRESTIGE.USD': str('paypal.live.plan_error.PRESTIGE.USD'),
             'payments.paypal.enabled': bool('payments.paypal.enabled'),
             'stripe.secret_key': str('stripe.secret_key'),
             'stripe.publishable_key': str('stripe.publishable_key'),
             'stripe.webhook_secret': str('stripe.webhook_secret'),
             'payments.stripe.enabled': bool('payments.stripe.enabled'),
           }}
+          subPlanInfo={subPlanInfo}
         />
       </div>
     </div>

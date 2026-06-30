@@ -5,10 +5,26 @@ import { saveGatewayAction, createSubscriptionPlanAction } from '@/lib/admin-act
 
 type Values = Record<string, string | boolean>;
 
+type PlanInfo = {
+  phaseKey: string;
+  phaseName: string;
+  price: string;
+  sandbox: string;
+  live: string;
+  sandboxErr: string;
+  liveErr: string;
+};
+
 const inp = 'mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground';
 
 // Configuración dinámica de pasarela: eliges pasarela → aparecen sus campos.
-export function GatewayConfig({ values }: { values: Values }) {
+export function GatewayConfig({
+  values,
+  subPlanInfo = {},
+}: {
+  values: Values;
+  subPlanInfo?: Record<string, PlanInfo>;
+}) {
   const [gateway, setGateway] = useState<'paypal' | 'stripe'>('paypal');
   const [mode, setMode] = useState<'sandbox' | 'live'>(
     (String(values['paypal.mode'] ?? '') as 'sandbox' | 'live') || 'sandbox',
@@ -67,25 +83,6 @@ export function GatewayConfig({ values }: { values: Values }) {
             </fieldset>
           </div>
 
-          {/* Planes de suscripción (renovación anual). IDs creados en PayPal y
-              pegados aquí; se guardan para el MODO seleccionado arriba. */}
-          <fieldset key={mode} className="rounded border border-border p-3">
-            <legend className="px-1 text-xs uppercase tracking-wider text-gold-light">
-              Planes de suscripción · {mode}
-            </legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block"><span className="text-xs text-muted">Plan Prime EUR</span>
-                <input name="paypal.plan.PRIME.EUR" defaultValue={v(`paypal.${mode}.plan.PRIME.EUR`)} className={inp} /></label>
-              <label className="block"><span className="text-xs text-muted">Plan Prime USD</span>
-                <input name="paypal.plan.PRIME.USD" defaultValue={v(`paypal.${mode}.plan.PRIME.USD`)} className={inp} /></label>
-              <label className="block"><span className="text-xs text-muted">Plan Prestige EUR</span>
-                <input name="paypal.plan.PRESTIGE.EUR" defaultValue={v(`paypal.${mode}.plan.PRESTIGE.EUR`)} className={inp} /></label>
-              <label className="block"><span className="text-xs text-muted">Plan Prestige USD</span>
-                <input name="paypal.plan.PRESTIGE.USD" defaultValue={v(`paypal.${mode}.plan.PRESTIGE.USD`)} className={inp} /></label>
-            </div>
-            <p className="mt-2 text-[11px] text-faint">Puedes crearlos automáticamente abajo, o pegar aquí IDs ya existentes (P-XXXX).</p>
-          </fieldset>
-
           <label className="flex items-center gap-2 text-sm text-muted">
             <input type="checkbox" name="enabled" defaultChecked={b('payments.paypal.enabled')} /> Usar PayPal como método de pago
           </label>
@@ -112,14 +109,14 @@ export function GatewayConfig({ values }: { values: Values }) {
       </p>
     </form>
 
-    {/* Crear planes de suscripción en la pasarela (botones = formularios aparte) */}
+    {/* Crear planes de suscripción según la FASE actual (precio por fase) */}
     {gateway === 'paypal' ? (
       <div className="rounded-card border border-border bg-surface p-5">
-        <h3 className="font-display text-base text-gold-light">Crear planes de suscripción en PayPal · {mode}</h3>
+        <h3 className="font-display text-base text-gold-light">Planes de suscripción · {mode}</h3>
         <p className="mt-1 text-[11px] text-faint">
-          Crea el Billing Plan anual en PayPal con el precio actual del club y guarda su ID
-          automáticamente. Requiere credenciales {mode} guardadas. Para cambiar el precio, crea un
-          plan nuevo (PayPal no permite editar el importe de un plan existente).
+          El precio del plan es el de la FASE activa. Como PayPal no permite editar el importe de un
+          plan, cada fase/precio usa su propio plan: se crea automáticamente al suscribirse, o puedes
+          pre-crearlo aquí. Requiere credenciales {mode} guardadas.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {([
@@ -128,8 +125,9 @@ export function GatewayConfig({ values }: { values: Values }) {
             ['PRESTIGE', 'EUR'],
             ['PRESTIGE', 'USD'],
           ] as const).map(([club, cur]) => {
-            const planId = v(`paypal.${mode}.plan.${club}.${cur}`);
-            const err = v(`paypal.${mode}.plan_error.${club}.${cur}`);
+            const info = subPlanInfo[`${club}.${cur}`];
+            const planId = mode === 'live' ? info?.live : info?.sandbox;
+            const err = mode === 'live' ? info?.liveErr : info?.sandboxErr;
             return (
               <form
                 key={`${club}.${cur}`}
@@ -141,15 +139,18 @@ export function GatewayConfig({ values }: { values: Values }) {
                 <input type="hidden" name="currency" value={cur} />
                 <input type="hidden" name="mode" value={mode} />
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-muted">{club} · {cur}</span>
+                  <span className="text-xs text-muted">
+                    {club} · {cur}
+                    {info ? <span className="text-faint"> — {info.phaseName || info.phaseKey}: {info.price}</span> : null}
+                  </span>
                   <button className="bevel bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#1a1408]">
-                    {planId ? 'Recrear plan' : 'Crear plan'}
+                    {planId ? 'Recrear' : 'Crear plan'}
                   </button>
                 </div>
                 {planId ? (
                   <span className="truncate text-[11px] text-silver" title={planId}>✓ {planId}</span>
                 ) : (
-                  <span className="text-[11px] text-faint">Sin plan</span>
+                  <span className="text-[11px] text-faint">Sin plan para esta fase/precio</span>
                 )}
                 {err ? <span className="text-[11px] text-red-400">⚠ {err}</span> : null}
               </form>
