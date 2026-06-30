@@ -175,6 +175,8 @@
     "communityTitle": "Community",
     "communitySoon": "Your Telegram, Discord and private content access will appear here.",
     "profileTitle": "Profile",
+    "saveProfile": "Save changes",
+    "profileSaved": "Details updated successfully.",
     "subscriptionTitle": "Subscription",
     "subRenews": "Next renewal",
     "subAmount": "Amount per year",
