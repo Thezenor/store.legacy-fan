@@ -39,7 +39,7 @@ export async function startReservation(opts: {
   currency: Currency;
   locale: string;
 }): Promise<StartReservationResult> {
-  const terms = await getReservationTerms(opts.currency);
+  const terms = await getReservationTerms(opts.currency, undefined, opts.club ?? undefined);
   const fullPricing = opts.club ? await getClubPricing(opts.club, opts.currency) : null;
 
   const reservation = await prisma.reservation.create({

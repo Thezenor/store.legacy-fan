@@ -5,8 +5,9 @@ import { PriceBlock } from '@/components/commerce/price-block';
 import { FaqSection } from '@/components/commerce/faq-section';
 import { CurrencySwitcher } from '@/components/commerce/currency-switcher';
 import { JsonLd } from '@/components/seo/json-ld';
-import { getClubPricing } from '@/lib/commerce';
+import { getClubPricing, isClubActive } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
+import { notFound } from 'next/navigation';
 import { productOffer, breadcrumb } from '@/lib/seo/structured-data';
 
 export async function generateMetadata({
@@ -30,6 +31,7 @@ export default async function PrestigePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  if (!(await isClubActive('PRESTIGE'))) notFound();
   const t = await getTranslations({ locale, namespace: 'prestige' });
   const pricingT = await getTranslations({ locale, namespace: 'pricing' });
   const faqT = await getTranslations({ locale, namespace: 'faq' });

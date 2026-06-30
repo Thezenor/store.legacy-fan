@@ -77,6 +77,12 @@
 - `MainNav` reescrito: soporta ítems internos, externos y desplegables (desktop hover/focus, móvil expandible).
 - **Página pública `/colecciones`** con las colecciones (World Peace, Sacred Blessings, Legends of War, Top Sports), cada una con su moneda y estado; sitemap ampliado.
 
+### Superadmin v2 (tanda 2) — clubs y pasarelas
+- **Gestión de Clubs** `/lf-admin/clubs`: activar/desactivar (muestra u oculta el club en la web), editar nombre/lema, y **lanzamiento y reserva propios por club** (con respaldo a los globales). Migración `club_config` aplicada.
+- El motor comercial usa la **reserva y el lanzamiento por club**; las páginas Prime/Prestige y la comparativa **ocultan los clubs inactivos**.
+- **Fases y precios** movido al final del menú (se publica poco).
+- **Pasarelas**: estado de credenciales PayPal (variables de entorno) visible en Configuración; las API keys viven en el entorno (seguro), no en BD.
+
 ### Superadmin v2 (tanda 1) — usabilidad y control
 - **Sidebar** resalta la sección activa (borde + fondo oro).
 - **Ficha de socio** completa: datos personales/dirección, pagos (con **ID de PayPal**) e factura, reservas, pedidos+envíos, histórico de puntos, referidos, y acciones (club/estado, ajuste de saldo, reset contraseña, bloqueo).

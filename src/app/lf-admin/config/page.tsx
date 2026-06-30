@@ -50,6 +50,12 @@ export default async function AdminConfig() {
           <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="payments.paypal.enabled" defaultChecked={bool('payments.paypal.enabled')} /> PayPal activo</label>
           <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="payments.stripe.enabled" defaultChecked={bool('payments.stripe.enabled')} /> Stripe activo</label>
           <Field label="Modo"><select name="payments.mode" defaultValue={str('payments.mode') || 'test'} className={inp}><option value="test">test</option><option value="live">live</option></select></Field>
+          <div className="w-full text-xs text-muted">
+            <p className="mb-1 text-faint">Credenciales (variables de entorno — Railway):</p>
+            <p>PAYPAL_CLIENT_ID: <span className={process.env.PAYPAL_CLIENT_ID ? 'text-state-green' : 'text-red-400'}>{process.env.PAYPAL_CLIENT_ID ? 'configurada' : 'sin configurar'}</span></p>
+            <p>PAYPAL_CLIENT_SECRET: <span className={process.env.PAYPAL_CLIENT_SECRET ? 'text-state-green' : 'text-red-400'}>{process.env.PAYPAL_CLIENT_SECRET ? 'configurada' : 'sin configurar'}</span></p>
+            <p>PAYPAL_WEBHOOK_ID: <span className={process.env.PAYPAL_WEBHOOK_ID ? 'text-state-green' : 'text-red-400'}>{process.env.PAYPAL_WEBHOOK_ID ? 'configurada' : 'sin configurar'}</span></p>
+          </div>
         </Group>
 
         <Group title="Reserva">

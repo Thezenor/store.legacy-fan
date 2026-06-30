@@ -14,7 +14,7 @@ export async function PriceBlock({
 }) {
   const [pricing, reservation, t] = await Promise.all([
     getClubPricing(club, currency, locale),
-    getReservationTerms(currency, locale),
+    getReservationTerms(currency, locale, club),
     getTranslations({ locale, namespace: 'pricing' }),
   ]);
 

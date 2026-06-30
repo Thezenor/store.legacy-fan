@@ -1,8 +1,30 @@
 import { cache } from 'react';
-import type { ClubType, MembershipPhase } from '@prisma/client';
+import type { ClubType, MembershipPhase, MembershipPlan } from '@prisma/client';
 import { prisma } from '../prisma';
 import { getDate, getNumber } from './settings';
 import { formatMoney, pickPrice, type Currency } from './money';
+
+// Plan (club) con su configuración propia. Memoizado por request.
+export const getPlan = cache(async (club: ClubType): Promise<MembershipPlan | null> => {
+  return prisma.membershipPlan.findUnique({ where: { club } });
+});
+
+/** ¿El club está activo (visible en la web)? */
+export async function isClubActive(club: ClubType): Promise<boolean> {
+  const p = await getPlan(club);
+  return !!p?.active;
+}
+
+/** Clubs activos, ordenados por club. */
+export async function listActiveClubs(): Promise<MembershipPlan[]> {
+  return prisma.membershipPlan.findMany({ where: { active: true }, orderBy: { club: 'asc' } });
+}
+
+/** Fecha de lanzamiento del club (propia) con respaldo a la global. */
+export async function getClubLaunchDate(club: ClubType): Promise<Date | null> {
+  const p = await getPlan(club);
+  return p?.launchDate ?? (await getDate('launch.date'));
+}
 
 /**
  * Resolución de la fase activa de un club (doc 09):
@@ -89,11 +111,21 @@ export interface ReservationTerms {
 export async function getReservationTerms(
   currency: Currency,
   locale?: string,
+  club?: ClubType,
 ): Promise<ReservationTerms> {
-  const amountCents = await getNumber(
-    currency === 'USD' ? 'reservation.amount.usd' : 'reservation.amount.eur',
-  );
-  const launchDate = await getDate('launch.date');
+  // Importe de reserva propio del club si está definido; si no, el global.
+  let amountCents: number | null = null;
+  let launchDate: Date | null;
+  if (club) {
+    const plan = await getPlan(club);
+    amountCents = currency === 'USD' ? plan?.reservationUsdCents ?? null : plan?.reservationEurCents ?? null;
+    launchDate = plan?.launchDate ?? (await getDate('launch.date'));
+  } else {
+    launchDate = await getDate('launch.date');
+  }
+  if (amountCents == null) {
+    amountCents = await getNumber(currency === 'USD' ? 'reservation.amount.usd' : 'reservation.amount.eur');
+  }
   const graceDays = await getNumber('reservation.grace_days_after_launch');
   const refundableHours = await getNumber('reservation.refundable_hours_before_launch');
 

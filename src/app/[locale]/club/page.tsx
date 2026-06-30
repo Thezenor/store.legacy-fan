@@ -4,7 +4,7 @@ import { PlanCard } from '@/components/commerce/plan-card';
 import { FaqSection } from '@/components/commerce/faq-section';
 import { CurrencySwitcher } from '@/components/commerce/currency-switcher';
 import { JsonLd } from '@/components/seo/json-ld';
-import { getClubPricing, getReservationTerms } from '@/lib/commerce';
+import { getClubPricing, getReservationTerms, isClubActive } from '@/lib/commerce';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { productOffer, faqPage, breadcrumb } from '@/lib/seo/structured-data';
 
@@ -36,15 +36,19 @@ export default async function ClubPage({
   setRequestLocale(locale);
 
   const currency = await getDisplayCurrency();
-  const [prime, prestige, primePricing, prestigePricing, reservation, c, faqT] = await Promise.all([
-    getTranslations({ locale, namespace: 'prime' }),
-    getTranslations({ locale, namespace: 'prestige' }),
-    getClubPricing('PRIME', currency, locale),
-    getClubPricing('PRESTIGE', currency, locale),
-    getReservationTerms(currency, locale),
-    getTranslations({ locale, namespace: 'common' }),
-    getTranslations({ locale, namespace: 'faq' }),
-  ]);
+  const [prime, prestige, primePricing, prestigePricing, primeRes, prestigeRes, primeActive, prestigeActive, c, faqT] =
+    await Promise.all([
+      getTranslations({ locale, namespace: 'prime' }),
+      getTranslations({ locale, namespace: 'prestige' }),
+      getClubPricing('PRIME', currency, locale),
+      getClubPricing('PRESTIGE', currency, locale),
+      getReservationTerms(currency, locale, 'PRIME'),
+      getReservationTerms(currency, locale, 'PRESTIGE'),
+      isClubActive('PRIME'),
+      isClubActive('PRESTIGE'),
+      getTranslations({ locale, namespace: 'common' }),
+      getTranslations({ locale, namespace: 'faq' }),
+    ]);
   const pricingT = await getTranslations({ locale, namespace: 'pricing' });
 
   if (!primePricing || !prestigePricing) return null;
@@ -92,25 +96,29 @@ export default async function ClubPage({
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <PlanCard
-            title={prime('title')}
-            tagline={prime('tagline')}
-            pricing={primePricing}
-            reservationFormatted={reservation.amountFormatted}
-            includes={prime.raw('includes') as string[]}
-            labels={{ ...labelsBase, reserve: prime('ctaReserve'), join: prime('ctaJoin') }}
-            accent="silver"
-          />
-          <PlanCard
-            title={prestige('title')}
-            tagline={prestige('tagline')}
-            pricing={prestigePricing}
-            reservationFormatted={reservation.amountFormatted}
-            includes={prestige.raw('includes') as string[]}
-            labels={{ ...labelsBase, reserve: prestige('ctaReserve'), join: prestige('ctaJoin') }}
-            accent="gold"
-            featured
-          />
+          {primeActive ? (
+            <PlanCard
+              title={prime('title')}
+              tagline={prime('tagline')}
+              pricing={primePricing}
+              reservationFormatted={primeRes.amountFormatted}
+              includes={prime.raw('includes') as string[]}
+              labels={{ ...labelsBase, reserve: prime('ctaReserve'), join: prime('ctaJoin') }}
+              accent="silver"
+            />
+          ) : null}
+          {prestigeActive ? (
+            <PlanCard
+              title={prestige('title')}
+              tagline={prestige('tagline')}
+              pricing={prestigePricing}
+              reservationFormatted={prestigeRes.amountFormatted}
+              includes={prestige.raw('includes') as string[]}
+              labels={{ ...labelsBase, reserve: prestige('ctaReserve'), join: prestige('ctaJoin') }}
+              accent="gold"
+              featured
+            />
+          ) : null}
         </div>
 
         <FaqSection title={faqT('title')} items={faqItems} />

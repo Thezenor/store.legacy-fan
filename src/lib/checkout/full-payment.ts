@@ -1,8 +1,8 @@
 import type { ClubType, Currency } from '@prisma/client';
 import { prisma } from '../prisma';
 import { getPaymentProvider } from '../payments';
-import { getClubPricing } from '../commerce';
-import { getSetting, getNumber, getDate } from '../commerce/settings';
+import { getClubPricing, getClubLaunchDate } from '../commerce';
+import { getSetting, getNumber } from '../commerce/settings';
 import { activateMembershipTx } from '../members/membership';
 import { createIncludedOrder } from '../members/order';
 import { createInvoice } from '../members/invoice';
@@ -115,7 +115,7 @@ export async function captureFullPaymentByOrder(orderId: string): Promise<string
   if (!club) return payment.reservationId; // sin club definitivo no se puede activar
 
   // Config leída fuera de la transacción.
-  const launchDate = await getDate('launch.date');
+  const launchDate = await getClubLaunchDate(club);
   const ratio = await getNumber('points.ratio_per_currency_unit');
   const expiryYears = await getNumber('points.expiry_years');
   const fullCents = payment.reservation.totalDueCents;

@@ -36,7 +36,7 @@ export default async function CheckoutPage({
   const t = await getTranslations({ locale, namespace: 'checkout' });
   const clubKey = club as ClubType;
   const pricing = await getClubPricing(clubKey, currency, locale);
-  const reservation = await getReservationTerms(currency, locale);
+  const reservation = await getReservationTerms(currency, locale, clubKey);
   if (!pricing) notFound();
 
   const amount = type === 'reserve' ? reservation.amountFormatted : pricing.priceFormatted;

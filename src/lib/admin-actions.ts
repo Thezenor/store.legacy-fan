@@ -490,6 +490,29 @@ export async function saveConfigAction(formData: FormData): Promise<void> {
   revalidatePath('/lf-admin/config');
 }
 
+/** Edita un club: nombre, tagline, activo, lanzamiento y reserva propios. */
+export async function updateClubAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id'));
+  const eur = String(formData.get('reservationEur') ?? '').trim();
+  const usd = String(formData.get('reservationUsd') ?? '').trim();
+  const launch = String(formData.get('launchDate') ?? '').trim();
+  const data = {
+    name: String(formData.get('name') ?? '').trim() || undefined,
+    tagline: String(formData.get('tagline') ?? '') || null,
+    active: formData.get('active') === 'on',
+    launchDate: launch ? new Date(launch) : null,
+    reservationEurCents: eur ? Math.round(parseFloat(eur.replace(',', '.')) * 100) : null,
+    reservationUsdCents: usd ? Math.round(parseFloat(usd.replace(',', '.')) * 100) : null,
+  };
+  await prisma.membershipPlan.update({ where: { id }, data });
+  await audit(admin.id, admin.email, 'club.update', 'MembershipPlan', id, null, { name: data.name, active: data.active });
+  revalidatePath('/lf-admin/clubs');
+  revalidatePath('/club');
+  revalidatePath('/club/prime');
+  revalidatePath('/club/prestige');
+}
+
 /** Bloquea/desbloquea un número de socio (doc 04). */
 export async function toggleMemberNumberBlockAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();

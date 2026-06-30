@@ -268,6 +268,11 @@ model MembershipPlan {
   name      String
   slug      String   @unique
   active    Boolean  @default(true)
+  // Configuración propia del club (lanzamiento y reserva por club; doc usuario).
+  tagline             String?
+  launchDate          DateTime?
+  reservationEurCents Int?
+  reservationUsdCents Int?
   phases    MembershipPhase[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
