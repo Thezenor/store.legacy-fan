@@ -7,6 +7,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthNav } from '@/components/auth/auth-nav';
 import { Wordmark } from '@/components/brand/wordmark';
 import { MainNav } from '@/components/brand/main-nav';
+import { LocaleSwitcher } from '@/components/brand/locale-switcher';
 import { Link } from '@/i18n/navigation';
 import { auth } from '@/lib/auth';
 import { getBool } from '@/lib/commerce/settings';
@@ -116,6 +117,7 @@ export default async function LocaleLayout({
                   loginLabel={t('login')}
                   logoutLabel={t('logout')}
                 />
+                <LocaleSwitcher />
                 <ThemeToggle label={t('toggleTheme')} />
               </div>
             </div>
