@@ -22,6 +22,9 @@ export async function generateMetadata({
   };
 }
 
+// Precios/colección dependen de la BD y del admin → render dinámico (evita BD en build).
+export const dynamic = 'force-dynamic';
+
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://store.legacy-fan.com';
 
 export default async function ClubPage({

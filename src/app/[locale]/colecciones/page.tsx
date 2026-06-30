@@ -14,6 +14,9 @@ export async function generateMetadata({
   return { title: t('title'), description: t('tagline') };
 }
 
+// Colecciones vienen de la BD/admin → render dinámico (evita BD en build).
+export const dynamic = 'force-dynamic';
+
 const METALS = ['silver', 'gold', 'copper'] as const;
 
 function statusLabel(status: CollectionStatus, t: (k: string) => string): string | null {

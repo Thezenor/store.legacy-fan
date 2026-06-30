@@ -18,6 +18,8 @@ const credentialsSchema = z.object({
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  // Necesario detrás de proxies (Railway/Cloudflare) para validar el host.
+  trustHost: true,
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',

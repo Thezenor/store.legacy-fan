@@ -19,6 +19,8 @@ export async function generateMetadata({
   return { title: t('title'), description: t('tagline') };
 }
 
+export const dynamic = 'force-dynamic';
+
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://store.legacy-fan.com';
 
 export default async function PrestigePage({
