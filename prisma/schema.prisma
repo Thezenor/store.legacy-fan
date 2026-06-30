@@ -417,6 +417,7 @@ model Subscription {
   intervalMonths         Int                @default(12)
   currentPeriodEnd       DateTime? // fin del periodo pagado (= fin de membresía)
   cancelAtPeriodEnd      Boolean            @default(false)
+  downgradeToClub        String? // si el socio bajó de nivel (p. ej. PRESTIGE→PRIME)
   rawPayload             Json?
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
@@ -424,6 +425,19 @@ model Subscription {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([providerSubscriptionId])
+}
+
+// Encuesta/registro al cancelar o bajar de nivel la suscripción (retención).
+model CancellationFeedback {
+  id        String   @id @default(cuid())
+  userId    String
+  fromClub  String?
+  outcome   String // 'downgraded' | 'cancelled'
+  reason    String?
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // Eventos de webhook ya procesados (idempotencia por id de evento de la pasarela).

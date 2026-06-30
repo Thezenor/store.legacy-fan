@@ -6,7 +6,7 @@ import { getPointsSummary } from '@/lib/points/summary';
 import { getReferralSummary } from '@/lib/referrals/stats';
 import { DigitalMemberCard } from '@/components/brand/member-card';
 import { FullPaymentButton } from '@/components/checkout/full-payment-button';
-import { CancelSubscriptionButton } from '@/components/account/cancel-subscription-button';
+import { CancelSubscriptionFlow } from '@/components/account/cancel-subscription-flow';
 import { AccountNav, type AccountNavItem } from '@/components/account/account-nav';
 import { ChangePasswordForm } from '@/components/account/change-password-form';
 import { updateOwnProfileAction } from '@/lib/account-actions';
@@ -67,6 +67,10 @@ export default async function AccountPage({
         ? { kind: 'ok' as const, msg: a('bannerReserved') }
         : sp.saved === 'profile'
           ? { kind: 'ok' as const, msg: a('profileSaved') }
+          : sp.saved === 'downgraded'
+          ? { kind: 'ok' as const, msg: a('bannerDowngraded') }
+          : sp.saved === 'cancelled'
+          ? { kind: 'warn' as const, msg: a('bannerCancelled') }
           : sp.pending
             ? { kind: 'warn' as const, msg: a('bannerPending') }
             : sp.error
@@ -156,7 +160,7 @@ export default async function AccountPage({
                 <dd className="text-foreground">{fmtDate(subscription.currentPeriodEnd)}</dd>
               </dl>
               <p className="text-xs text-muted">{a('subActiveNote')}</p>
-              <CancelSubscriptionButton label={a('subCancel')} confirmText={a('subCancelConfirm')} />
+              <CancelSubscriptionFlow canDowngrade={membership?.club === 'PRESTIGE'} />
             </div>
           ) : (
             <p className="text-sm text-muted">{subscription.status.replaceAll('_', ' ').toLowerCase()}</p>
@@ -317,6 +321,16 @@ export default async function AccountPage({
       <Section id="perfil" title={a('profileTitle')}>
         <p className="text-sm text-muted">
           {t('emailLabel')}: <span className="text-foreground">{session.user.email}</span>
+        </p>
+        <p className="mt-1 text-sm text-muted">
+          {a('subscriptionTitle')}:{' '}
+          <span className="text-foreground">
+            {!subscription
+              ? a('subStatusNone')
+              : subscription.status === 'ACTIVA' && !subscription.cancelAtPeriodEnd
+                ? a('subStatusActive')
+                : a('subStatusCancelled')}
+          </span>
         </p>
         <form action={updateOwnProfileAction} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <input type="hidden" name="locale" value={locale} />

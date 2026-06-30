@@ -33,6 +33,51 @@ export async function changeOwnPasswordAction(
   return { ok: true };
 }
 
+/**
+ * Flujo de retención al cancelar la suscripción. Registra la encuesta y, según la
+ * elección: 'downgrade' baja la membresía a PRIME (conserva al socio con los
+ * beneficios de Prime); 'cancel' cancela la renovación. Siempre guarda feedback.
+ */
+export async function submitCancellationAction(formData: FormData): Promise<void> {
+  const session = await auth();
+  if (!session?.user?.id) return;
+  const userId = session.user.id;
+  const outcome = String(formData.get('outcome') ?? '') === 'downgrade' ? 'downgrade' : 'cancel';
+  const reason = String(formData.get('reason') ?? '').trim() || null;
+  const comment = String(formData.get('comment') ?? '').trim().slice(0, 1000) || null;
+  const locale = String(formData.get('locale') ?? 'es');
+
+  const membership = await prisma.membership.findUnique({ where: { userId } });
+  const fromClub = membership?.club ?? null;
+
+  await prisma.cancellationFeedback.create({
+    data: { userId, fromClub, outcome: outcome === 'downgrade' ? 'downgraded' : 'cancelled', reason, comment },
+  });
+
+  if (outcome === 'downgrade' && fromClub === 'PRESTIGE') {
+    // Baja a Prime: conserva al socio con los beneficios de Prime. (El ajuste del
+    // importe recurrente en la pasarela se aplica en el siguiente ciclo / al re-
+    // suscribir a Prime; aquí reflejamos el cambio de nivel y el club de la suscripción.)
+    await prisma.membership.update({ where: { userId }, data: { club: 'PRIME' } }).catch(() => {});
+    await prisma.subscription
+      .update({ where: { userId }, data: { club: 'PRIME', downgradeToClub: 'PRIME' } })
+      .catch(() => {});
+    const base = locale === 'es' ? '/account' : `/${locale}/account`;
+    revalidatePath('/[locale]/account', 'page');
+    redirect(`${base}?saved=downgraded#suscripcion`);
+  }
+
+  // Cancelación efectiva (no renovará).
+  try {
+    await cancelSubscription(userId, reason ?? 'Cancelada por el socio');
+  } catch {
+    /* la marca local queda; reintentar luego */
+  }
+  const base = locale === 'es' ? '/account' : `/${locale}/account`;
+  revalidatePath('/[locale]/account', 'page');
+  redirect(`${base}?saved=cancelled#suscripcion`);
+}
+
 // El propio usuario edita sus datos de perfil (no requiere admin).
 export async function updateOwnProfileAction(formData: FormData): Promise<void> {
   const session = await auth();
