@@ -130,11 +130,11 @@ async function seedSettings() {
 }
 
 async function seedReservedMemberNumbers() {
-  // 1–100 reservados a asignación manual (doc 04). Idempotente.
+  // 1–50 reservados a asignación manual (decisión usuario; 51+ libres). Idempotente.
   const existing = await prisma.memberNumber.count({ where: { isReserved: true } });
-  if (existing >= 100) return;
+  if (existing >= 50) return;
   const data = [];
-  for (let n = 1; n <= 100; n++) {
+  for (let n = 1; n <= 50; n++) {
     data.push({
       number: n,
       formatted: `LF-${String(n).padStart(6, '0')}`,

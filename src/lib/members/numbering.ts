@@ -1,13 +1,13 @@
 import type { Prisma, MemberNumber } from '@prisma/client';
 
-// Numeración de socios (doc 04):
-//  - Numeración global única, formato LF-000101.
-//  - 1–100 reservados a asignación manual del superadmin (pre-sembrados).
-//  - La numeración automática empieza en 101.
+// Numeración de socios (doc 04 / decisión usuario):
+//  - Numeración global única, formato LF-000051+.
+//  - 1–50 reservados a asignación manual del superadmin (pre-sembrados).
+//  - La numeración automática empieza en 51 (51–100 liberados).
 //  - Solo el pago completo asigna número; la reserva no.
 //  - En upgrade Prime→Prestige se conserva el número.
 
-export const AUTO_START = 101;
+export const AUTO_START = 51;
 // Clave de advisory lock para serializar la generación de números (evita carreras).
 const LOCK_KEY = 919283;
 
@@ -24,12 +24,18 @@ export function formatMemberNumber(n: number): string {
 async function nextFreeNumber(tx: Prisma.TransactionClient): Promise<number> {
   // Serializa esta sección crítica entre transacciones concurrentes.
   await tx.$executeRawUnsafe(`SELECT pg_advisory_xact_lock(${LOCK_KEY})`);
-  const last = await tx.memberNumber.findFirst({
+  // Primer hueco libre ≥ AUTO_START (usa 51–100 antes de seguir subiendo).
+  const taken = await tx.memberNumber.findMany({
     where: { number: { gte: AUTO_START } },
-    orderBy: { number: 'desc' },
+    orderBy: { number: 'asc' },
     select: { number: true },
   });
-  return last ? last.number + 1 : AUTO_START;
+  let n = AUTO_START;
+  for (const row of taken) {
+    if (row.number === n) n += 1;
+    else if (row.number > n) break; // hueco encontrado
+  }
+  return n;
 }
 
 /**

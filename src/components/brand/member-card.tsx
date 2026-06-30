@@ -1,41 +1,64 @@
 import { ArtDecoMotif } from './art-deco-motif';
 
-// Carnet digital del socio (réplica del carnet físico Art Deco).
-// `active=false` muestra una vista atenuada para reservas pendientes.
+// Carnet digital del socio (réplica del carnet físico Art Deco): anverso con
+// número y nombre, y reverso. `active=false` atenúa (reservas pendientes).
 export function DigitalMemberCard({
   name,
   number,
+  side = 'front',
   active = true,
   pendingLabel,
 }: {
   name: string;
   number: string;
+  side?: 'front' | 'back';
   active?: boolean;
   pendingLabel?: string;
 }) {
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl border border-gold/30 bg-[#08080a] shadow-card"
+      className="relative w-full overflow-hidden rounded-2xl border border-gold/30 bg-[#0a0a0c] shadow-card"
       style={{ aspectRatio: '1.586' }}
     >
-      {/* Motivo Art Deco como fondo */}
-      <ArtDecoMotif className="pointer-events-none absolute -left-10 bottom-0 h-full opacity-70" />
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#08080a]/40 to-[#08080a]/85" />
+      {/* Motivo Art Deco (cuñas oro/plata/cobre + arco) en la esquina izquierda */}
+      <ArtDecoMotif className="pointer-events-none absolute -left-[12%] bottom-0 h-full opacity-90" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0c]/10 via-[#0a0a0c]/55 to-[#0a0a0c]/92" />
 
-      {/* Marco fino dorado interior */}
-      <div className="absolute inset-3 rounded-xl border border-gold/20" />
+      {/* Filos dorados (marco fino + líneas Art Deco como en el carnet) */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute right-[7%] top-[8%] h-[84%] w-px bg-gold/30" />
+        <div className="absolute left-[40%] right-0 top-[64%] h-px bg-gold/25" />
+      </div>
 
-      <div className={`relative flex h-full flex-col justify-between p-5 sm:p-7 ${active ? '' : 'opacity-60'}`}>
-        <p className="eyebrow">Legacy Fan Club · Member Card</p>
-        <div className="ml-auto max-w-[75%] text-right">
-          <p className="truncate font-display text-base text-foreground sm:text-2xl">{name}</p>
-          <p className="font-display text-2xl font-semibold text-metal-gold sm:text-4xl">
-            Nº {number}
-          </p>
-        </div>
-        <p className="truncate whitespace-nowrap text-[9px] tracking-wide text-faint sm:text-[10px]">
-          legacyfan.es © Legacy Fan Precious Metals LLC
-        </p>
+      <div className={`relative flex h-full flex-col p-5 sm:p-7 ${active ? '' : 'opacity-60'}`}>
+        {side === 'front' ? (
+          <>
+            <div className="mt-auto text-right">
+              {name ? (
+                <p className="truncate font-display text-sm uppercase tracking-[0.12em] text-foreground/90 sm:text-base">
+                  {name}
+                </p>
+              ) : null}
+              <p className="font-display text-3xl font-semibold tracking-wide text-metal-gold sm:text-5xl">
+                <span className="align-super text-base sm:text-2xl">Nº</span> {number}
+              </p>
+              <p className="mt-1 font-display text-[11px] uppercase tracking-[0.22em] text-gold-light sm:text-sm">
+                Legacy Fan Club · Member Card
+              </p>
+            </div>
+            <p className="mt-auto text-right text-[9px] leading-relaxed tracking-wide text-gold-light/70 sm:text-[11px]">
+              Legacy-fan.com
+              <br />© Legacy Fan Precious Metals LLC.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="ml-auto mt-auto max-w-[55%] text-right text-[9px] leading-relaxed tracking-wide text-gold-light/70 sm:text-[11px]">
+              Legacy-fan.com
+              <br />© Legacy Fan Precious Metals LLC.
+            </p>
+          </>
+        )}
       </div>
 
       {!active && pendingLabel ? (

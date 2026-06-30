@@ -455,10 +455,11 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      {/* Carnet digital */}
+      {/* Carnet digital (anverso + reverso). Permanente desde el primer pago. */}
       {isMember ? (
-        <div className="mt-6 max-w-md">
-          <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} />
+        <div className="mt-6 grid max-w-md gap-4 sm:max-w-2xl sm:grid-cols-2">
+          <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} side="front" />
+          <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} side="back" />
         </div>
       ) : reservation ? (
         <div className="mt-6 max-w-md">
