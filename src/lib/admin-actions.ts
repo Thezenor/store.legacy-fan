@@ -329,6 +329,7 @@ export async function toggleUserBlockAction(formData: FormData): Promise<void> {
   await prisma.user.update({ where: { id: userId }, data: { isBlocked: !user.isBlocked } });
   await audit(admin.id, admin.email, 'user.block_toggle', 'User', userId, { isBlocked: user.isBlocked }, { isBlocked: !user.isBlocked });
   revalidatePath('/lf-admin/socios');
+  revalidatePath('/lf-admin/registros');
 }
 
 // ───────────────── Socio: editar membresía / puntos / contraseña ─────────────────

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 const NAV = [
   { href: '/lf-admin', label: 'Dashboard' },
+  { href: '/lf-admin/registros', label: 'Registros' },
   { href: '/lf-admin/socios', label: 'Socios' },
   { href: '/lf-admin/numeracion', label: 'Numeración' },
   { href: '/lf-admin/pagos', label: 'Reservas y pagos' },
