@@ -208,6 +208,7 @@ export async function updateProductAction(formData: FormData): Promise<void> {
   await audit(admin.id, admin.email, 'product.update', 'Product', id, null, { id });
   revalidatePath('/lf-admin/productos');
   revalidatePath(`/lf-admin/productos/${id}`);
+  redirect('/lf-admin/productos?saved=1');
 }
 
 /** Sube una imagen y la asocia al producto (galería). */
@@ -974,6 +975,7 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
   await prisma.product.delete({ where: { id } }).catch(() => {});
   await audit(admin.id, admin.email, 'product.delete', 'Product', id, null, null);
   revalidatePath('/lf-admin/productos');
+  redirect('/lf-admin/productos');
 }
 
 export async function deleteCollectionAction(formData: FormData): Promise<void> {

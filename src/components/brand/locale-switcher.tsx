@@ -36,7 +36,7 @@ export function LocaleSwitcher() {
           aria-label={NAME[l]}
           title={NAME[l]}
           aria-current={l === current ? 'true' : undefined}
-          className={`rounded px-1 text-lg leading-none transition ${
+          className={`inline-flex h-9 w-8 items-center justify-center rounded text-lg leading-none transition ${
             l === current ? 'opacity-100' : 'opacity-50 hover:opacity-90'
           }`}
         >

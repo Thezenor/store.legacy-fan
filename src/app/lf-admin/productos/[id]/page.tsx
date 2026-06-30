@@ -8,6 +8,7 @@ import {
   deleteProductImageAction,
   uploadProductVideoAction,
 } from '@/lib/admin-actions';
+import { ConfirmButton } from '@/components/admin/confirm-button';
 
 const inp = 'mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground';
 const money = (c: number) => (c / 100).toFixed(2);
@@ -137,7 +138,12 @@ export default async function ProductoDetalle({ params }: { params: Promise<{ id
 
         <div className="flex gap-2">
           <button className="bevel bg-gold px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Guardar producto</button>
-          <button formAction={deleteProductAction} className="border border-red-500/40 px-4 py-3 text-xs uppercase tracking-wider text-red-400 hover:bg-surface-elevated">Borrar</button>
+          <ConfirmButton
+            action={deleteProductAction}
+            label="Borrar"
+            confirmText="¿Borrar este producto? No se puede deshacer."
+            className="border border-red-500/40 px-4 py-3 text-xs uppercase tracking-wider text-red-400 hover:bg-surface-elevated"
+          />
         </div>
       </form>
     </div>
