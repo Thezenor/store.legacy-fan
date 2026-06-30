@@ -22,6 +22,11 @@ const credentialsSchema = z.object({
 function resolveAuthSecret(): string {
   const fromEnv = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
   if (fromEnv) return fromEnv;
+  // Durante `next build` (recolección de datos de página) no se sirven peticiones
+  // ni se firman sesiones: no exigir el secreto aquí para no romper el build.
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return 'lf-build-time-placeholder-not-used-at-runtime';
+  }
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
       'AUTH_SECRET no está definido. Define AUTH_SECRET en el entorno (Railway) antes de arrancar.',
