@@ -426,6 +426,14 @@ model Subscription {
   @@index([providerSubscriptionId])
 }
 
+// Eventos de webhook ya procesados (idempotencia por id de evento de la pasarela).
+model WebhookEvent {
+  id         String   @id // id del evento (p. ej. WH-... de PayPal)
+  provider   String
+  eventType  String
+  receivedAt DateTime @default(now())
+}
+
 model Invoice {
   id          String   @id @default(cuid())
   paymentId   String   @unique

@@ -26,6 +26,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, reason: 'unverified' }, { status: 400 });
     }
 
+    // Idempotencia por id de evento: si ya lo procesamos, no repetir.
+    const eventId = (result.raw as { id?: string }).id;
+    if (eventId) {
+      try {
+        await prisma.webhookEvent.create({
+          data: { id: eventId, provider: 'PAYPAL', eventType: result.eventType },
+        });
+      } catch {
+        return NextResponse.json({ ok: true, duplicate: true });
+      }
+    }
+
     const event = result.raw as {
       resource?: {
         id?: string;
