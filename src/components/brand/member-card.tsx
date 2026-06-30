@@ -30,7 +30,7 @@ export function DigitalMemberCard({
   return (
     <div
       className="relative w-full overflow-hidden rounded-2xl bg-[#0c0c0e] shadow-card"
-      style={{ aspectRatio: '714 / 466', containerType: 'inline-size' }}
+      style={{ aspectRatio: '1579 / 996', containerType: 'inline-size' }}
     >
       {/* Imagen real del carnet */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -44,10 +44,11 @@ export function DigitalMemberCard({
       {/* Reverso: nombre + número + leyenda + footer (texto vivo, en oro). */}
       {isBack && active ? (
         <>
-          {/* Solo nombre + número, centrados en el panel oscuro de la derecha */}
+          {/* Solo nombre + número, centrados en el panel oscuro (encima del
+              footer, que ya viene horneado en la imagen). */}
           <div
             className="absolute flex flex-col items-center text-center"
-            style={{ left: '33%', right: '3%', top: '50%', transform: 'translateY(-50%)', color: GOLD }}
+            style={{ left: '37%', right: '3%', top: '46%', transform: 'translateY(-50%)', color: GOLD }}
           >
             {name ? (
               <span
@@ -59,26 +60,18 @@ export function DigitalMemberCard({
             ) : null}
             <span
               className="font-sans font-semibold"
-              style={{ fontSize: '6.7cqw', lineHeight: 1.15, marginTop: '2.8cqw', letterSpacing: '0.01em' }}
+              style={{ fontSize: '6.7cqw', lineHeight: 1.15, marginTop: '2.6cqw', letterSpacing: '0.01em' }}
             >
               <span style={{ fontSize: '3.6cqw', verticalAlign: '0.95em', marginRight: '0.25em' }}>Nº</span>
               {number}
             </span>
           </div>
 
-          {/* Footer (se mantiene tal cual) */}
-          <div
-            className="absolute text-center font-sans"
-            style={{ left: '33%', right: '3%', bottom: '7%', color: GOLD, opacity: 0.78, fontSize: '1.55cqw', letterSpacing: '0.06em' }}
-          >
-            Legacy-fan.com · © Legacy Fan Precious Metals LLC.
-          </div>
-
           {/* QR firmado (solo si el sistema de carnet está activo) */}
           {qrDataUri ? (
             <div
               className="absolute rounded-md bg-white shadow-card"
-              style={{ top: '8%', right: '5%', width: '15%', padding: '1%' }}
+              style={{ top: '7%', right: '5%', width: '14%', padding: '1%' }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrDataUri} alt={`QR socio ${number}`} className="h-full w-full" />
