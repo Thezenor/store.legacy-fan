@@ -10,6 +10,9 @@ const inp = 'mt-1 w-full rounded border border-border bg-background px-2 py-1.5 
 // Configuración dinámica de pasarela: eliges pasarela → aparecen sus campos.
 export function GatewayConfig({ values }: { values: Values }) {
   const [gateway, setGateway] = useState<'paypal' | 'stripe'>('paypal');
+  const [mode, setMode] = useState<'sandbox' | 'live'>(
+    (String(values['paypal.mode'] ?? '') as 'sandbox' | 'live') || 'sandbox',
+  );
   const v = (k: string) => String(values[k] ?? '');
   const b = (k: string) => Boolean(values[k]);
 
@@ -33,10 +36,10 @@ export function GatewayConfig({ values }: { values: Values }) {
       {gateway === 'paypal' ? (
         <div className="mt-3 space-y-4">
           <label className="block max-w-xs"><span className="text-xs text-muted">Modo activo</span>
-            <select name="paypal.mode" defaultValue={v('paypal.mode') || 'sandbox'} className={inp}>
+            <select name="paypal.mode" value={mode} onChange={(e) => setMode(e.target.value as 'sandbox' | 'live')} className={inp}>
               <option value="sandbox">sandbox (pruebas)</option><option value="live">live (producción)</option>
             </select>
-            <span className="mt-1 block text-[11px] text-faint">Cambia entre sandbox y live sin reescribir credenciales: se guardan los dos juegos.</span>
+            <span className="mt-1 block text-[11px] text-faint">Cambia entre sandbox y live sin reescribir credenciales: se guardan los dos juegos. Los IDs de plan de abajo se guardan para el modo seleccionado.</span>
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -62,6 +65,25 @@ export function GatewayConfig({ values }: { values: Values }) {
                 <input name="paypal.live.webhook_id" defaultValue={v('paypal.live.webhook_id')} className={inp} /></label>
             </fieldset>
           </div>
+
+          {/* Planes de suscripción (renovación anual). IDs creados en PayPal y
+              pegados aquí; se guardan para el MODO seleccionado arriba. */}
+          <fieldset key={mode} className="rounded border border-border p-3">
+            <legend className="px-1 text-xs uppercase tracking-wider text-gold-light">
+              Planes de suscripción · {mode}
+            </legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block"><span className="text-xs text-muted">Plan Prime EUR</span>
+                <input name="paypal.plan.PRIME.EUR" defaultValue={v(`paypal.${mode}.plan.PRIME.EUR`)} className={inp} /></label>
+              <label className="block"><span className="text-xs text-muted">Plan Prime USD</span>
+                <input name="paypal.plan.PRIME.USD" defaultValue={v(`paypal.${mode}.plan.PRIME.USD`)} className={inp} /></label>
+              <label className="block"><span className="text-xs text-muted">Plan Prestige EUR</span>
+                <input name="paypal.plan.PRESTIGE.EUR" defaultValue={v(`paypal.${mode}.plan.PRESTIGE.EUR`)} className={inp} /></label>
+              <label className="block"><span className="text-xs text-muted">Plan Prestige USD</span>
+                <input name="paypal.plan.PRESTIGE.USD" defaultValue={v(`paypal.${mode}.plan.PRESTIGE.USD`)} className={inp} /></label>
+            </div>
+            <p className="mt-2 text-[11px] text-faint">Crea los planes en PayPal (Billing Plans) y pega aquí sus IDs (P-XXXX). Cada plan fija su divisa e importe anual.</p>
+          </fieldset>
 
           <label className="flex items-center gap-2 text-sm text-muted">
             <input type="checkbox" name="enabled" defaultChecked={b('payments.paypal.enabled')} /> Usar PayPal como método de pago

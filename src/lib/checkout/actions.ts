@@ -9,6 +9,8 @@ import { prisma } from '../prisma';
 import { RL } from '../rate-limit';
 import { getDisplayCurrency } from '../commerce/currency';
 import { getPlan } from '../commerce';
+import { getSetting } from '../commerce/settings';
+import { startSubscription } from '../subscriptions';
 import { checkoutRegisterSchema, loginSchema } from '../validation/auth';
 import { emailVerification } from '../tokens';
 import { sendVerificationEmail } from '../email/auth-emails';
@@ -218,6 +220,12 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
         return { ok: false, code: 'already_active' };
       }
       const { approveUrl } = await startReservation({ userId, club, currency, locale });
+      return { ok: true, approveUrl };
+    }
+    // Pago completo: suscripción recurrente o pago único según billing.mode.
+    const billingMode = await getSetting<string>('billing.mode');
+    if (billingMode === 'subscription') {
+      const { approveUrl } = await startSubscription({ userId, club, currency, locale });
       return { ok: true, approveUrl };
     }
     const { approveUrl } = await startFullPayment({ userId, club, currency, locale });

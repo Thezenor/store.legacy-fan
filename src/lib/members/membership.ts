@@ -62,6 +62,49 @@ export async function activateMembershipTx(
   return { membership, number };
 }
 
+/**
+ * Renueva la membresía un ciclo más (suscripción anual). Extiende endsAt (al
+ * periodo de la pasarela si se conoce, o +1 año) CONSERVANDO el número de socio
+ * y la fecha de alta. Reactiva si estaba caducada/suspendida. Idempotente por
+ * periodo: no acorta una fecha de fin ya mayor. No reasigna número.
+ */
+export async function renewMembershipTx(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  periodEnd?: Date | null,
+) {
+  const existing = await tx.membership.findUnique({ where: { userId } });
+  if (!existing) return null; // sin alta previa no hay nada que renovar
+
+  const now = new Date();
+  const floor = existing.endsAt && existing.endsAt.getTime() > now.getTime() ? existing.endsAt : now;
+  // Si la pasarela informa fin de periodo, es autoritativo (idempotente ante
+  // reentregas del webhook); si no, sumamos un año. Nunca acortamos.
+  let newEnd: Date;
+  if (periodEnd) {
+    newEnd = periodEnd.getTime() > floor.getTime() ? periodEnd : floor;
+  } else {
+    newEnd = addYears(floor, 1);
+  }
+
+  const membership = await tx.membership.update({
+    where: { userId },
+    data: { status: 'SOCIO_ACTIVO', endsAt: newEnd },
+  });
+
+  await tx.auditLog.create({
+    data: {
+      actorId: userId,
+      action: 'membership.renewed',
+      entity: 'Membership',
+      entityId: membership.id,
+      newValue: { endsAt: newEnd.toISOString() },
+    },
+  });
+
+  return membership;
+}
+
 /** Activa la membresía en su propia transacción (uso directo / admin). */
 export async function activateMembership(userId: string, club: ClubType) {
   const launchDate = await getDate('launch.date');

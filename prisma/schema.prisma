@@ -100,6 +100,16 @@ enum PaymentMode {
   LIVE
 }
 
+// Estado de una suscripción recurrente (renovación anual, doc usuario).
+enum SubscriptionStatus {
+  PENDIENTE // creada, esperando aprobación del usuario en la pasarela
+  ACTIVA // suscripción vigente
+  EN_PRUEBA // periodo de prueba (no usado de inicio)
+  PAGO_FALLIDO // impago / suspendida por la pasarela
+  CANCELADA // no renovará (cancelada por socio o admin)
+  CADUCADA // expiró sin renovar
+}
+
 enum PointsTxnType {
   EARN
   SPEND
@@ -155,6 +165,7 @@ model User {
   profile      UserProfile?
   roles        UserRole[]
   membership   Membership?
+  subscription Subscription?
   reservations Reservation[]
   payments     Payment[]
   orders       Order[]
@@ -382,6 +393,31 @@ model Payment {
 
   @@index([userId])
   @@index([providerRef])
+}
+
+// Suscripción recurrente para la renovación anual de la membresía (doc usuario).
+// Agnóstica de pasarela: PayPal (Subscriptions) y Stripe (Billing) la implementan.
+// El número de socio NO depende de la suscripción: es permanente (Membership).
+model Subscription {
+  id                     String             @id @default(cuid())
+  userId                 String             @unique
+  provider               PaymentProvider
+  mode                   PaymentMode        @default(TEST)
+  providerSubscriptionId String?            @unique // id de la suscripción en la pasarela
+  status                 SubscriptionStatus @default(PENDIENTE)
+  club                   String
+  currency               Currency
+  amountCents            Int                @default(0) // importe por ciclo (anual)
+  intervalMonths         Int                @default(12)
+  currentPeriodEnd       DateTime? // fin del periodo pagado (= fin de membresía)
+  cancelAtPeriodEnd      Boolean            @default(false)
+  rawPayload             Json?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([providerSubscriptionId])
 }
 
 model Invoice {

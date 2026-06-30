@@ -11,6 +11,7 @@ export type SettingKey =
   | 'payments.paypal.enabled'
   | 'payments.stripe.enabled'
   | 'payments.mode'
+  | 'billing.mode'
   | 'reservation.amount.eur'
   | 'reservation.amount.usd'
   | 'reservation.grace_days_after_launch'
@@ -32,6 +33,7 @@ const DEFAULTS: Record<string, unknown> = {
   'payments.paypal.enabled': true,
   'payments.stripe.enabled': false,
   'payments.mode': 'test',
+  'billing.mode': 'one_time',
   'reservation.amount.eur': 5000,
   'reservation.amount.usd': 5000,
   'reservation.grace_days_after_launch': 7,
@@ -56,6 +58,17 @@ export async function getSetting<T = unknown>(key: SettingKey): Promise<T> {
   const map = await loadAll();
   const value = map.has(key) ? map.get(key) : DEFAULTS[key];
   return value as T;
+}
+
+/**
+ * Lectura de claves dinámicas no enumeradas en SettingKey (p. ej. credenciales y
+ * planes de pasarela: `paypal.sandbox.plan.PRIME.EUR`, `paypal.mode`). Devuelve
+ * string o null. No usar para configuración comercial tipada (usa getSetting).
+ */
+export async function getSettingString(key: string): Promise<string | null> {
+  const map = await loadAll();
+  const v = map.get(key);
+  return v == null ? null : String(v);
 }
 
 export async function getBool(key: SettingKey): Promise<boolean> {

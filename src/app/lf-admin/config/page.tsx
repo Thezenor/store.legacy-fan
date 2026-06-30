@@ -49,6 +49,7 @@ export default async function AdminConfig() {
 
         <Group title="Sistema · modo de pago global">
           <Field label="Modo (test/live)"><select name="payments.mode" defaultValue={str('payments.mode') || 'test'} className={inp}><option value="test">test</option><option value="live">live</option></select></Field>
+          <Field label="Modelo de cobro"><select name="billing.mode" defaultValue={str('billing.mode') || 'one_time'} className={inp}><option value="one_time">Pago único (anual manual)</option><option value="subscription">Suscripción (renovación automática)</option></select></Field>
         </Group>
 
         <Group title="Reserva">
@@ -84,6 +85,15 @@ export default async function AdminConfig() {
             'paypal.live.client_secret': str('paypal.live.client_secret'),
             'paypal.live.webhook_id': str('paypal.live.webhook_id'),
             'paypal.mode': str('paypal.mode'),
+            // IDs de plan de suscripción por modo (sandbox/live).
+            'paypal.sandbox.plan.PRIME.EUR': str('paypal.sandbox.plan.PRIME.EUR'),
+            'paypal.sandbox.plan.PRIME.USD': str('paypal.sandbox.plan.PRIME.USD'),
+            'paypal.sandbox.plan.PRESTIGE.EUR': str('paypal.sandbox.plan.PRESTIGE.EUR'),
+            'paypal.sandbox.plan.PRESTIGE.USD': str('paypal.sandbox.plan.PRESTIGE.USD'),
+            'paypal.live.plan.PRIME.EUR': str('paypal.live.plan.PRIME.EUR'),
+            'paypal.live.plan.PRIME.USD': str('paypal.live.plan.PRIME.USD'),
+            'paypal.live.plan.PRESTIGE.EUR': str('paypal.live.plan.PRESTIGE.EUR'),
+            'paypal.live.plan.PRESTIGE.USD': str('paypal.live.plan.PRESTIGE.USD'),
             'payments.paypal.enabled': bool('payments.paypal.enabled'),
             'stripe.secret_key': str('stripe.secret_key'),
             'stripe.publishable_key': str('stripe.publishable_key'),

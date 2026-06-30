@@ -2,10 +2,31 @@ import type {
   CapturePaymentResult,
   CreatePaymentInput,
   CreatePaymentResult,
+  CreateSubscriptionInput,
+  CreateSubscriptionResult,
   PaymentProvider,
+  SubscriptionInfo,
+  SubscriptionProvider,
+  SubscriptionRemoteStatus,
   WebhookVerificationResult,
 } from './types';
 import { prisma } from '../prisma';
+
+// Mapea el estado remoto de PayPal a nuestro estado de suscripción.
+function mapPayPalSubStatus(s?: string): SubscriptionRemoteStatus {
+  switch (s) {
+    case 'ACTIVE':
+      return 'ACTIVA';
+    case 'SUSPENDED':
+      return 'PAGO_FALLIDO';
+    case 'CANCELLED':
+      return 'CANCELADA';
+    case 'EXPIRED':
+      return 'CADUCADA';
+    default:
+      return 'PENDIENTE'; // APPROVAL_PENDING / APPROVED
+  }
+}
 
 // Lee una credencial: BD (panel admin) con respaldo a variable de entorno.
 async function cred(key: string, envName: string): Promise<string | undefined> {
@@ -33,7 +54,7 @@ async function credForMode(
  * webhooks, PAYPAL_WEBHOOK_ID. Sin credenciales, las llamadas fallan de forma
  * controlada (el flujo está implementado pero no probado hasta tener sandbox).
  */
-export class PayPalProvider implements PaymentProvider {
+export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
   readonly key = 'PAYPAL' as const;
 
   private tokenCache: { token: string; expiresAt: number } | null = null;
@@ -184,5 +205,64 @@ export class PayPalProvider implements PaymentProvider {
       providerRef: event.resource?.custom_id,
       raw: event,
     };
+  }
+
+  // ── Suscripciones (PayPal Subscriptions / Billing) ────────────────────────
+
+  async createSubscription(input: CreateSubscriptionInput): Promise<CreateSubscriptionResult> {
+    const token = await this.accessToken();
+    const res = await fetch(`${await this.baseUrl()}/v1/billing/subscriptions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan_id: input.planId,
+        custom_id: input.referenceId,
+        application_context: {
+          brand_name: 'Legacy Fan',
+          user_action: 'SUBSCRIBE_NOW',
+          return_url: input.returnUrl,
+          cancel_url: input.cancelUrl,
+        },
+      }),
+    });
+    if (!res.ok) throw new Error(`PayPal create subscription falló: HTTP ${res.status}`);
+    const data = (await res.json()) as { id: string; links?: { rel: string; href: string }[] };
+    const approveUrl = data.links?.find((l) => l.rel === 'approve')?.href;
+    return { providerSubscriptionId: data.id, approveUrl };
+  }
+
+  async getSubscription(providerSubscriptionId: string): Promise<SubscriptionInfo> {
+    const token = await this.accessToken();
+    const res = await fetch(
+      `${await this.baseUrl()}/v1/billing/subscriptions/${providerSubscriptionId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!res.ok) throw new Error(`PayPal get subscription falló: HTTP ${res.status}`);
+    const data = (await res.json()) as {
+      status?: string;
+      billing_info?: { next_billing_time?: string };
+    };
+    const next = data.billing_info?.next_billing_time;
+    return {
+      status: mapPayPalSubStatus(data.status),
+      currentPeriodEnd: next ? new Date(next) : undefined,
+      raw: data,
+    };
+  }
+
+  async cancelSubscription(providerSubscriptionId: string, reason = 'Cancelada por el socio'): Promise<void> {
+    const token = await this.accessToken();
+    const res = await fetch(
+      `${await this.baseUrl()}/v1/billing/subscriptions/${providerSubscriptionId}/cancel`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      },
+    );
+    // 204 = cancelada; 422 si ya estaba cancelada → lo tratamos como idempotente.
+    if (!res.ok && res.status !== 422) {
+      throw new Error(`PayPal cancel subscription falló: HTTP ${res.status}`);
+    }
   }
 }

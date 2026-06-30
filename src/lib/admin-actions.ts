@@ -489,6 +489,8 @@ const CONFIG_FIELDS: { key: string; type: 'string' | 'number' | 'bool' | 'money'
   { key: 'launch.date', type: 'date' },
   // payments.*.enabled se gestionan en la sección Pasarelas (saveGatewayAction).
   { key: 'payments.mode', type: 'string' },
+  // Modelo de cobro de la membresía: 'one_time' (pago único) o 'subscription' (anual recurrente).
+  { key: 'billing.mode', type: 'string' },
   { key: 'reservation.amount.eur', type: 'money' },
   { key: 'reservation.amount.usd', type: 'money' },
   { key: 'reservation.grace_days_after_launch', type: 'number' },
@@ -632,6 +634,24 @@ export async function saveGatewayAction(formData: FormData): Promise<void> {
       update: { value },
       create: { key, value, group: 'payments' },
     });
+  }
+
+  // IDs de plan de suscripción: se guardan para el modo seleccionado
+  // (paypal.{mode}.plan.{CLUB}.{CUR}). Solo se sobrescriben si llegan con valor.
+  if (gateway === 'paypal') {
+    const mode = String(formData.get('paypal.mode') || 'sandbox');
+    for (const club of ['PRIME', 'PRESTIGE']) {
+      for (const cur of ['EUR', 'USD']) {
+        const planVal = String(formData.get(`paypal.plan.${club}.${cur}`) ?? '').trim();
+        if (!planVal) continue;
+        const key = `paypal.${mode}.plan.${club}.${cur}`;
+        await prisma.systemSetting.upsert({
+          where: { key },
+          update: { value: planVal },
+          create: { key, value: planVal, group: 'payments' },
+        });
+      }
+    }
   }
   const enabledKey = gateway === 'stripe' ? 'payments.stripe.enabled' : 'payments.paypal.enabled';
   await prisma.systemSetting.upsert({
