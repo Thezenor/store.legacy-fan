@@ -173,7 +173,19 @@
     "noOrders": "Aucune commande pour le moment.",
     "communityTitle": "Communauté",
     "communitySoon": "Vos accès Telegram, Discord et contenus privés apparaîtront ici.",
-    "profileTitle": "Profil"
+    "profileTitle": "Profil",
+    "subscriptionTitle": "Abonnement",
+    "subRenews": "Prochain renouvellement",
+    "subAmount": "Montant par an",
+    "subActiveNote": "Votre abonnement se renouvelle automatiquement tous les 12 mois. Vous pouvez annuler le renouvellement à tout moment ; vous conservez l'accès jusqu'à la fin de la période payée.",
+    "subCancel": "Annuler le renouvellement",
+    "subCancelConfirm": "Annuler le renouvellement automatique ? Vous conserverez l'accès jusqu'à la fin de la période déjà payée.",
+    "subCanceled": "Renouvellement annulé. Aucun autre prélèvement ; vous conservez l'accès jusqu'à la fin de la période.",
+    "bannerWelcome": "Bienvenue ! Votre abonnement est actif.",
+    "bannerReserved": "Réservation reçue. Merci !",
+    "bannerSubscribed": "Abonnement activé avec succès.",
+    "bannerPending": "Votre paiement est en cours de vérification ; nous vous préviendrons une fois confirmé.",
+    "bannerError": "Un problème est survenu avec le paiement. Réessayez ou contactez-nous."
   },
   "collections": {
     "eyebrow": "Legacy Fan",

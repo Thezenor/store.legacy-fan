@@ -6,6 +6,7 @@ import { getPointsSummary } from '@/lib/points/summary';
 import { getReferralSummary } from '@/lib/referrals/stats';
 import { DigitalMemberCard } from '@/components/brand/member-card';
 import { FullPaymentButton } from '@/components/checkout/full-payment-button';
+import { CancelSubscriptionButton } from '@/components/account/cancel-subscription-button';
 import { Link } from '@/i18n/navigation';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -19,10 +20,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default async function AccountPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ welcome?: string; reserved?: string; subscribed?: string; pending?: string; error?: string }>;
 }) {
   const { locale } = await params;
+  const sp = await searchParams;
   setRequestLocale(locale);
   const session = await requireUser(locale);
   const userId = session.user.id;
@@ -37,7 +41,7 @@ export default async function AccountPage({
     error: co('errors.error'),
   };
 
-  const [profile, reservation, membership, orders, payments, points, referral] = await Promise.all([
+  const [profile, reservation, membership, orders, payments, points, referral, subscription] = await Promise.all([
     prisma.userProfile.findUnique({ where: { userId } }),
     prisma.reservation.findFirst({
       where: { userId, status: { in: ['RESERVA_PENDIENTE', 'PAGO_COMPLETO'] } },
@@ -48,7 +52,20 @@ export default async function AccountPage({
     prisma.payment.findMany({ where: { userId }, include: { invoice: true }, orderBy: { createdAt: 'desc' } }),
     getPointsSummary(userId),
     getReferralSummary(userId),
+    prisma.subscription.findUnique({ where: { userId } }),
   ]);
+  // Aviso de retorno de pago.
+  const banner = sp.welcome
+    ? { kind: 'ok' as const, msg: a('bannerWelcome') }
+    : sp.subscribed
+      ? { kind: 'ok' as const, msg: a('bannerSubscribed') }
+      : sp.reserved
+        ? { kind: 'ok' as const, msg: a('bannerReserved') }
+        : sp.pending
+          ? { kind: 'warn' as const, msg: a('bannerPending') }
+          : sp.error
+            ? { kind: 'err' as const, msg: a('bannerError') }
+            : null;
 
   const verified = isEmailVerified(session);
   const fullName = profile ? `${profile.firstName} ${profile.lastName}` : (session.user.email ?? '');
@@ -62,6 +79,20 @@ export default async function AccountPage({
     <section className="mx-auto max-w-2xl animate-fade-in">
       <h1 className="font-display text-3xl font-bold text-metal-gold">{fullName}</h1>
       <p className="mt-2 text-muted">{session.user.email}</p>
+
+      {banner ? (
+        <p
+          className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+            banner.kind === 'ok'
+              ? 'border-green-500/40 bg-green-500/10 text-green-300'
+              : banner.kind === 'warn'
+                ? 'border-gold/40 bg-gold/10 text-foreground'
+                : 'border-red-500/40 bg-red-500/10 text-red-300'
+          }`}
+        >
+          {banner.msg}
+        </p>
+      ) : null}
 
       {!verified ? (
         <div className="mt-4 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm">
@@ -88,6 +119,28 @@ export default async function AccountPage({
             pendingLabel={a('statusReservaPendiente')}
           />
         </div>
+      ) : null}
+
+      {/* Suscripción (renovación automática): estado + cancelar */}
+      {subscription ? (
+        <Section title={a('subscriptionTitle')}>
+          {subscription.status === 'CANCELADA' || subscription.cancelAtPeriodEnd ? (
+            <p className="text-sm text-muted">{a('subCanceled')}</p>
+          ) : subscription.status === 'ACTIVA' ? (
+            <div className="space-y-2 text-sm">
+              <dl className="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+                <dt className="text-muted">{a('subAmount')}</dt>
+                <dd className="text-foreground">{formatMoney(subscription.amountCents, subscription.currency, locale)}</dd>
+                <dt className="text-muted">{a('subRenews')}</dt>
+                <dd className="text-foreground">{fmtDate(subscription.currentPeriodEnd)}</dd>
+              </dl>
+              <p className="text-xs text-muted">{a('subActiveNote')}</p>
+              <CancelSubscriptionButton label={a('subCancel')} confirmText={a('subCancelConfirm')} />
+            </div>
+          ) : (
+            <p className="text-sm text-muted">{subscription.status.replaceAll('_', ' ').toLowerCase()}</p>
+          )}
+        </Section>
       ) : null}
 
       {/* Socio activo: resumen + membresía + productos + comunidad */}

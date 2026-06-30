@@ -173,7 +173,19 @@
     "noOrders": "No orders yet.",
     "communityTitle": "Community",
     "communitySoon": "Your Telegram, Discord and private content access will appear here.",
-    "profileTitle": "Profile"
+    "profileTitle": "Profile",
+    "subscriptionTitle": "Subscription",
+    "subRenews": "Next renewal",
+    "subAmount": "Amount per year",
+    "subActiveNote": "Your membership renews automatically every 12 months. You can cancel the renewal anytime; you keep access until the end of the paid period.",
+    "subCancel": "Cancel renewal",
+    "subCancelConfirm": "Cancel automatic renewal? You will keep access until the end of the period already paid.",
+    "subCanceled": "Renewal cancelled. No further charges; you keep access until the end of the period.",
+    "bannerWelcome": "Welcome! Your membership is active.",
+    "bannerReserved": "Reservation received. Thank you!",
+    "bannerSubscribed": "Subscription activated successfully.",
+    "bannerPending": "Your payment is being verified; we'll let you know once confirmed.",
+    "bannerError": "There was a problem with the payment. Please try again or contact us."
   },
   "collections": {
     "eyebrow": "Legacy Fan",

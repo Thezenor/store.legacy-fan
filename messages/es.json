@@ -173,7 +173,19 @@
     "noOrders": "Aún no hay pedidos.",
     "communityTitle": "Comunidad",
     "communitySoon": "Tus accesos a Telegram, Discord y contenidos privados aparecerán aquí.",
-    "profileTitle": "Perfil"
+    "profileTitle": "Perfil",
+    "subscriptionTitle": "Suscripción",
+    "subRenews": "Próxima renovación",
+    "subAmount": "Importe por año",
+    "subActiveNote": "Tu membresía se renueva automáticamente cada 12 meses. Puedes cancelar la renovación cuando quieras; conservarás el acceso hasta el final del periodo pagado.",
+    "subCancel": "Cancelar renovación",
+    "subCancelConfirm": "¿Cancelar la renovación automática? Conservarás el acceso hasta el final del periodo ya pagado.",
+    "subCanceled": "Renovación cancelada. No se harán más cobros; mantienes el acceso hasta el final del periodo.",
+    "bannerWelcome": "¡Bienvenido! Tu membresía está activa.",
+    "bannerReserved": "Reserva recibida. ¡Gracias!",
+    "bannerSubscribed": "Suscripción activada correctamente.",
+    "bannerPending": "Tu pago está en verificación; te avisaremos cuando se confirme.",
+    "bannerError": "Hubo un problema con el pago. Inténtalo de nuevo o contáctanos."
   },
   "collections": {
     "eyebrow": "Legacy Fan",
