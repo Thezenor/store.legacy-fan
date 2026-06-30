@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { checkoutSubmitAction, checkEmailExistsAction } from '@/lib/checkout/actions';
 import { inputClass, Alert } from '@/components/auth/ui';
 import { COUNTRIES } from '@/lib/countries';
+import { SecondCoinUpsell, type UpsellData } from '@/components/checkout/second-coin-upsell';
 
 type Selected = 'reserve' | 'full';
 type Mode = 'register' | 'login';
@@ -20,6 +21,7 @@ export function CheckoutForm({
   fullFormatted,
   listFormatted,
   refCode,
+  upsell = null,
 }: {
   club: string;
   isLoggedIn: boolean;
@@ -27,6 +29,7 @@ export function CheckoutForm({
   fullFormatted: string;
   listFormatted: string | null;
   refCode?: string;
+  upsell?: UpsellData | null;
 }) {
   const tc = useTranslations('checkout');
   const ta = useTranslations('auth');
@@ -159,6 +162,9 @@ export function CheckoutForm({
           chooseLabel={tc('choose')}
         />
       </div>
+
+      {/* Upsell de 2ª moneda (solo Prestige): elegir incluida + añadir la segunda */}
+      {upsell ? <SecondCoinUpsell data={upsell} /> : null}
 
       {!isLoggedIn ? (
         <div className="rounded-card border border-border bg-surface p-5">

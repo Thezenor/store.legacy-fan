@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { saveConfigAction } from '@/lib/admin-actions';
+import { saveConfigAction, uploadUpsellCoinImageAction } from '@/lib/admin-actions';
 import { GatewayConfig } from '@/components/admin/gateway-config';
 import { getClubPricing } from '@/lib/commerce';
 
@@ -90,12 +90,43 @@ export default async function AdminConfig() {
           <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="upsell.second_coin.enabled_prestige" defaultChecked={bool('upsell.second_coin.enabled_prestige')} /> Upsell 2ª moneda en Prestige</label>
         </Group>
 
+        <Group title="Upsell 2ª moneda (Prestige) · nombres y precios">
+          <Field label="Nombre moneda A"><input name="upsell.coin.a.name" defaultValue={str('upsell.coin.a.name')} className={`${inp} w-44`} /></Field>
+          <Field label="Nombre moneda B"><input name="upsell.coin.b.name" defaultValue={str('upsell.coin.b.name')} className={`${inp} w-44`} /></Field>
+          <Field label="2ª moneda — precio EUR"><input name="upsell.second_coin.price_eur" type="number" step="0.01" defaultValue={money('upsell.second_coin.price_eur')} className={`${inp} w-28`} /></Field>
+          <Field label="2ª moneda — precio USD"><input name="upsell.second_coin.price_usd" type="number" step="0.01" defaultValue={money('upsell.second_coin.price_usd')} className={`${inp} w-28`} /></Field>
+          <Field label="PVP original EUR (tachado)"><input name="upsell.second_coin.list_eur" type="number" step="0.01" defaultValue={money('upsell.second_coin.list_eur')} className={`${inp} w-28`} /></Field>
+          <Field label="PVP original USD (tachado)"><input name="upsell.second_coin.list_usd" type="number" step="0.01" defaultValue={money('upsell.second_coin.list_usd')} className={`${inp} w-28`} /></Field>
+        </Group>
+
         <Group title="Sistema">
           <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" name="system.maintenance_mode" defaultChecked={bool('system.maintenance_mode')} /> Modo mantenimiento (solo admin ve la web)</label>
         </Group>
 
         <button type="submit" className="bevel bg-gold px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Guardar configuración</button>
       </form>
+
+      {/* Imágenes de las monedas del upsell (subida de fichero, formularios aparte) */}
+      <div className="mt-4 rounded-card border border-border bg-surface p-5">
+        <h2 className="font-display text-lg text-gold-light">Imágenes de las monedas (Prestige)</h2>
+        <p className="mt-1 text-xs text-faint">Sube una imagen por moneda. Requiere el Volume de Railway montado para que persistan.</p>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          {(['a', 'b'] as const).map((coin) => (
+            <form key={coin} action={uploadUpsellCoinImageAction} className="rounded border border-border p-3">
+              <input type="hidden" name="coin" value={coin} />
+              <span className="text-xs uppercase tracking-wider text-gold-light">Moneda {coin.toUpperCase()}</span>
+              {str(`upsell.coin.${coin}.image`) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={str(`upsell.coin.${coin}.image`)} alt={`Moneda ${coin}`} className="mt-2 h-24 w-24 rounded object-cover" />
+              ) : (
+                <p className="mt-2 text-xs text-faint">Sin imagen</p>
+              )}
+              <input type="file" name="file" accept="image/*" className="mt-2 block w-full text-xs text-muted" />
+              <button className="bevel mt-2 bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#1a1408]">Subir imagen</button>
+            </form>
+          ))}
+        </div>
+      </div>
 
       {/* Pasarelas de pago (formulario propio, credenciales) */}
       <div className="mt-4">

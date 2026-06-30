@@ -26,6 +26,9 @@ export async function startFullPayment(opts: {
   club: ClubType;
   currency: Currency;
   locale: string;
+  includedCoin?: 'a' | 'b' | null;
+  secondCoin?: boolean;
+  secondCoinCents?: number;
 }) {
   const membership = await prisma.membership.findUnique({ where: { userId: opts.userId } });
   if (membership?.status === 'SOCIO_ACTIVO') {
@@ -34,7 +37,9 @@ export async function startFullPayment(opts: {
 
   const pricing = await getClubPricing(opts.club, opts.currency);
   if (!pricing) throw new Error('no_pricing');
-  const fullCents = pricing.priceCents;
+  // La 2ª moneda (Prestige) se suma al total a pagar.
+  const secondCoinCents = opts.secondCoin ? opts.secondCoinCents ?? 0 : 0;
+  const fullCents = pricing.priceCents + secondCoinCents;
 
   // ¿Reserva con depósito pagado? Se reutiliza y se descuenta.
   const reservation = await prisma.reservation.findFirst({
@@ -59,6 +64,9 @@ export async function startFullPayment(opts: {
             currency: opts.currency,
             amountPaidCents: 0,
             totalDueCents: fullCents,
+            includedCoin: opts.includedCoin ?? null,
+            secondCoin: secondCoinCents > 0,
+            secondCoinCents,
           },
         })
       ).id;
@@ -80,7 +88,14 @@ export async function startFullPayment(opts: {
     if (reusing) {
       await prisma.reservation.update({
         where: { id: reservationId },
-        data: { type: 'PAGO_COMPLETO', club: opts.club, totalDueCents: fullCents },
+        data: {
+          type: 'PAGO_COMPLETO',
+          club: opts.club,
+          totalDueCents: fullCents,
+          includedCoin: opts.includedCoin ?? null,
+          secondCoin: secondCoinCents > 0,
+          secondCoinCents,
+        },
       });
     }
 

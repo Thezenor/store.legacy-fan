@@ -502,6 +502,13 @@ const CONFIG_FIELDS: { key: string; type: 'string' | 'number' | 'bool' | 'money'
   { key: 'points.expiry_years', type: 'number' },
   { key: 'upsell.second_coin.enabled_prime', type: 'bool' },
   { key: 'upsell.second_coin.enabled_prestige', type: 'bool' },
+  // Upsell 2ª moneda (Prestige): nombres y precios; las imágenes se suben aparte.
+  { key: 'upsell.coin.a.name', type: 'string' },
+  { key: 'upsell.coin.b.name', type: 'string' },
+  { key: 'upsell.second_coin.price_eur', type: 'money' },
+  { key: 'upsell.second_coin.price_usd', type: 'money' },
+  { key: 'upsell.second_coin.list_eur', type: 'money' },
+  { key: 'upsell.second_coin.list_usd', type: 'money' },
   { key: 'system.maintenance_mode', type: 'bool' },
 ];
 
@@ -663,6 +670,23 @@ export async function saveGatewayAction(formData: FormData): Promise<void> {
     create: { key: enabledKey, value: formData.get('enabled') === 'on', group: 'payments' },
   });
   await audit(admin.id, admin.email, 'gateway.save', 'SystemSetting', gateway, null, { gateway });
+  revalidatePath('/lf-admin/config');
+}
+
+/** Sube la imagen de una moneda del upsell (a|b) y guarda su URL en settings. */
+export async function uploadUpsellCoinImageAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const coin = String(formData.get('coin') ?? 'a') === 'b' ? 'b' : 'a';
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return;
+  const { url } = await saveUpload(file);
+  const key = `upsell.coin.${coin}.image`;
+  await prisma.systemSetting.upsert({
+    where: { key },
+    update: { value: url },
+    create: { key, value: url, group: 'upsell' },
+  });
+  await audit(admin.id, admin.email, 'upsell.coin_image', 'SystemSetting', key, null, { url });
   revalidatePath('/lf-admin/config');
 }
 

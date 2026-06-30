@@ -39,9 +39,13 @@ export async function startReservation(opts: {
   club: ClubType | null;
   currency: Currency;
   locale: string;
+  includedCoin?: 'a' | 'b' | null;
+  secondCoin?: boolean;
+  secondCoinCents?: number;
 }): Promise<StartReservationResult> {
   const terms = await getReservationTerms(opts.currency, undefined, opts.club ?? undefined);
   const fullPricing = opts.club ? await getClubPricing(opts.club, opts.currency) : null;
+  const secondCoinCents = opts.secondCoin ? opts.secondCoinCents ?? 0 : 0;
 
   const reservation = await prisma.reservation.create({
     data: {
@@ -51,7 +55,11 @@ export async function startReservation(opts: {
       status: 'PENDIENTE_DE_PAGO',
       currency: opts.currency,
       amountPaidCents: 0,
-      totalDueCents: fullPricing?.priceCents ?? 0,
+      // La 2ª moneda se cobra en el pago completo; aquí solo se registra la elección.
+      totalDueCents: (fullPricing?.priceCents ?? 0) + secondCoinCents,
+      includedCoin: opts.includedCoin ?? null,
+      secondCoin: secondCoinCents > 0,
+      secondCoinCents,
       launchDate: terms.launchDate,
       expiresAt: terms.expiresAt,
       refundableUntil: terms.refundableUntil,

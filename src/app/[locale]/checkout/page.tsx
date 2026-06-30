@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getClubPricing, getReservationTerms, getPlan } from '@/lib/commerce';
+import { getSecondCoinUpsell } from '@/lib/commerce/upsell';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { hasActiveReservationOrMembership } from '@/lib/checkout/reservation';
 import { CheckoutForm } from '@/components/checkout/checkout-form';
@@ -33,6 +34,7 @@ export default async function CheckoutPage({
   const [plan, pricing] = await Promise.all([getPlan(club), getClubPricing(club, currency, locale)]);
   if (!plan || !plan.active || !pricing) notFound();
   const reservation = await getReservationTerms(currency, locale, club);
+  const upsell = await getSecondCoinUpsell(club, currency, locale);
 
   const session = await auth();
   const isLoggedIn = !!session?.user?.id;
@@ -59,6 +61,16 @@ export default async function CheckoutPage({
             fullFormatted={pricing.priceFormatted}
             listFormatted={pricing.listPriceFormatted}
             refCode={ref}
+            upsell={
+              upsell
+                ? {
+                    coinA: upsell.coinA,
+                    coinB: upsell.coinB,
+                    secondFormatted: upsell.secondFormatted,
+                    listFormatted: upsell.listFormatted,
+                  }
+                : null
+            }
           />
         </div>
       )}

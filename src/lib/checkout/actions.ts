@@ -10,6 +10,7 @@ import { RL } from '../rate-limit';
 import { getDisplayCurrency } from '../commerce/currency';
 import { getPlan } from '../commerce';
 import { getSetting } from '../commerce/settings';
+import { getSecondCoinUpsell } from '../commerce/upsell';
 import { startSubscription } from '../subscriptions';
 import { checkoutRegisterSchema, loginSchema } from '../validation/auth';
 import { emailVerification } from '../tokens';
@@ -224,13 +225,24 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
 
   if (!userId) return { ok: false, code: 'unauthenticated' };
 
+  // Upsell de 2ª moneda (Prestige): elección de moneda incluida y, si añade la
+  // segunda, su importe con descuento (calculado en el servidor, no del cliente).
+  const includedCoin = (String(formData.get('includedCoin') ?? '') || null) as 'a' | 'b' | null;
+  const wantsSecond = formData.get('addSecondCoin') === 'on';
+  let secondCoinCents = 0;
+  if (wantsSecond) {
+    const up = await getSecondCoinUpsell(club, currency);
+    secondCoinCents = up?.secondCents ?? 0;
+  }
+  const coinOpts = { includedCoin, secondCoin: secondCoinCents > 0, secondCoinCents };
+
   // 2) Iniciar el pago elegido.
   try {
     if (type === 'reserve') {
       if (await hasActiveReservationOrMembership(userId)) {
         return { ok: false, code: 'already_active' };
       }
-      const { approveUrl } = await startReservation({ userId, club, currency, locale });
+      const { approveUrl } = await startReservation({ userId, club, currency, locale, ...coinOpts });
       return { ok: true, approveUrl };
     }
     // Pago completo: suscripción recurrente o pago único según billing.mode.
@@ -239,7 +251,7 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
       const { approveUrl } = await startSubscription({ userId, club, currency, locale });
       return { ok: true, approveUrl };
     }
-    const { approveUrl } = await startFullPayment({ userId, club, currency, locale });
+    const { approveUrl } = await startFullPayment({ userId, club, currency, locale, ...coinOpts });
     return { ok: true, approveUrl };
   } catch (e) {
     if (e instanceof Error && e.message === 'already_member') {

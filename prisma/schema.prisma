@@ -363,6 +363,11 @@ model Reservation {
   launchDate    DateTime?
   expiresAt     DateTime? // lanzamiento + margen 7 días (configurable)
   refundableUntil DateTime? // 24h antes de lanzamiento (configurable)
+  // Upsell de 2ª moneda (solo Prestige): moneda incluida elegida y, si añade la
+  // segunda con descuento, su importe (se suma al pago completo).
+  includedCoin    String? // 'a' | 'b' (moneda incluida elegida)
+  secondCoin      Boolean @default(false)
+  secondCoinCents Int     @default(0)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
