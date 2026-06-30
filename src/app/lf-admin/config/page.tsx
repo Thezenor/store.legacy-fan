@@ -76,9 +76,13 @@ export default async function AdminConfig() {
       <div className="mt-4">
         <GatewayConfig
           values={{
-            'paypal.client_id': str('paypal.client_id'),
-            'paypal.client_secret': str('paypal.client_secret'),
-            'paypal.webhook_id': str('paypal.webhook_id'),
+            // Credenciales por modo; si están vacías, migramos las heredadas a sandbox.
+            'paypal.sandbox.client_id': str('paypal.sandbox.client_id') || str('paypal.client_id'),
+            'paypal.sandbox.client_secret': str('paypal.sandbox.client_secret') || str('paypal.client_secret'),
+            'paypal.sandbox.webhook_id': str('paypal.sandbox.webhook_id') || str('paypal.webhook_id'),
+            'paypal.live.client_id': str('paypal.live.client_id'),
+            'paypal.live.client_secret': str('paypal.live.client_secret'),
+            'paypal.live.webhook_id': str('paypal.live.webhook_id'),
             'paypal.mode': str('paypal.mode'),
             'payments.paypal.enabled': bool('payments.paypal.enabled'),
             'stripe.secret_key': str('stripe.secret_key'),

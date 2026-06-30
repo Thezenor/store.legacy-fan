@@ -609,11 +609,24 @@ export async function toggleProductFlagAction(formData: FormData): Promise<void>
 export async function saveGatewayAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const gateway = String(formData.get('gateway')); // 'paypal' | 'stripe'
+  // PayPal guarda AMBOS juegos (sandbox y live) + el modo activo, para poder
+  // alternar sin reescribir credenciales. paypal.mode no es secreto (siempre se
+  // guarda); las credenciales solo se sobrescriben si llegan con valor.
   const fields = gateway === 'stripe'
     ? ['stripe.secret_key', 'stripe.publishable_key', 'stripe.webhook_secret']
-    : ['paypal.client_id', 'paypal.client_secret', 'paypal.webhook_id', 'paypal.mode'];
+    : [
+        'paypal.sandbox.client_id',
+        'paypal.sandbox.client_secret',
+        'paypal.sandbox.webhook_id',
+        'paypal.live.client_id',
+        'paypal.live.client_secret',
+        'paypal.live.webhook_id',
+        'paypal.mode',
+      ];
   for (const key of fields) {
     const value = String(formData.get(key) ?? '');
+    // No borrar una credencial existente si el campo llega vacío (excepto el modo).
+    if (value === '' && key !== 'paypal.mode') continue;
     await prisma.systemSetting.upsert({
       where: { key },
       update: { value },

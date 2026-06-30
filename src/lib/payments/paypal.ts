@@ -14,6 +14,19 @@ async function cred(key: string, envName: string): Promise<string | undefined> {
   return dbVal || process.env[envName];
 }
 
+// Lee una credencial por modo (sandbox/live): primero la clave específica del modo
+// (paypal.sandbox.* / paypal.live.*), luego la clave heredada (paypal.*) y el entorno.
+// Permite guardar AMBOS juegos de credenciales y alternar solo cambiando el modo.
+async function credForMode(
+  mode: 'sandbox' | 'live',
+  field: string,
+  envName: string,
+): Promise<string | undefined> {
+  const row = await prisma.systemSetting.findUnique({ where: { key: `paypal.${mode}.${field}` } });
+  if (row?.value) return String(row.value);
+  return cred(`paypal.${field}`, envName); // respaldo: clave heredada + variable de entorno
+}
+
 /**
  * Proveedor PayPal — ACTIVO desde inicio (doc 03). Integración REST Orders v2.
  * Modo sandbox/live según PAYPAL_MODE. Requiere PAYPAL_CLIENT_ID/SECRET y, para
@@ -29,16 +42,25 @@ export class PayPalProvider implements PaymentProvider {
     return process.env.PAYMENTS_PAYPAL_ENABLED === 'true';
   }
 
+  private async mode(): Promise<'sandbox' | 'live'> {
+    const m = await cred('paypal.mode', 'PAYPAL_MODE');
+    return m === 'live' ? 'live' : 'sandbox';
+  }
+
   private async baseUrl(): Promise<string> {
-    const mode = (await cred('paypal.mode', 'PAYPAL_MODE')) ?? 'sandbox';
-    return mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+    return (await this.mode()) === 'live'
+      ? 'https://api-m.paypal.com'
+      : 'https://api-m.sandbox.paypal.com';
   }
 
   private async credentials(): Promise<{ id: string; secret: string }> {
-    const id = await cred('paypal.client_id', 'PAYPAL_CLIENT_ID');
-    const secret = await cred('paypal.client_secret', 'PAYPAL_CLIENT_SECRET');
+    const mode = await this.mode();
+    const id = await credForMode(mode, 'client_id', 'PAYPAL_CLIENT_ID');
+    const secret = await credForMode(mode, 'client_secret', 'PAYPAL_CLIENT_SECRET');
     if (!id || !secret) {
-      throw new Error('PayPal sin credenciales: configúralas en /lf-admin (Configuración) o en el entorno.');
+      throw new Error(
+        `PayPal sin credenciales para modo "${mode}": configúralas en /lf-admin (Configuración) o en el entorno.`,
+      );
     }
     return { id, secret };
   }
@@ -138,7 +160,7 @@ export class PayPalProvider implements PaymentProvider {
     body: string,
   ): Promise<WebhookVerificationResult> {
     const token = await this.accessToken();
-    const webhookId = await cred('paypal.webhook_id', 'PAYPAL_WEBHOOK_ID');
+    const webhookId = await credForMode(await this.mode(), 'webhook_id', 'PAYPAL_WEBHOOK_ID');
     if (!webhookId) throw new Error('Falta el Webhook ID de PayPal (config o entorno).');
 
     const event = JSON.parse(body) as { event_type?: string; resource?: { custom_id?: string } };

@@ -31,17 +31,38 @@ export function GatewayConfig({ values }: { values: Values }) {
       </label>
 
       {gateway === 'paypal' ? (
-        <div className="mt-3 space-y-3">
-          <label className="block"><span className="text-xs text-muted">Client ID</span>
-            <input name="paypal.client_id" defaultValue={v('paypal.client_id')} className={inp} /></label>
-          <label className="block"><span className="text-xs text-muted">Client Secret</span>
-            <input name="paypal.client_secret" type="password" defaultValue={v('paypal.client_secret')} className={inp} /></label>
-          <label className="block"><span className="text-xs text-muted">Webhook ID</span>
-            <input name="paypal.webhook_id" defaultValue={v('paypal.webhook_id')} className={inp} /></label>
-          <label className="block max-w-xs"><span className="text-xs text-muted">Modo</span>
+        <div className="mt-3 space-y-4">
+          <label className="block max-w-xs"><span className="text-xs text-muted">Modo activo</span>
             <select name="paypal.mode" defaultValue={v('paypal.mode') || 'sandbox'} className={inp}>
-              <option value="sandbox">sandbox</option><option value="live">live</option>
-            </select></label>
+              <option value="sandbox">sandbox (pruebas)</option><option value="live">live (producción)</option>
+            </select>
+            <span className="mt-1 block text-[11px] text-faint">Cambia entre sandbox y live sin reescribir credenciales: se guardan los dos juegos.</span>
+          </label>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Sandbox */}
+            <fieldset className="rounded border border-border p-3">
+              <legend className="px-1 text-xs uppercase tracking-wider text-gold-light">Sandbox</legend>
+              <label className="block"><span className="text-xs text-muted">Client ID</span>
+                <input name="paypal.sandbox.client_id" defaultValue={v('paypal.sandbox.client_id')} className={inp} /></label>
+              <label className="mt-2 block"><span className="text-xs text-muted">Client Secret</span>
+                <input name="paypal.sandbox.client_secret" type="password" defaultValue={v('paypal.sandbox.client_secret')} className={inp} /></label>
+              <label className="mt-2 block"><span className="text-xs text-muted">Webhook ID</span>
+                <input name="paypal.sandbox.webhook_id" defaultValue={v('paypal.sandbox.webhook_id')} className={inp} /></label>
+            </fieldset>
+
+            {/* Live */}
+            <fieldset className="rounded border border-border p-3">
+              <legend className="px-1 text-xs uppercase tracking-wider text-gold-light">Live</legend>
+              <label className="block"><span className="text-xs text-muted">Client ID</span>
+                <input name="paypal.live.client_id" defaultValue={v('paypal.live.client_id')} className={inp} /></label>
+              <label className="mt-2 block"><span className="text-xs text-muted">Client Secret</span>
+                <input name="paypal.live.client_secret" type="password" defaultValue={v('paypal.live.client_secret')} className={inp} /></label>
+              <label className="mt-2 block"><span className="text-xs text-muted">Webhook ID</span>
+                <input name="paypal.live.webhook_id" defaultValue={v('paypal.live.webhook_id')} className={inp} /></label>
+            </fieldset>
+          </div>
+
           <label className="flex items-center gap-2 text-sm text-muted">
             <input type="checkbox" name="enabled" defaultChecked={b('payments.paypal.enabled')} /> Usar PayPal como método de pago
           </label>
