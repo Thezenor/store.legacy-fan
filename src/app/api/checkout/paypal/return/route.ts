@@ -26,18 +26,23 @@ export async function GET(req: NextRequest) {
 
   try {
     if (intent === 'full') {
-      const reservationId = await captureFullPaymentByOrder(orderId);
-      if (reservationId) {
+      const result = await captureFullPaymentByOrder(orderId);
+      // Captura no COMPLETED (PENDING/FAILED): no fingir éxito.
+      if (result === 'pending') {
+        return NextResponse.redirect(localizedPath(locale, '/account?pending=1'));
+      }
+      if (result) {
         const data = await prisma.reservation.findUnique({
-          where: { id: reservationId },
+          where: { id: result },
           include: { user: { include: { membership: { include: { memberNumber: true } } } } },
         });
         const memberNo = data?.user?.membership?.memberNumber?.formatted;
         if (data?.user?.email && memberNo) {
           await sendFullPaymentEmail(data.user.email, loc, memberNo);
         }
+        return NextResponse.redirect(localizedPath(locale, '/account?welcome=1'));
       }
-      return NextResponse.redirect(localizedPath(locale, '/account?welcome=1'));
+      return NextResponse.redirect(localizedPath(locale, '/account?error=capture'));
     }
 
     const reservationId = await captureReservationByOrder(orderId);

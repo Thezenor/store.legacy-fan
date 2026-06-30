@@ -23,7 +23,10 @@ NEXT_PUBLIC_SITE_NAME=Legacy Fan
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 
 # Auth.js (NextAuth)
-AUTH_SECRET=43c255ce7387a70d0ceeb9bf54dcaea905598775cd97914ac3e6c1e283c0c88e
+# OBLIGATORIO y SECRETO. Genera uno propio y NO lo subas al repo:
+#   openssl rand -base64 32      (o: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
+# Sin AUTH_SECRET, la app NO arranca en producción (fail-fast intencionado).
+AUTH_SECRET=__genera_uno_propio_y_pegalo_aqui__
 AUTH_URL=https://store.legacy-fan.com
 AUTH_TRUST_HOST=true
 

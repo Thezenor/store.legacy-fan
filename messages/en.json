@@ -192,6 +192,7 @@
     "optionReserveDesc": "Refundable deposit. Deducted from the full payment.",
     "optionFull": "Full payment",
     "optionFullDesc": "Become a member now: member number and instant access.",
+    "payFull": "Pay and join with PayPal",
     "selected": "Selected",
     "choose": "Choose",
     "account": "Your details",

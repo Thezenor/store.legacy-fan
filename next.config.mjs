@@ -6,6 +6,10 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    // Subidas de imagen/vídeo del admin via Server Actions (límite por defecto: 1 MB).
+    serverActions: { bodySizeLimit: '64mb' },
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [],

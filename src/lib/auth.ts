@@ -16,16 +16,26 @@ const credentialsSchema = z.object({
  * Email único garantizado a nivel de BD (User.email @unique).
  * La lógica completa de registro/verificación se implementa en Fase 1.
  */
+// Secreto que firma los JWT de sesión. En producción es OBLIGATORIO (fail-fast):
+// sin él, un atacante con un secreto conocido podría forjar sesiones de admin.
+// En desarrollo se permite un valor efímero local (no sirve en prod).
+function resolveAuthSecret(): string {
+  const fromEnv = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (fromEnv) return fromEnv;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'AUTH_SECRET no está definido. Define AUTH_SECRET en el entorno (Railway) antes de arrancar.',
+    );
+  }
+  // Solo desarrollo: valor local, nunca usado en producción.
+  return 'lf-dev-only-secret-not-for-production';
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   // Necesario detrás de proxies (Railway/Cloudflare) para validar el host.
   trustHost: true,
-  // Secreto: usa AUTH_SECRET del entorno; si no está, un respaldo para no romper.
-  // ⚠️ DEFINE AUTH_SECRET en producción (Railway) — el respaldo es público (está en el repo).
-  secret:
-    process.env.AUTH_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    'lf-fallback-43c255ce7387a70d0ceeb9bf54dcaea905598775cd97914ac3e6c1e283c0c88e',
+  secret: resolveAuthSecret(),
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',

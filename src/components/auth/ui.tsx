@@ -3,7 +3,7 @@
 import { useFormStatus } from 'react-dom';
 
 export const inputClass =
-  'w-full rounded-lg border border-border bg-background px-3 py-2.5 text-foreground outline-none transition focus:border-gold';
+  'w-full rounded-lg border border-border bg-background px-3 py-2.5 text-foreground outline-none transition focus:border-gold focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 export function Field({
   label,

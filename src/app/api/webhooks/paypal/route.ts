@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { getPaymentProvider } from '@/lib/payments';
 import { reconcileReservationPaid } from '@/lib/checkout/reservation';
+import { reconcileFullPaymentPaid } from '@/lib/checkout/full-payment';
 
 // Webhook PayPal (doc 14). Verifica firma y reconcilia el estado de la reserva.
 // Idempotente: PAYMENT.CAPTURE.COMPLETED puede llegar varias veces.
@@ -22,10 +24,21 @@ export async function POST(req: NextRequest) {
       const event = result.raw as {
         resource?: { custom_id?: string; amount?: { value?: string } };
       };
-      const customId = event.resource?.custom_id;
+      const customId = event.resource?.custom_id; // = reservationId
       const value = event.resource?.amount?.value;
       if (customId && value) {
-        await reconcileReservationPaid(customId, Math.round(parseFloat(value) * 100));
+        const amountCents = Math.round(parseFloat(value) * 100);
+        // Distinguir intención por el tipo de la reserva: un pago completo debe
+        // activar la membresía (no quedarse como depósito de reserva).
+        const reservation = await prisma.reservation.findUnique({
+          where: { id: customId },
+          select: { type: true },
+        });
+        if (reservation?.type === 'PAGO_COMPLETO') {
+          await reconcileFullPaymentPaid(customId, amountCents);
+        } else {
+          await reconcileReservationPaid(customId, amountCents);
+        }
       }
     }
 

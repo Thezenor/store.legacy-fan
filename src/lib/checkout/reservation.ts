@@ -58,31 +58,38 @@ export async function startReservation(opts: {
     },
   });
 
-  const provider = getPaymentProvider('PAYPAL');
-  const order = await provider.createPayment({
-    amountCents: terms.amountCents,
-    currency: opts.currency,
-    description: 'Legacy Fan Club — Reserva',
-    referenceId: reservation.id,
-    returnUrl: `${appUrl()}/api/checkout/paypal/return?locale=${opts.locale}`,
-    cancelUrl: `${appUrl()}/api/checkout/paypal/cancel?locale=${opts.locale}`,
-  });
-
-  await prisma.payment.create({
-    data: {
-      userId: opts.userId,
-      reservationId: reservation.id,
-      provider: 'PAYPAL',
-      mode: await paymentMode(),
-      status: 'PENDIENTE_DE_PAGO',
-      currency: opts.currency,
+  // Si PayPal falla (sin credenciales, error de red…), revertimos la reserva
+  // para no dejar filas huérfanas que bloqueen futuros intentos del usuario.
+  try {
+    const provider = getPaymentProvider('PAYPAL');
+    const order = await provider.createPayment({
       amountCents: terms.amountCents,
-      providerRef: order.providerRef,
-    },
-  });
+      currency: opts.currency,
+      description: 'Legacy Fan Club — Reserva',
+      referenceId: reservation.id,
+      returnUrl: `${appUrl()}/api/checkout/paypal/return?locale=${opts.locale}`,
+      cancelUrl: `${appUrl()}/api/checkout/paypal/cancel?locale=${opts.locale}`,
+    });
 
-  if (!order.approveUrl) throw new Error('PayPal no devolvió URL de aprobación.');
-  return { approveUrl: order.approveUrl, reservationId: reservation.id };
+    await prisma.payment.create({
+      data: {
+        userId: opts.userId,
+        reservationId: reservation.id,
+        provider: 'PAYPAL',
+        mode: await paymentMode(),
+        status: 'PENDIENTE_DE_PAGO',
+        currency: opts.currency,
+        amountCents: terms.amountCents,
+        providerRef: order.providerRef,
+      },
+    });
+
+    if (!order.approveUrl) throw new Error('PayPal no devolvió URL de aprobación.');
+    return { approveUrl: order.approveUrl, reservationId: reservation.id };
+  } catch (e) {
+    await prisma.reservation.delete({ where: { id: reservation.id } }).catch(() => {});
+    throw e;
+  }
 }
 
 /**

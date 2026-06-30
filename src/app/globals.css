@@ -80,6 +80,19 @@ h1, h2, h3, .font-display {
   color: #c0855a;
 }
 
+/* Modo claro: el oro/cobre de TEXTO necesita un tono más oscuro para cumplir
+   contraste AA sobre fondo claro (precios, kickers, titulares). Mapea también
+   las utilidades de Tailwind text-gold / text-gold-light por mayor especificidad. */
+.light .text-metal-gold,
+.light .eyebrow,
+.light .text-gold,
+.light .text-gold-light {
+  color: #8a6d22;
+}
+.light .serial {
+  color: #9a5a2e;
+}
+
 /* Filo dorado sutil (líneas Art Deco) */
 .hairline-gold {
   background: linear-gradient(90deg, transparent, rgba(200, 162, 75, 0.55), transparent);
