@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 export interface UpsellData {
   coinA: { name: string; image: string | null };
   coinB: { name: string; image: string | null };
+  offerSecond: boolean;
   secondFormatted: string;
   listFormatted: string | null;
 }
@@ -68,8 +69,8 @@ export function SecondCoinUpsell({ data }: { data: UpsellData }) {
         })}
       </div>
 
-      {/* Desplegable: ofrecer la segunda moneda con descuento */}
-      {other ? (
+      {/* Desplegable: ofrecer la segunda moneda con descuento (si hay precio) */}
+      {other && data.offerSecond ? (
         <div className="mt-4 animate-fade-in rounded-card border border-gold/30 bg-surface-elevated p-4">
           <h4 className="text-sm font-semibold text-foreground">{tc('secondTitle')}</h4>
           <label className="mt-3 flex items-center gap-3">

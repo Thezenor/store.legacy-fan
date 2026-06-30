@@ -66,6 +66,7 @@ export default async function CheckoutPage({
                 ? {
                     coinA: upsell.coinA,
                     coinB: upsell.coinB,
+                    offerSecond: upsell.offerSecond,
                     secondFormatted: upsell.secondFormatted,
                     listFormatted: upsell.listFormatted,
                   }

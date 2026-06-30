@@ -10,6 +10,8 @@ export interface UpsellCoin {
 export interface SecondCoinUpsell {
   coinA: UpsellCoin;
   coinB: UpsellCoin;
+  /** Hay precio configurado → se puede ofrecer añadir la 2ª moneda. */
+  offerSecond: boolean;
   /** Precio con descuento de la 2ª moneda (lo que se suma al pago). */
   secondCents: number;
   secondFormatted: string;
@@ -46,17 +48,17 @@ export async function getSecondCoinUpsell(
     getSettingString(`upsell.second_coin.list_${cur}`),
   ]);
 
+  // Con el flag activado ya mostramos la ELECCIÓN de moneda (nombres/imágenes
+  // opcionales: placeholder si faltan). La OFERTA de la 2ª moneda solo se muestra
+  // si hay precio con descuento configurado.
   const secondCents = toCents(priceRaw);
-  // Basta con un precio (con descuento) para ofrecer la 2ª moneda. Las imágenes
-  // son opcionales: si faltan, la UI muestra un placeholder (no bloquea el upsell).
-  if (secondCents <= 0) return null;
-
   const listCents = toCents(listRaw);
   const showList = listCents > secondCents ? listCents : null;
 
   return {
     coinA: { name: aName || 'Moneda A', image: aImg },
     coinB: { name: bName || 'Moneda B', image: bImg },
+    offerSecond: secondCents > 0,
     secondCents,
     secondFormatted: formatMoney(secondCents, currency, locale),
     listCents: showList,
