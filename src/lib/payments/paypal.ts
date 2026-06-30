@@ -75,7 +75,21 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
       : 'https://api-m.sandbox.paypal.com';
   }
 
-  /** Valida las credenciales del modo activo pidiendo un token OAuth. */
+  // Pide un token OAuth contra un entorno concreto (para diagnóstico).
+  private async tokenStatus(baseUrl: string, id: string, secret: string): Promise<number> {
+    const auth = Buffer.from(`${id}:${secret}`).toString('base64');
+    const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=client_credentials',
+    });
+    return res.status;
+  }
+
+  /**
+   * Valida las credenciales del modo activo y, si fallan, prueba el OTRO entorno
+   * para detectar el error típico de "credenciales de Live puestas en Sandbox".
+   */
   async verifyCredentials(): Promise<{ ok: boolean; detail: string }> {
     const mode = await this.mode();
     let id: string, secret: string;
@@ -86,12 +100,28 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
     }
     const idMask = id.length <= 12 ? id : `${id.slice(0, 6)}…${id.slice(-4)}`;
     const info = `modo ${mode} · Client ID ${idMask} (${id.length} car.) · Secret ${secret.length} car.`;
+    const sandbox = 'https://api-m.sandbox.paypal.com';
+    const live = 'https://api-m.paypal.com';
+    const activeBase = mode === 'live' ? live : sandbox;
+    const otherBase = mode === 'live' ? sandbox : live;
+    const otherName = mode === 'live' ? 'sandbox' : 'live';
+
     try {
-      await this.accessToken();
-      return { ok: true, detail: `Conexión correcta — ${info}.` };
+      const status = await this.tokenStatus(activeBase, id, secret);
+      if (status === 200) return { ok: true, detail: `Conexión correcta — ${info}.` };
+
+      // Falla en el entorno activo: ¿funcionan en el otro?
+      let crossNote = '';
+      try {
+        if ((await this.tokenStatus(otherBase, id, secret)) === 200) {
+          crossNote = ` ⚠ Estas credenciales SÍ son válidas en ${otherName.toUpperCase()}: las has puesto en el entorno equivocado. Ponlas en el bloque ${otherName} o cambia el "Modo activo" a ${otherName}.`;
+        }
+      } catch {
+        /* ignora el cross-check */
+      }
+      return { ok: false, detail: `HTTP ${status} · ${info}.${crossNote}` };
     } catch (e) {
-      const base = e instanceof Error ? e.message : 'Error OAuth';
-      return { ok: false, detail: `${base} · ${info}` };
+      return { ok: false, detail: `${e instanceof Error ? e.message : 'Error OAuth'} · ${info}` };
     }
   }
 
