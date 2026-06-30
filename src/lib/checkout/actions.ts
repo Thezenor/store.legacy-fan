@@ -245,14 +245,23 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
     if (e instanceof Error && e.message === 'already_member') {
       return { ok: false, code: 'already_member' };
     }
-    // Pasarela no configurada/activada o sin credenciales/plan: mensaje claro.
+    // Log del error REAL para diagnóstico (visible en los logs de Railway).
+    console.error('[checkout] no se pudo iniciar el pago:', {
+      club,
+      type,
+      message: e instanceof Error ? e.message : String(e),
+    });
+    // Problemas de pasarela (no habilitada, credenciales, OAuth/HTTP de PayPal,
+    // plan ausente): mensaje claro de "falta configurar la pasarela".
     if (e instanceof Error) {
       const m = e.message;
       if (
         m === 'gateway_disabled' ||
         m.includes('no está habilitada') ||
         m.includes('sin credenciales') ||
-        m.startsWith('Sin plan')
+        m.startsWith('Sin plan') ||
+        m.includes('PayPal') ||
+        m.includes('HTTP')
       ) {
         return { ok: false, code: 'gateway_unconfigured' };
       }
