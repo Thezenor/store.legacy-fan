@@ -35,6 +35,15 @@ export function getPaymentProviderUnchecked(key: 'PAYPAL' | 'STRIPE'): PaymentPr
   return provider;
 }
 
+/** Prueba la conexión/credenciales del modo activo de una pasarela. */
+export async function testGatewayConnection(
+  key: 'PAYPAL' | 'STRIPE',
+): Promise<{ ok: boolean; detail: string }> {
+  const provider = registry[key];
+  if (!provider) return { ok: false, detail: `Pasarela ${key} desconocida.` };
+  return provider.verifyCredentials();
+}
+
 /**
  * ¿La pasarela está habilitada? El interruptor del PANEL (SystemSetting
  * `payments.{gw}.enabled`) manda; si no existe, cae a la variable de entorno

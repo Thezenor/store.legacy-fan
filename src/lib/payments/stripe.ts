@@ -41,6 +41,10 @@ export class StripeProvider implements PaymentProvider, SubscriptionProvider {
     throw new Error('Stripe está desactivado.');
   }
 
+  async verifyCredentials(): Promise<{ ok: boolean; detail: string }> {
+    return { ok: false, detail: 'Stripe está desactivado.' };
+  }
+
   // ── Suscripciones (Stripe Billing) — preparado, desactivado ───────────────
 
   async createSubscriptionPlan(_input: CreatePlanInput): Promise<{ planId: string }> {

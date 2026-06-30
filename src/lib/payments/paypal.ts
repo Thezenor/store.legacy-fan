@@ -75,6 +75,17 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
       : 'https://api-m.sandbox.paypal.com';
   }
 
+  /** Valida las credenciales del modo activo pidiendo un token OAuth. */
+  async verifyCredentials(): Promise<{ ok: boolean; detail: string }> {
+    const mode = await this.mode();
+    try {
+      await this.accessToken();
+      return { ok: true, detail: `Conexión correcta (modo ${mode}).` };
+    } catch (e) {
+      return { ok: false, detail: e instanceof Error ? e.message : `Error en modo ${mode}.` };
+    }
+  }
+
   private async credentials(): Promise<{ id: string; secret: string }> {
     const mode = await this.mode();
     const id = await credForMode(mode, 'client_id', 'PAYPAL_CLIENT_ID');

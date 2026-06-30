@@ -14,7 +14,7 @@ import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
 import { sendTemplatedEmail } from './email/templates';
 import { saveUpload } from './storage';
-import { getSubscriptionProviderForAdmin } from './payments';
+import { getSubscriptionProviderForAdmin, testGatewayConnection } from './payments';
 import { getClubPricing, getPlan } from './commerce';
 
 // Lee campos opcionales de ficha técnica del producto desde un formulario.
@@ -662,6 +662,20 @@ export async function saveGatewayAction(formData: FormData): Promise<void> {
     create: { key: enabledKey, value: formData.get('enabled') === 'on', group: 'payments' },
   });
   await audit(admin.id, admin.email, 'gateway.save', 'SystemSetting', gateway, null, { gateway });
+  revalidatePath('/lf-admin/config');
+}
+
+/** Prueba la conexión con la pasarela (credenciales del modo activo) y guarda el resultado. */
+export async function testGatewayConnectionAction(formData: FormData): Promise<void> {
+  await ensureAdmin();
+  const gateway = String(formData.get('gateway') || 'paypal').toLowerCase();
+  const res = await testGatewayConnection(gateway.toUpperCase() as 'PAYPAL' | 'STRIPE');
+  const key = `${gateway}.test_result`;
+  await prisma.systemSetting.upsert({
+    where: { key },
+    update: { value: `${res.ok ? 'OK' : 'ERROR'}: ${res.detail}` },
+    create: { key, value: `${res.ok ? 'OK' : 'ERROR'}: ${res.detail}`, group: 'payments' },
+  });
   revalidatePath('/lf-admin/config');
 }
 

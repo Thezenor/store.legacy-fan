@@ -109,6 +109,7 @@ export default async function AdminConfig() {
             'paypal.live.client_secret': str('paypal.live.client_secret'),
             'paypal.live.webhook_id': str('paypal.live.webhook_id'),
             'paypal.mode': str('paypal.mode'),
+            'paypal.test_result': str('paypal.test_result'),
             'payments.paypal.enabled': bool('payments.paypal.enabled'),
             'stripe.secret_key': str('stripe.secret_key'),
             'stripe.publishable_key': str('stripe.publishable_key'),

@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { saveGatewayAction, createSubscriptionPlanAction } from '@/lib/admin-actions';
+import {
+  saveGatewayAction,
+  createSubscriptionPlanAction,
+  testGatewayConnectionAction,
+} from '@/lib/admin-actions';
 
 type Values = Record<string, string | boolean>;
 
@@ -108,6 +112,28 @@ export function GatewayConfig({
         Las credenciales se guardan en la base de datos. Para máxima seguridad puedes mantenerlas también en variables de entorno.
       </p>
     </form>
+
+    {/* Probar conexión con la pasarela (credenciales del modo activo) */}
+    {gateway === 'paypal' ? (
+      <form action={testGatewayConnectionAction} className="rounded-card border border-border bg-surface p-4">
+        <input type="hidden" name="gateway" value="paypal" />
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">
+            Probar conexión PayPal
+          </button>
+          <span className="text-xs text-muted">Valida las credenciales del modo activo (guarda antes los cambios).</span>
+        </div>
+        {v('paypal.test_result') ? (
+          <p
+            className={`mt-2 text-xs ${
+              v('paypal.test_result').startsWith('OK') ? 'text-silver' : 'text-red-400'
+            }`}
+          >
+            {v('paypal.test_result')}
+          </p>
+        ) : null}
+      </form>
+    ) : null}
 
     {/* Crear planes de suscripción según la FASE actual (precio por fase) */}
     {gateway === 'paypal' ? (
