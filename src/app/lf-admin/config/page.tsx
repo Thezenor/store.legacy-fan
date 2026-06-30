@@ -122,7 +122,7 @@ export default async function AdminConfig() {
                 <p className="mt-2 text-xs text-faint">Sin imagen</p>
               )}
               <input type="file" name="file" accept="image/*" className="mt-2 block w-full text-xs text-muted" />
-              <input name="url" defaultValue={str(`upsell.coin.${coin}.image`)} placeholder="o pega una URL de imagen" className={`${inp} mt-2 w-full text-xs`} />
+              <input name="url" defaultValue={str(`upsell.coin.${coin}.image`).startsWith('data:') ? '' : str(`upsell.coin.${coin}.image`)} placeholder="o pega una URL de imagen" className={`${inp} mt-2 w-full text-xs`} />
               <button className="bevel mt-2 bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#1a1408]">Guardar imagen</button>
               {str(`upsell.coin.${coin}.image_error`) ? (
                 <p className="mt-2 text-[11px] text-red-400">⚠ {str(`upsell.coin.${coin}.image_error`)}</p>

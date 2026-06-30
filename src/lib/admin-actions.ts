@@ -785,7 +785,14 @@ export async function uploadUpsellCoinImageAction(formData: FormData): Promise<v
   try {
     let url: string;
     if (file instanceof File && file.size > 0) {
-      url = (await saveUpload(file)).url;
+      // Imagen pequeña → se guarda como data URI EN LA BD (no depende del Volume,
+      // así se ve siempre). Para galerías grandes seguimos usando disco/Volume.
+      if (file.size > 2 * 1024 * 1024) throw new Error('La imagen supera 2 MB.');
+      const okTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif'];
+      const type = file.type || 'image/png';
+      if (!okTypes.includes(type)) throw new Error('Formato no soportado (usa PNG/JPG/WEBP).');
+      const b64 = Buffer.from(await file.arrayBuffer()).toString('base64');
+      url = `data:${type};base64,${b64}`;
     } else if (pastedUrl) {
       url = pastedUrl;
     } else {
@@ -799,7 +806,9 @@ export async function uploadUpsellCoinImageAction(formData: FormData): Promise<v
       create: { key, value: url, group: 'upsell' },
     });
     await prisma.systemSetting.deleteMany({ where: { key: errKey } });
-    await audit(admin.id, admin.email, 'upsell.coin_image', 'SystemSetting', key, null, { url });
+    await audit(admin.id, admin.email, 'upsell.coin_image', 'SystemSetting', key, null, {
+      kind: url.startsWith('data:') ? 'data-uri' : 'url',
+    });
   } catch (e) {
     await setErr(e instanceof Error ? e.message : 'Error al guardar la imagen.');
   }
