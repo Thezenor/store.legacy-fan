@@ -20,7 +20,10 @@
     "menu": "Menú",
     "legalTerms": "Términos",
     "legalPrivacy": "Privacidad",
-    "legalCookies": "Cookies"
+    "legalCookies": "Cookies",
+    "legalReturns": "Devoluciones",
+    "legalMembership": "Membresía",
+    "legalNotice": "Aviso legal"
   },
   "clubIntro": {
     "eyebrow": "ÚNETE AL LEGADO",
@@ -214,6 +217,8 @@
     "showPassword": "Mostrar",
     "hidePassword": "Ocultar",
     "forgotPassword": "He olvidado mi contraseña",
+    "legalTermsLink": "ver términos",
+    "legalPrivacyLink": "ver privacidad",
     "continue": "Continuar a PayPal",
     "processing": "Redirigiendo a PayPal…",
     "back": "Volver a los planes",
@@ -233,6 +238,12 @@
   },
   "legal": {
     "disclaimer": "Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura."
+  },
+  "cookieBanner": {
+    "text": "Usamos cookies necesarias para el funcionamiento del sitio y, con tu permiso, otras opcionales.",
+    "more": "Más información",
+    "accept": "Aceptar",
+    "reject": "Rechazar"
   },
   "auth": {
     "emailLabel": "Correo electrónico",

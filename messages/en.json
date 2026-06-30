@@ -20,7 +20,10 @@
     "menu": "Menu",
     "legalTerms": "Terms",
     "legalPrivacy": "Privacy",
-    "legalCookies": "Cookies"
+    "legalCookies": "Cookies",
+    "legalReturns": "Returns",
+    "legalMembership": "Membership",
+    "legalNotice": "Legal notice"
   },
   "clubIntro": {
     "eyebrow": "JOIN THE LEGACY",
@@ -214,6 +217,8 @@
     "showPassword": "Show",
     "hidePassword": "Hide",
     "forgotPassword": "I forgot my password",
+    "legalTermsLink": "view terms",
+    "legalPrivacyLink": "view privacy",
     "continue": "Continue to PayPal",
     "processing": "Redirecting to PayPal…",
     "back": "Back to plans",
@@ -233,6 +238,12 @@
   },
   "legal": {
     "disclaimer": "Legacy Fan products are collectible items. They do not constitute a financial product or any promise of future returns."
+  },
+  "cookieBanner": {
+    "text": "We use cookies necessary for the site to work and, with your permission, optional ones.",
+    "more": "Learn more",
+    "accept": "Accept",
+    "reject": "Reject"
   },
   "auth": {
     "emailLabel": "Email",

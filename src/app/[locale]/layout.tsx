@@ -8,6 +8,7 @@ import { AuthNav } from '@/components/auth/auth-nav';
 import { Wordmark } from '@/components/brand/wordmark';
 import { MainNav } from '@/components/brand/main-nav';
 import { LocaleSwitcher } from '@/components/brand/locale-switcher';
+import { CookieConsent } from '@/components/cookie-consent';
 import { Link } from '@/i18n/navigation';
 import { auth } from '@/lib/auth';
 import { getBool } from '@/lib/commerce/settings';
@@ -134,6 +135,9 @@ export default async function LocaleLayout({
                   <Link href="/legal/terms" className="hover:text-foreground">{t('legalTerms')}</Link>
                   <Link href="/legal/privacy" className="hover:text-foreground">{t('legalPrivacy')}</Link>
                   <Link href="/legal/cookies" className="hover:text-foreground">{t('legalCookies')}</Link>
+                  <Link href="/legal/returns" className="hover:text-foreground">{t('legalReturns')}</Link>
+                  <Link href="/legal/membership" className="hover:text-foreground">{t('legalMembership')}</Link>
+                  <Link href="/legal/aviso-legal" className="hover:text-foreground">{t('legalNotice')}</Link>
                 </nav>
                 <p className="max-w-2xl text-xs leading-relaxed text-faint">
                   {/* Disclaimer obligatorio (doc 15) */}
@@ -145,6 +149,7 @@ export default async function LocaleLayout({
               </div>
             </div>
           </footer>
+          <CookieConsent />
           </>
           )}
         </NextIntlClientProvider>

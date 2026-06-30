@@ -20,7 +20,10 @@
     "menu": "Menu",
     "legalTerms": "Termini",
     "legalPrivacy": "Privacy",
-    "legalCookies": "Cookie"
+    "legalCookies": "Cookie",
+    "legalReturns": "Resi",
+    "legalMembership": "Abbonamento",
+    "legalNotice": "Note legali"
   },
   "clubIntro": {
     "eyebrow": "UNISCITI AL LASCITO",
@@ -214,6 +217,8 @@
     "showPassword": "Mostra",
     "hidePassword": "Nascondi",
     "forgotPassword": "Ho dimenticato la password",
+    "legalTermsLink": "vedi termini",
+    "legalPrivacyLink": "vedi privacy",
     "continue": "Continua su PayPal",
     "processing": "Reindirizzamento a PayPal…",
     "back": "Torna ai piani",
@@ -233,6 +238,12 @@
   },
   "legal": {
     "disclaimer": "I prodotti Legacy Fan sono articoli da collezione. Non costituiscono un prodotto finanziario né una promessa di rendimento futuro."
+  },
+  "cookieBanner": {
+    "text": "Usiamo cookie necessari al funzionamento del sito e, con il tuo consenso, altri opzionali.",
+    "more": "Maggiori informazioni",
+    "accept": "Accetta",
+    "reject": "Rifiuta"
   },
   "auth": {
     "emailLabel": "Email",

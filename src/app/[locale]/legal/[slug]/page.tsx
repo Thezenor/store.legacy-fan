@@ -14,6 +14,7 @@ const SLUGS = [
   'points',
   'referrals',
   'disclaimer',
+  'aviso-legal',
 ];
 
 async function getPage(slug: string, locale: string) {

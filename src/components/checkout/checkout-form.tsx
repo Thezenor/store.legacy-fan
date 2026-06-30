@@ -283,7 +283,12 @@ export function CheckoutForm({
                 </label>
                 <label className="flex items-start gap-2 text-sm text-muted">
                   <input type="checkbox" name="acceptTerms" className="mt-1" required />
-                  <span>{ta('termsLabel')}</span>
+                  <span>
+                    {ta('termsLabel')}{' '}
+                    (<Link href="/legal/terms" target="_blank" className="text-gold hover:underline">{tc('legalTermsLink')}</Link>
+                    {' · '}
+                    <Link href="/legal/privacy" target="_blank" className="text-gold hover:underline">{tc('legalPrivacyLink')}</Link>)
+                  </span>
                 </label>
                 {fieldErrors.acceptTerms ? (
                   <span className="block text-xs text-red-400">{fieldErrors.acceptTerms}</span>
