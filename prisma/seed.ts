@@ -11,6 +11,7 @@ import {
   ClubType,
   ReferralRewardMode,
   Locale,
+  CollectionStatus,
 } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -224,6 +225,24 @@ const EMAIL_TEMPLATES: {
   },
 ];
 
+// Colecciones iniciales (alineadas con el catálogo de marca).
+const COLLECTIONS: { slug: string; name: string; status: CollectionStatus; sortOrder: number }[] = [
+  { slug: 'world-peace', name: 'World Peace', status: CollectionStatus.ACTIVA, sortOrder: 0 },
+  { slug: 'sacred-blessings', name: 'Sacred Blessings', status: CollectionStatus.ACTIVA, sortOrder: 1 },
+  { slug: 'legends-of-war', name: 'Legends of War', status: CollectionStatus.PROXIMA, sortOrder: 2 },
+  { slug: 'top-sports', name: 'Top Sports', status: CollectionStatus.PROXIMA, sortOrder: 3 },
+];
+
+async function seedCollections() {
+  for (const c of COLLECTIONS) {
+    await prisma.collection.upsert({
+      where: { slug: c.slug },
+      update: { name: c.name },
+      create: { slug: c.slug, name: c.name, status: c.status, sortOrder: c.sortOrder },
+    });
+  }
+}
+
 async function seedEmailTemplates() {
   for (const tpl of EMAIL_TEMPLATES) {
     const template = await prisma.emailTemplate.upsert({
@@ -251,6 +270,7 @@ async function main() {
   await seedLegalDisclaimer();
   await seedLegalPages();
   await seedEmailTemplates();
+  await seedCollections();
   // Silencio en producción; útil en local.
   void ReferralRewardMode;
 }

@@ -11,6 +11,11 @@
     "toggleTheme": "Cambiar tema",
     "comparePlans": "Comparar planes",
     "navClub": "El Club",
+    "navColecciones": "Colecciones",
+    "navPuntoVenta": "Punto de venta",
+    "navDistribuidor": "Distribuidor",
+    "navFounders": "Founders",
+    "navTrabaja": "Trabaja con nosotros",
     "menu": "Menú",
     "legalTerms": "Términos",
     "legalPrivacy": "Privacidad",
@@ -126,6 +131,15 @@
     "communityTitle": "Comunidad",
     "communitySoon": "Tus accesos a Telegram, Discord y contenidos privados aparecerán aquí.",
     "profileTitle": "Perfil"
+  },
+  "collections": {
+    "eyebrow": "Legacy Fan",
+    "title": "Colecciones",
+    "tagline": "Cada serie, una historia. Cada pieza, un legado.",
+    "empty": "Pronto anunciaremos nuestras colecciones.",
+    "statusActiva": "Activa",
+    "statusProxima": "Próximamente",
+    "statusAgotada": "Agotada"
   },
   "checkout": {
     "title": "Finalizar tu acceso",

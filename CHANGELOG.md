@@ -72,6 +72,11 @@
 - Pulido: marquesina infinita animada (CSS, respeta reduce-motion), 3 pilares de valor en home, **carnet digital Art Deco** en /account (réplica del carnet físico con nº de socio; vista previa atenuada para reservas), hover dorado en tarjetas de plan.
 - **Fidelidad al prototipo** (spec extraído con subagente del handoff): logo recreado "LEGACY FAN + filete dorado + PRECIOUS METALS"; header 74px con nav centrado title-case (13px, tracking 0.04em, oro activo); Hero A·Split con **moneda metálica** (radial plata + doble sombra), eyebrow 0.34em, titular Cormorant 76px con acento dorado en italic, CTAs exactos (gradiente 135deg, radius 4px); marquesina Cormorant 17px sobre #0b0b0d. Verificado por render. Early Collector excluido (regla maestra).
 
+### Navegación — Menú superior alineado al sitio corporativo
+- Menú con desplegable **El Club** (Prime · Prestige · Comparar) + **Colecciones** (nuestra) + enlaces al sitio corporativo: **Punto de venta · Distribuidor · Founders · Trabaja con nosotros** (en pestaña nueva). **Early Collector excluido** (regla maestra).
+- `MainNav` reescrito: soporta ítems internos, externos y desplegables (desktop hover/focus, móvil expandible).
+- **Página pública `/colecciones`** con las colecciones (World Peace, Sacred Blessings, Legends of War, Top Sports), cada una con su moneda y estado; sitemap ampliado.
+
 ### Fase 1 · Módulo 10 — Superadmin completo
 - **Detalle de socio** `/lf-admin/socios/[id]`: cambiar club/estado, ajustar saldo/puntos (transacción auditada), restablecer contraseña, ver datos relacionados.
 - **Reembolsos** en pagos (estado interno + auditoría; devolución PayPal real al activar pasarela).

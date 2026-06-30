@@ -85,9 +85,21 @@ export default async function LocaleLayout({
               <MainNav
                 menuLabel={t('menu')}
                 items={[
-                  { href: '/club', label: t('navClub') },
-                  { href: '/club/prime', label: 'Prime' },
-                  { href: '/club/prestige', label: 'Prestige' },
+                  {
+                    kind: 'menu',
+                    label: t('navClub'),
+                    basePath: '/club',
+                    children: [
+                      { href: '/club/prime', label: 'Prime' },
+                      { href: '/club/prestige', label: 'Prestige' },
+                      { href: '/club', label: t('comparePlans') },
+                    ],
+                  },
+                  { kind: 'link', href: '/colecciones', label: t('navColecciones') },
+                  { kind: 'external', href: 'https://legacy-fan.com/punto-de-venta/', label: t('navPuntoVenta') },
+                  { kind: 'external', href: 'https://legacy-fan.com/distribuidores/', label: t('navDistribuidor') },
+                  { kind: 'external', href: 'https://legacy-fan.com/founders-inversion/', label: t('navFounders') },
+                  { kind: 'external', href: 'https://legacy-fan.com/trabaja-con-nosotros/', label: t('navTrabaja') },
                 ]}
               />
               <div className="flex flex-none items-center gap-2 sm:gap-4">

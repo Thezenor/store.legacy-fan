@@ -11,6 +11,11 @@
     "toggleTheme": "Toggle theme",
     "comparePlans": "Compare plans",
     "navClub": "The Club",
+    "navColecciones": "Collections",
+    "navPuntoVenta": "Points of sale",
+    "navDistribuidor": "Distributor",
+    "navFounders": "Founders",
+    "navTrabaja": "Work with us",
     "menu": "Menu",
     "legalTerms": "Terms",
     "legalPrivacy": "Privacy",
@@ -126,6 +131,15 @@
     "communityTitle": "Community",
     "communitySoon": "Your Telegram, Discord and private content access will appear here.",
     "profileTitle": "Profile"
+  },
+  "collections": {
+    "eyebrow": "Legacy Fan",
+    "title": "Collections",
+    "tagline": "Each series, a story. Each piece, a legacy.",
+    "empty": "We'll announce our collections soon.",
+    "statusActiva": "Active",
+    "statusProxima": "Coming soon",
+    "statusAgotada": "Sold out"
   },
   "checkout": {
     "title": "Complete your access",

@@ -9,6 +9,7 @@ const paths = [
   '/club',
   '/club/prime',
   '/club/prestige',
+  '/colecciones',
   '/legal/terms',
   '/legal/privacy',
   '/legal/cookies',
