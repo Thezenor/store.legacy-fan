@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { saveGatewayAction } from '@/lib/admin-actions';
+import { saveGatewayAction, createSubscriptionPlanAction } from '@/lib/admin-actions';
 
 type Values = Record<string, string | boolean>;
 
@@ -17,6 +17,7 @@ export function GatewayConfig({ values }: { values: Values }) {
   const b = (k: string) => Boolean(values[k]);
 
   return (
+    <div className="space-y-4">
     <form action={saveGatewayAction} className="rounded-card border border-border bg-surface p-5">
       <h2 className="font-display text-lg text-gold-light">Pasarelas de pago</h2>
 
@@ -82,7 +83,7 @@ export function GatewayConfig({ values }: { values: Values }) {
               <label className="block"><span className="text-xs text-muted">Plan Prestige USD</span>
                 <input name="paypal.plan.PRESTIGE.USD" defaultValue={v(`paypal.${mode}.plan.PRESTIGE.USD`)} className={inp} /></label>
             </div>
-            <p className="mt-2 text-[11px] text-faint">Crea los planes en PayPal (Billing Plans) y pega aquí sus IDs (P-XXXX). Cada plan fija su divisa e importe anual.</p>
+            <p className="mt-2 text-[11px] text-faint">Puedes crearlos automáticamente abajo, o pegar aquí IDs ya existentes (P-XXXX).</p>
           </fieldset>
 
           <label className="flex items-center gap-2 text-sm text-muted">
@@ -110,5 +111,53 @@ export function GatewayConfig({ values }: { values: Values }) {
         Las credenciales se guardan en la base de datos. Para máxima seguridad puedes mantenerlas también en variables de entorno.
       </p>
     </form>
+
+    {/* Crear planes de suscripción en la pasarela (botones = formularios aparte) */}
+    {gateway === 'paypal' ? (
+      <div className="rounded-card border border-border bg-surface p-5">
+        <h3 className="font-display text-base text-gold-light">Crear planes de suscripción en PayPal · {mode}</h3>
+        <p className="mt-1 text-[11px] text-faint">
+          Crea el Billing Plan anual en PayPal con el precio actual del club y guarda su ID
+          automáticamente. Requiere credenciales {mode} guardadas. Para cambiar el precio, crea un
+          plan nuevo (PayPal no permite editar el importe de un plan existente).
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {([
+            ['PRIME', 'EUR'],
+            ['PRIME', 'USD'],
+            ['PRESTIGE', 'EUR'],
+            ['PRESTIGE', 'USD'],
+          ] as const).map(([club, cur]) => {
+            const planId = v(`paypal.${mode}.plan.${club}.${cur}`);
+            const err = v(`paypal.${mode}.plan_error.${club}.${cur}`);
+            return (
+              <form
+                key={`${club}.${cur}`}
+                action={createSubscriptionPlanAction}
+                className="flex flex-col gap-1 rounded border border-border p-3"
+              >
+                <input type="hidden" name="gateway" value="paypal" />
+                <input type="hidden" name="club" value={club} />
+                <input type="hidden" name="currency" value={cur} />
+                <input type="hidden" name="mode" value={mode} />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-muted">{club} · {cur}</span>
+                  <button className="bevel bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#1a1408]">
+                    {planId ? 'Recrear plan' : 'Crear plan'}
+                  </button>
+                </div>
+                {planId ? (
+                  <span className="truncate text-[11px] text-silver" title={planId}>✓ {planId}</span>
+                ) : (
+                  <span className="text-[11px] text-faint">Sin plan</span>
+                )}
+                {err ? <span className="text-[11px] text-red-400">⚠ {err}</span> : null}
+              </form>
+            );
+          })}
+        </div>
+      </div>
+    ) : null}
+    </div>
   );
 }

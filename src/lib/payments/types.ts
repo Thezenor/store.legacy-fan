@@ -80,10 +80,24 @@ export interface SubscriptionInfo {
   raw: unknown;
 }
 
+/** Datos para crear un plan/precio recurrente en la pasarela desde el admin. */
+export interface CreatePlanInput {
+  club: string;
+  /** Nombre visible del plan (p. ej. "Legacy Prime Club — Anual"). */
+  name: string;
+  currency: Currency;
+  /** Importe por ciclo en céntimos. */
+  amountCents: number;
+  /** Periodicidad en meses (12 = anual). */
+  intervalMonths: number;
+}
+
 /** Capacidad de suscripción recurrente. La implementan PayPal y Stripe. */
 export interface SubscriptionProvider {
   readonly key: 'PAYPAL' | 'STRIPE';
   isEnabled(): boolean;
+  /** Crea el plan/precio en la pasarela y devuelve su id (P-XXXX en PayPal). */
+  createSubscriptionPlan(input: CreatePlanInput): Promise<{ planId: string }>;
   createSubscription(input: CreateSubscriptionInput): Promise<CreateSubscriptionResult>;
   getSubscription(providerSubscriptionId: string): Promise<SubscriptionInfo>;
   cancelSubscription(providerSubscriptionId: string, reason?: string): Promise<void>;

@@ -14,6 +14,8 @@ import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
 import { sendTemplatedEmail } from './email/templates';
 import { saveUpload } from './storage';
+import { getSubscriptionProviderForAdmin } from './payments';
+import { getClubPricing, getPlan } from './commerce';
 
 // Lee campos opcionales de ficha técnica del producto desde un formulario.
 function productSpecFields(formData: FormData) {
@@ -660,6 +662,64 @@ export async function saveGatewayAction(formData: FormData): Promise<void> {
     create: { key: enabledKey, value: formData.get('enabled') === 'on', group: 'payments' },
   });
   await audit(admin.id, admin.email, 'gateway.save', 'SystemSetting', gateway, null, { gateway });
+  revalidatePath('/lf-admin/config');
+}
+
+/**
+ * Crea el plan/precio de suscripción anual en la pasarela (PayPal Billing Plan)
+ * para un club y divisa, y guarda su id en `paypal.{mode}.plan.{CLUB}.{CUR}`.
+ * El importe sale del precio actual del club. Guarda el error si falla, para
+ * mostrarlo en el panel.
+ */
+export async function createSubscriptionPlanAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const gateway = String(formData.get('gateway') || 'paypal').toLowerCase();
+  const club = String(formData.get('club') || '');
+  const currency = (String(formData.get('currency') || 'EUR') as 'EUR' | 'USD');
+  const mode = String(formData.get('mode') || 'sandbox');
+  const errKey = `${gateway}.${mode}.plan_error.${club}.${currency}`;
+
+  const setError = (msg: string) =>
+    prisma.systemSetting.upsert({
+      where: { key: errKey },
+      update: { value: msg },
+      create: { key: errKey, value: msg, group: 'payments' },
+    });
+  const clearError = () => prisma.systemSetting.deleteMany({ where: { key: errKey } });
+
+  try {
+    const [pricing, plan] = await Promise.all([getClubPricing(club, currency), getPlan(club)]);
+    const amountCents = pricing?.priceCents ?? 0;
+    if (amountCents <= 0) {
+      await setError('El club no tiene precio actual configurado.');
+      revalidatePath('/lf-admin/config');
+      return;
+    }
+    const name = `${plan?.name ?? club} — Anual`;
+    const provider = getSubscriptionProviderForAdmin(gateway.toUpperCase() as 'PAYPAL' | 'STRIPE');
+    const { planId } = await provider.createSubscriptionPlan({
+      club,
+      name,
+      currency,
+      amountCents,
+      intervalMonths: 12,
+    });
+    const key = `${gateway}.${mode}.plan.${club}.${currency}`;
+    await prisma.systemSetting.upsert({
+      where: { key },
+      update: { value: planId },
+      create: { key, value: planId, group: 'payments' },
+    });
+    await clearError();
+    await audit(admin.id, admin.email, 'subscription.plan_created', 'SystemSetting', key, null, {
+      planId,
+      club,
+      currency,
+      mode,
+    });
+  } catch (e) {
+    await setError(e instanceof Error ? e.message : 'Error creando el plan.');
+  }
   revalidatePath('/lf-admin/config');
 }
 

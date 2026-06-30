@@ -42,3 +42,14 @@ export function getActiveSubscriptionProvider(): SubscriptionProvider {
   if (!active) throw new Error('No hay ninguna pasarela habilitada.');
   return active;
 }
+
+/**
+ * Proveedor de suscripción SIN comprobar isEnabled (operaciones de admin como
+ * crear planes antes de activar la pasarela). El acceso real sigue gobernado por
+ * la presencia de credenciales en el propio proveedor.
+ */
+export function getSubscriptionProviderForAdmin(key: 'PAYPAL' | 'STRIPE'): SubscriptionProvider {
+  const provider = registry[key];
+  if (!provider) throw new Error(`Pasarela ${key} desconocida.`);
+  return provider;
+}

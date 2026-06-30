@@ -2,6 +2,7 @@ import type {
   CapturePaymentResult,
   CreatePaymentInput,
   CreatePaymentResult,
+  CreatePlanInput,
   CreateSubscriptionInput,
   CreateSubscriptionResult,
   PaymentProvider,
@@ -41,6 +42,11 @@ export class StripeProvider implements PaymentProvider, SubscriptionProvider {
   }
 
   // ── Suscripciones (Stripe Billing) — preparado, desactivado ───────────────
+
+  async createSubscriptionPlan(_input: CreatePlanInput): Promise<{ planId: string }> {
+    // Futuro: crear Product + Price recurrente (stripe.prices.create) y devolver price.id.
+    throw new Error('Stripe (suscripciones) está desactivado.');
+  }
 
   async createSubscription(_input: CreateSubscriptionInput): Promise<CreateSubscriptionResult> {
     throw new Error('Stripe (suscripciones) está desactivado. Actívalo cuando proceda.');

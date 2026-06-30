@@ -2,6 +2,7 @@ import type {
   CapturePaymentResult,
   CreatePaymentInput,
   CreatePaymentResult,
+  CreatePlanInput,
   CreateSubscriptionInput,
   CreateSubscriptionResult,
   PaymentProvider,
@@ -208,6 +209,74 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
   }
 
   // ── Suscripciones (PayPal Subscriptions / Billing) ────────────────────────
+
+  /** Producto de catálogo (uno por modo, reutilizado para todos los planes). */
+  private async ensureProductId(mode: 'sandbox' | 'live', token: string): Promise<string> {
+    const key = `paypal.${mode}.product_id`;
+    const row = await prisma.systemSetting.findUnique({ where: { key } });
+    if (row?.value) return String(row.value);
+
+    const res = await fetch(`${await this.baseUrl()}/v1/catalogs/products`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Legacy Fan Club',
+        description: 'Membresía Legacy Fan Club',
+        type: 'SERVICE',
+        category: 'MEMBERSHIP_CLUBS_AND_ORGANIZATIONS',
+      }),
+    });
+    if (!res.ok) throw new Error(`PayPal create product falló: HTTP ${res.status}`);
+    const data = (await res.json()) as { id: string };
+    await prisma.systemSetting.upsert({
+      where: { key },
+      update: { value: data.id },
+      create: { key, value: data.id, group: 'payments' },
+    });
+    return data.id;
+  }
+
+  async createSubscriptionPlan(input: CreatePlanInput): Promise<{ planId: string }> {
+    const token = await this.accessToken();
+    const mode = await this.mode();
+    const productId = await this.ensureProductId(mode, token);
+
+    const annual = input.intervalMonths % 12 === 0;
+    const interval_unit = annual ? 'YEAR' : 'MONTH';
+    const interval_count = annual ? input.intervalMonths / 12 : input.intervalMonths;
+
+    const res = await fetch(`${await this.baseUrl()}/v1/billing/plans`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: productId,
+        name: input.name,
+        status: 'ACTIVE',
+        billing_cycles: [
+          {
+            frequency: { interval_unit, interval_count },
+            tenure_type: 'REGULAR',
+            sequence: 1,
+            total_cycles: 0, // 0 = se renueva indefinidamente
+            pricing_scheme: {
+              fixed_price: {
+                value: (input.amountCents / 100).toFixed(2),
+                currency_code: input.currency,
+              },
+            },
+          },
+        ],
+        payment_preferences: {
+          auto_bill_outstanding: true,
+          setup_fee_failure_action: 'CONTINUE',
+          payment_failure_threshold: 1,
+        },
+      }),
+    });
+    if (!res.ok) throw new Error(`PayPal create plan falló: HTTP ${res.status}`);
+    const data = (await res.json()) as { id: string };
+    return { planId: data.id };
+  }
 
   async createSubscription(input: CreateSubscriptionInput): Promise<CreateSubscriptionResult> {
     const token = await this.accessToken();
