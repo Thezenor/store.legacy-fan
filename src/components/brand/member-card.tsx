@@ -1,7 +1,15 @@
-import { ArtDecoMotif } from './art-deco-motif';
+// Carnet digital del socio: usa las imágenes reales del carnet físico Art Deco
+// (anverso = portada "LEGACY FAN CLUB"; reverso = lado del socio con el motivo
+// metálico) y superpone el nombre y el número reales sobre el reverso.
+// El tamaño del texto escala con el ancho de la tarjeta (container queries),
+// para que se vea igual en móvil y escritorio.
 
-// Carnet digital del socio (réplica del carnet físico Art Deco): anverso con
-// número y nombre, y reverso. `active=false` atenúa (reservas pendientes).
+const GOLD = '#c6a04e';
+
+// Posiciones del reverso clonadas de la referencia (preview validado en SVG).
+const FRONT_SRC = '/brand/legacy-card-front.webp';
+const BACK_SRC = '/brand/legacy-card-back.webp';
+
 export function DigitalMemberCard({
   name,
   number,
@@ -18,58 +26,74 @@ export function DigitalMemberCard({
   /** QR firmado (data URI SVG) para el reverso; solo si el sistema está activo. */
   qrDataUri?: string;
 }) {
+  const isBack = side === 'back';
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl border border-gold/30 bg-[#0a0a0c] shadow-card"
-      style={{ aspectRatio: '1.586' }}
+      className="relative w-full overflow-hidden rounded-2xl bg-[#0c0c0e] shadow-card"
+      style={{ aspectRatio: '714 / 466', containerType: 'inline-size' }}
     >
-      {/* Motivo Art Deco (cuñas oro/plata/cobre + arco) en la esquina izquierda */}
-      <ArtDecoMotif className="pointer-events-none absolute -left-[12%] bottom-0 h-full opacity-90" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0c]/10 via-[#0a0a0c]/55 to-[#0a0a0c]/92" />
+      {/* Imagen real del carnet */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={isBack ? BACK_SRC : FRONT_SRC}
+        alt={isBack ? `Carnet de socio ${number}` : 'Legacy Fan Club'}
+        className={`absolute inset-0 h-full w-full scale-[1.02] object-cover ${active ? '' : 'opacity-50'}`}
+        draggable={false}
+      />
 
-      {/* Filos dorados (marco fino + líneas Art Deco como en el carnet) */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute right-[7%] top-[8%] h-[84%] w-px bg-gold/30" />
-        <div className="absolute left-[40%] right-0 top-[64%] h-px bg-gold/25" />
-      </div>
-
-      <div className={`relative flex h-full flex-col p-5 sm:p-7 ${active ? '' : 'opacity-60'}`}>
-        {side === 'front' ? (
-          <>
-            <div className="mt-auto text-right">
-              {name ? (
-                <p className="truncate font-display text-sm uppercase tracking-[0.12em] text-foreground/90 sm:text-base">
-                  {name}
-                </p>
-              ) : null}
-              <p className="font-display text-3xl font-semibold tracking-wide text-metal-gold sm:text-5xl">
-                <span className="align-super text-base sm:text-2xl">Nº</span> {number}
-              </p>
-              <p className="mt-1 font-display text-[11px] uppercase tracking-[0.22em] text-gold-light sm:text-sm">
-                Legacy Fan Club · Member Card
-              </p>
-            </div>
-            <p className="mt-auto text-right text-[9px] leading-relaxed tracking-wide text-gold-light/70 sm:text-[11px]">
-              Legacy-fan.com
-              <br />© Legacy Fan Precious Metals LLC.
-            </p>
-          </>
-        ) : (
-          <>
-            {qrDataUri ? (
-              <div className="absolute left-5 top-5 rounded-md bg-white p-1.5 shadow-card sm:left-7 sm:top-7">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={qrDataUri} alt={`QR socio ${number}`} className="h-16 w-16 sm:h-20 sm:w-20" />
-              </div>
+      {/* Reverso: nombre + número + leyenda + footer (texto vivo, en oro). */}
+      {isBack && active ? (
+        <>
+          {/* Bloque central (en el panel oscuro de la derecha) */}
+          <div
+            className="absolute flex flex-col items-center text-center"
+            style={{ left: '33%', right: '3%', top: '45%', transform: 'translateY(-50%)', color: GOLD }}
+          >
+            {name ? (
+              <span
+                className="block max-w-full truncate font-sans"
+                style={{ fontSize: '4.2cqw', lineHeight: 1.1 }}
+              >
+                {name}
+              </span>
             ) : null}
-            <p className="ml-auto mt-auto max-w-[55%] text-right text-[9px] leading-relaxed tracking-wide text-gold-light/70 sm:text-[11px]">
-              Legacy-fan.com
-              <br />© Legacy Fan Precious Metals LLC.
-            </p>
-          </>
-        )}
-      </div>
+            <span
+              className="font-sans font-semibold"
+              style={{ fontSize: '6.2cqw', lineHeight: 1.15, marginTop: '2.5cqw', letterSpacing: '0.01em' }}
+            >
+              <span style={{ fontSize: '3.4cqw', verticalAlign: '0.9em', marginRight: '0.2em' }}>Nº</span>
+              {number}
+            </span>
+            <span
+              className="font-sans uppercase"
+              style={{ fontSize: '2.25cqw', letterSpacing: '0.18em', marginTop: '2.2cqw', opacity: 0.92 }}
+            >
+              Legacy Fan Club · Member Card
+            </span>
+          </div>
 
+          {/* Footer */}
+          <div
+            className="absolute text-center font-sans"
+            style={{ left: '33%', right: '3%', bottom: '7%', color: GOLD, opacity: 0.78, fontSize: '1.55cqw', letterSpacing: '0.06em' }}
+          >
+            Legacy-fan.com · © Legacy Fan Precious Metals LLC.
+          </div>
+
+          {/* QR firmado (solo si el sistema de carnet está activo) */}
+          {qrDataUri ? (
+            <div
+              className="absolute rounded-md bg-white shadow-card"
+              style={{ top: '8%', right: '5%', width: '15%', padding: '1%' }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={qrDataUri} alt={`QR socio ${number}`} className="h-full w-full" />
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {/* Estado pendiente (reserva sin pago completo) */}
       {!active && pendingLabel ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="rounded-full border border-gold/40 bg-background/70 px-4 py-1.5 text-xs uppercase tracking-wider text-gold-light backdrop-blur">
