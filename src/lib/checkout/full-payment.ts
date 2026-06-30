@@ -173,8 +173,11 @@ async function activateFullPayment(opts: {
   const ratio = await getNumber('points.ratio_per_currency_unit');
   const expiryYears = await getNumber('points.expiry_years');
   const fullCents = payment.reservation.totalDueCents;
+  // Base de PREMIUM para puntos/recompensa: excluye el importe de la 2ª moneda,
+  // que incluye valor spot del metal (regla: puntos solo sobre premium).
+  const premiumCents = Math.max(0, fullCents - payment.reservation.secondCoinCents);
   // Recompensa de referido: 10% del premium (configurable en M8).
-  const referralRewardCents = Math.round(fullCents * 0.1);
+  const referralRewardCents = Math.round(premiumCents * 0.1);
 
   await prisma.$transaction(
     async (tx) => {
@@ -209,10 +212,10 @@ async function activateFullPayment(opts: {
         year: new Date().getFullYear(),
       });
 
-      // Puntos sobre premium (membresía = premium íntegro)
+      // Puntos solo sobre el premium (sin el spot de la 2ª moneda)
       await earnPointsOnPurchase(tx, {
         userId: payment.userId,
-        premiumCents: fullCents,
+        premiumCents,
         currency: payment.currency,
         ratio: Number.isFinite(ratio) ? ratio : 1,
         expiryYears: Number.isFinite(expiryYears) ? expiryYears : 2,

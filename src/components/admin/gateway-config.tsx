@@ -70,7 +70,7 @@ export function GatewayConfig({
               <label className="block"><span className="text-xs text-muted">Client ID</span>
                 <input name="paypal.sandbox.client_id" defaultValue={v('paypal.sandbox.client_id')} className={inp} /></label>
               <label className="mt-2 block"><span className="text-xs text-muted">Client Secret</span>
-                <input name="paypal.sandbox.client_secret" type="password" defaultValue={v('paypal.sandbox.client_secret')} className={inp} /></label>
+                <input name="paypal.sandbox.client_secret" type="password" defaultValue="" placeholder={b('paypal.sandbox.client_secret.set') ? '•••••••• (guardado)' : ''} className={inp} /></label>
               <label className="mt-2 block"><span className="text-xs text-muted">Webhook ID</span>
                 <input name="paypal.sandbox.webhook_id" defaultValue={v('paypal.sandbox.webhook_id')} className={inp} /></label>
             </fieldset>
@@ -81,7 +81,7 @@ export function GatewayConfig({
               <label className="block"><span className="text-xs text-muted">Client ID</span>
                 <input name="paypal.live.client_id" defaultValue={v('paypal.live.client_id')} className={inp} /></label>
               <label className="mt-2 block"><span className="text-xs text-muted">Client Secret</span>
-                <input name="paypal.live.client_secret" type="password" defaultValue={v('paypal.live.client_secret')} className={inp} /></label>
+                <input name="paypal.live.client_secret" type="password" defaultValue="" placeholder={b('paypal.live.client_secret.set') ? '•••••••• (guardado)' : ''} className={inp} /></label>
               <label className="mt-2 block"><span className="text-xs text-muted">Webhook ID</span>
                 <input name="paypal.live.webhook_id" defaultValue={v('paypal.live.webhook_id')} className={inp} /></label>
             </fieldset>
@@ -94,11 +94,11 @@ export function GatewayConfig({
       ) : (
         <div className="mt-3 space-y-3">
           <label className="block"><span className="text-xs text-muted">Secret Key</span>
-            <input name="stripe.secret_key" type="password" defaultValue={v('stripe.secret_key')} className={inp} /></label>
+            <input name="stripe.secret_key" type="password" defaultValue="" placeholder={b('stripe.secret_key.set') ? '•••••••• (guardado)' : ''} className={inp} /></label>
           <label className="block"><span className="text-xs text-muted">Publishable Key</span>
             <input name="stripe.publishable_key" defaultValue={v('stripe.publishable_key')} className={inp} /></label>
           <label className="block"><span className="text-xs text-muted">Webhook Secret</span>
-            <input name="stripe.webhook_secret" type="password" defaultValue={v('stripe.webhook_secret')} className={inp} /></label>
+            <input name="stripe.webhook_secret" type="password" defaultValue="" placeholder={b('stripe.webhook_secret.set') ? '•••••••• (guardado)' : ''} className={inp} /></label>
           <label className="flex items-center gap-2 text-sm text-muted">
             <input type="checkbox" name="enabled" defaultChecked={b('payments.stripe.enabled')} /> Usar Stripe como método de pago
           </label>

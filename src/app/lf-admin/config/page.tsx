@@ -136,19 +136,21 @@ export default async function AdminConfig() {
       <div className="mt-4">
         <GatewayConfig
           values={{
-            // Credenciales por modo; si están vacías, migramos las heredadas a sandbox.
+            // Credenciales por modo. Los SECRETOS no se envían al navegador: solo
+            // un flag "*.set" para indicar que están guardados (deja en blanco para
+            // mantenerlos; al escribir uno nuevo se sobrescribe).
             'paypal.sandbox.client_id': str('paypal.sandbox.client_id') || str('paypal.client_id'),
-            'paypal.sandbox.client_secret': str('paypal.sandbox.client_secret') || str('paypal.client_secret'),
+            'paypal.sandbox.client_secret.set': !!(str('paypal.sandbox.client_secret') || str('paypal.client_secret')),
             'paypal.sandbox.webhook_id': str('paypal.sandbox.webhook_id') || str('paypal.webhook_id'),
             'paypal.live.client_id': str('paypal.live.client_id'),
-            'paypal.live.client_secret': str('paypal.live.client_secret'),
+            'paypal.live.client_secret.set': !!str('paypal.live.client_secret'),
             'paypal.live.webhook_id': str('paypal.live.webhook_id'),
             'paypal.mode': str('paypal.mode'),
             'paypal.test_result': str('paypal.test_result'),
             'payments.paypal.enabled': bool('payments.paypal.enabled'),
-            'stripe.secret_key': str('stripe.secret_key'),
+            'stripe.secret_key.set': !!str('stripe.secret_key'),
             'stripe.publishable_key': str('stripe.publishable_key'),
-            'stripe.webhook_secret': str('stripe.webhook_secret'),
+            'stripe.webhook_secret.set': !!str('stripe.webhook_secret'),
             'payments.stripe.enabled': bool('payments.stripe.enabled'),
           }}
           subPlanInfo={subPlanInfo}

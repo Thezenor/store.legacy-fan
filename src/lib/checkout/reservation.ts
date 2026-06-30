@@ -75,12 +75,16 @@ export async function startReservation(opts: {
 
   // Si PayPal falla (sin credenciales, error de red…), revertimos la reserva
   // para no dejar filas huérfanas que bloqueen futuros intentos del usuario.
+  // Importe a cobrar ahora: depósito de membresía + lo elegido para la 2ª moneda
+  // (depósito de 50 si "reservar", o su precio con descuento si "pagarla ahora").
+  const chargeCents = terms.amountCents + secondCoinCents;
+
   try {
     const provider = getPaymentProviderUnchecked('PAYPAL');
     const order = await provider.createPayment({
-      amountCents: terms.amountCents,
+      amountCents: chargeCents,
       currency: opts.currency,
-      description: 'Legacy Fan Club — Reserva',
+      description: secondCoinCents > 0 ? 'Legacy Fan Club — Reserva + 2ª moneda' : 'Legacy Fan Club — Reserva',
       referenceId: reservation.id,
       returnUrl: `${appUrl()}/api/checkout/paypal/return?locale=${opts.locale}`,
       cancelUrl: `${appUrl()}/api/checkout/paypal/cancel?locale=${opts.locale}`,
@@ -94,7 +98,7 @@ export async function startReservation(opts: {
         mode: await paymentMode(),
         status: 'PENDIENTE_DE_PAGO',
         currency: opts.currency,
-        amountCents: terms.amountCents,
+        amountCents: chargeCents,
         providerRef: order.providerRef,
       },
     });
@@ -155,6 +159,24 @@ export async function reconcileReservationPaid(customId: string, amountCents: nu
   const reservation = await prisma.reservation.findUnique({ where: { id: customId } });
   if (!reservation) return;
   if (reservation.status === 'RESERVA_PENDIENTE' || reservation.status === 'PAGO_COMPLETO') return;
+
+  // Integridad: lo cobrado debe cubrir el importe esperado del depósito.
+  const pendingPayment = await prisma.payment.findFirst({
+    where: { reservationId: customId, provider: 'PAYPAL', status: 'PENDIENTE_DE_PAGO' },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (pendingPayment && amountCents < pendingPayment.amountCents) {
+    await prisma.auditLog.create({
+      data: {
+        actorId: reservation.userId,
+        action: 'reservation.amount_mismatch',
+        entity: 'Reservation',
+        entityId: customId,
+        newValue: { expectedCents: pendingPayment.amountCents, paidCents: amountCents },
+      },
+    });
+    return; // no marcar pagado si el importe no cuadra
+  }
 
   await prisma.$transaction([
     prisma.reservation.update({
