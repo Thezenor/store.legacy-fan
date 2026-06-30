@@ -16,6 +16,8 @@ import { sendTemplatedEmail } from './email/templates';
 import { saveUpload } from './storage';
 import { getSubscriptionProviderForAdmin, testGatewayConnection } from './payments';
 import { getClubPricing, getPlan } from './commerce';
+import { emailVerification } from './tokens';
+import { sendVerificationEmail } from './email/auth-emails';
 
 // Lee campos opcionales de ficha técnica del producto desde un formulario.
 function productSpecFields(formData: FormData) {
@@ -375,6 +377,82 @@ export async function resetUserPasswordAction(formData: FormData): Promise<void>
   await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
   await audit(admin.id, admin.email, 'user.password_reset', 'User', userId, null, { byAdmin: true });
   revalidatePath('/lf-admin/socios');
+  revalidatePath('/lf-admin/registros');
+}
+
+/** Elimina un usuario y todos sus datos (cascada). No permite admins ni a uno mismo. */
+export async function deleteUserAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId'));
+  if (!userId || userId === admin.id) return; // no eliminarse a sí mismo
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { roles: { include: { role: true } } },
+  });
+  if (!target) return;
+  // Protección: no eliminar administradores/superadmins.
+  if (target.roles.some((r) => r.role.key === 'admin' || r.role.key === 'superadmin')) return;
+  await prisma.user.delete({ where: { id: userId } }).catch(() => {});
+  await audit(admin.id, admin.email, 'user.delete', 'User', userId, { email: target.email }, null);
+  revalidatePath('/lf-admin/registros');
+  revalidatePath('/lf-admin/socios');
+}
+
+/** Reenvía el correo de verificación/registro a un usuario (acción del admin). */
+export async function resendRegistrationEmailAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId'));
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { profile: true },
+  });
+  if (!user) return;
+  const locale = (user.profile?.preferredLocale as 'es' | 'en' | 'fr' | 'it') || 'es';
+  const token = await emailVerification.create(user.email);
+  await sendVerificationEmail(user.email, locale, token);
+  await audit(admin.id, admin.email, 'user.resend_verification', 'User', userId, null, { email: user.email });
+  revalidatePath('/lf-admin/registros');
+}
+
+/** Alta MANUAL de un cliente (registro sin necesidad de socio) desde el admin. */
+export async function createManualUserAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const firstName = String(formData.get('firstName') ?? '').trim();
+  const lastName = String(formData.get('lastName') ?? '').trim();
+  const phone = String(formData.get('phone') ?? '').trim() || null;
+  const country = (String(formData.get('country') ?? 'ES').trim() || 'ES').toUpperCase().slice(0, 2);
+  const rawPassword = String(formData.get('password') ?? '');
+  const sendEmail = formData.get('sendEmail') === 'on';
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !firstName || !lastName) return;
+  if (await prisma.user.findUnique({ where: { email } })) return; // ya existe
+
+  // Contraseña: la del admin si es válida; si no, una aleatoria (el cliente la resetea).
+  const password = rawPassword.length >= 8 ? rawPassword : crypto.randomUUID().replace(/-/g, '') + 'Aa1';
+  const passwordHash = await bcrypt.hash(password, 12);
+  const user = await prisma.user.create({
+    data: {
+      email,
+      passwordHash,
+      profile: {
+        create: {
+          firstName,
+          lastName,
+          phone,
+          country,
+          preferredLocale: 'es',
+          preferredCurrency: 'EUR',
+          termsAcceptedAt: new Date(),
+        },
+      },
+    },
+  });
+  if (sendEmail) {
+    const token = await emailVerification.create(email);
+    await sendVerificationEmail(email, 'es', token);
+  }
+  await audit(admin.id, admin.email, 'user.manual_create', 'User', user.id, null, { email });
+  revalidatePath('/lf-admin/registros');
 }
 
 // ───────────────── Pagos: reembolso ─────────────────

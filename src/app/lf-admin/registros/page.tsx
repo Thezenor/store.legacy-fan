@@ -1,22 +1,42 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { toggleUserBlockAction, resetUserPasswordAction } from '@/lib/admin-actions';
+import {
+  toggleUserBlockAction,
+  resetUserPasswordAction,
+  deleteUserAction,
+  resendRegistrationEmailAction,
+  createManualUserAction,
+} from '@/lib/admin-actions';
+import { COUNTRIES } from '@/lib/countries';
 
 export const dynamic = 'force-dynamic';
 
 type Filter = 'all' | 'nonmember' | 'unverified';
+const inp = 'rounded border border-border bg-background px-2 py-1.5 text-sm text-foreground';
 
-// Registros: TODOS los usuarios (sean o no socios) para poder administrarlos.
+// Registros: TODOS los usuarios (sean o no socios) con buscador y administración.
 export default async function AdminRegistros({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; q?: string }>;
 }) {
-  const { filter: rawFilter } = await searchParams;
+  const { filter: rawFilter, q: rawQ } = await searchParams;
   const filter: Filter =
     rawFilter === 'nonmember' || rawFilter === 'unverified' ? rawFilter : 'all';
+  const q = (rawQ ?? '').trim();
+
+  const where = q
+    ? {
+        OR: [
+          { email: { contains: q, mode: 'insensitive' as const } },
+          { profile: { firstName: { contains: q, mode: 'insensitive' as const } } },
+          { profile: { lastName: { contains: q, mode: 'insensitive' as const } } },
+        ],
+      }
+    : {};
 
   const users = await prisma.user.findMany({
+    where,
     include: {
       profile: true,
       membership: { include: { memberNumber: true } },
@@ -42,25 +62,62 @@ export default async function AdminRegistros({
     return { label: 'Registrado (sin socio)', cls: 'text-faint' };
   };
 
-  const tab = (key: Filter, label: string) => (
-    <Link
-      href={`/lf-admin/registros${key === 'all' ? '' : `?filter=${key}`}`}
-      className={`rounded px-3 py-1.5 text-xs ${
-        filter === key ? 'bg-gold/15 text-gold-light' : 'border border-border text-muted hover:text-foreground'
-      }`}
-    >
-      {label}
-    </Link>
-  );
+  const tab = (key: Filter, label: string) => {
+    const params = new URLSearchParams();
+    if (key !== 'all') params.set('filter', key);
+    if (q) params.set('q', q);
+    const qs = params.toString();
+    return (
+      <Link
+        href={`/lf-admin/registros${qs ? `?${qs}` : ''}`}
+        className={`rounded px-3 py-1.5 text-xs ${
+          filter === key ? 'bg-gold/15 text-gold-light' : 'border border-border text-muted hover:text-foreground'
+        }`}
+      >
+        {label}
+      </Link>
+    );
+  };
 
   return (
     <div>
       <h1 className="font-display text-3xl font-bold text-foreground">Registros</h1>
       <p className="mt-1 text-sm text-muted">
-        {filtered.length} de {users.length} usuarios (clientes registrados, sean o no socios).
+        {filtered.length} de {users.length} usuarios{q ? ` para “${q}”` : ''}.
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      {/* Alta manual de cliente */}
+      <details className="mt-4 rounded-card border border-gold/30 bg-surface p-4">
+        <summary className="cursor-pointer text-sm font-semibold text-gold-light">+ Dar de alta un cliente manualmente</summary>
+        <form action={createManualUserAction} className="mt-3 flex flex-wrap items-end gap-3">
+          <label className="block"><span className="text-xs text-muted">Nombre</span>
+            <input name="firstName" required className={`${inp} mt-1 w-36`} /></label>
+          <label className="block"><span className="text-xs text-muted">Apellidos</span>
+            <input name="lastName" required className={`${inp} mt-1 w-40`} /></label>
+          <label className="block"><span className="text-xs text-muted">Email</span>
+            <input name="email" type="email" required className={`${inp} mt-1 w-56`} /></label>
+          <label className="block"><span className="text-xs text-muted">Teléfono</span>
+            <input name="phone" className={`${inp} mt-1 w-32`} /></label>
+          <label className="block"><span className="text-xs text-muted">País</span>
+            <select name="country" defaultValue="ES" className={`${inp} mt-1`}>
+              {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+            </select></label>
+          <label className="block"><span className="text-xs text-muted">Contraseña (opcional)</span>
+            <input name="password" type="text" placeholder="aleatoria si vacío" className={`${inp} mt-1 w-40`} /></label>
+          <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="sendEmail" defaultChecked /> Enviar correo de verificación</label>
+          <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Dar de alta</button>
+        </form>
+      </details>
+
+      {/* Buscador */}
+      <form method="get" action="/lf-admin/registros" className="mt-4 flex flex-wrap items-center gap-2">
+        {filter !== 'all' ? <input type="hidden" name="filter" value={filter} /> : null}
+        <input name="q" defaultValue={q} placeholder="Buscar por nombre, apellidos o email…" className={`${inp} w-72`} />
+        <button className="rounded border border-border px-3 py-1.5 text-xs text-muted hover:text-foreground">Buscar</button>
+        {q ? <Link href={`/lf-admin/registros${filter !== 'all' ? `?filter=${filter}` : ''}`} className="text-xs text-gold hover:underline">Limpiar</Link> : null}
+      </form>
+
+      <div className="mt-3 flex flex-wrap gap-2">
         {tab('all', 'Todos')}
         {tab('nonmember', 'Sin socio')}
         {tab('unverified', 'Email sin verificar')}
@@ -84,7 +141,7 @@ export default async function AdminRegistros({
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-4 py-6 text-center text-muted">
-                  No hay usuarios para este filtro.
+                  No hay usuarios para este filtro/búsqueda.
                 </td>
               </tr>
             ) : (
@@ -117,19 +174,33 @@ export default async function AdminRegistros({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-2">
-                        <form action={toggleUserBlockAction}>
-                          <input type="hidden" name="userId" value={u.id} />
-                          <button
-                            type="submit"
-                            className={`rounded border px-2 py-1 text-xs ${
-                              u.isBlocked
-                                ? 'border-red-500/40 text-red-400'
-                                : 'border-border text-muted hover:text-foreground'
-                            }`}
-                          >
-                            {u.isBlocked ? 'Desbloquear' : 'Bloquear'}
-                          </button>
-                        </form>
+                        <div className="flex flex-wrap gap-2">
+                          <form action={toggleUserBlockAction}>
+                            <input type="hidden" name="userId" value={u.id} />
+                            <button
+                              type="submit"
+                              className={`rounded border px-2 py-1 text-xs ${
+                                u.isBlocked
+                                  ? 'border-red-500/40 text-red-400'
+                                  : 'border-border text-muted hover:text-foreground'
+                              }`}
+                            >
+                              {u.isBlocked ? 'Desbloquear' : 'Bloquear'}
+                            </button>
+                          </form>
+                          <form action={resendRegistrationEmailAction}>
+                            <input type="hidden" name="userId" value={u.id} />
+                            <button type="submit" className="rounded border border-border px-2 py-1 text-xs text-muted hover:text-foreground">
+                              Reenviar correo
+                            </button>
+                          </form>
+                          <form action={deleteUserAction}>
+                            <input type="hidden" name="userId" value={u.id} />
+                            <button type="submit" className="rounded border border-red-500/40 px-2 py-1 text-xs text-red-400 hover:bg-red-500/10">
+                              Eliminar
+                            </button>
+                          </form>
+                        </div>
                         <form action={resetUserPasswordAction} className="flex items-center gap-1">
                           <input type="hidden" name="userId" value={u.id} />
                           <input
@@ -138,10 +209,7 @@ export default async function AdminRegistros({
                             placeholder="Nueva contraseña"
                             className="w-32 rounded border border-border bg-background px-2 py-1 text-xs text-foreground"
                           />
-                          <button
-                            type="submit"
-                            className="rounded border border-border px-2 py-1 text-xs text-muted hover:text-foreground"
-                          >
+                          <button type="submit" className="rounded border border-border px-2 py-1 text-xs text-muted hover:text-foreground">
                             Reset
                           </button>
                         </form>
