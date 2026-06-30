@@ -14,7 +14,7 @@ import { prisma } from './prisma';
 import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
 import { sendTemplatedEmail } from './email/templates';
-import { saveUpload } from './storage';
+import { saveUpload, optimizeImageToDataUri } from './storage';
 import { getSubscriptionProviderForAdmin, testGatewayConnection } from './payments';
 import { getClubPricing, getPlan } from './commerce';
 import { emailVerification } from './tokens';
@@ -217,10 +217,10 @@ export async function uploadProductImageAction(formData: FormData): Promise<void
   const productId = String(formData.get('productId'));
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return;
-  const { url } = await saveUpload(file);
+  const { url, urlMobile } = await saveUpload(file);
   const count = await prisma.productImage.count({ where: { productId } });
   await prisma.productImage.create({
-    data: { productId, url, alt: String(formData.get('alt') ?? '') || null, sortOrder: count },
+    data: { productId, url, urlMobile: urlMobile ?? null, alt: String(formData.get('alt') ?? '') || null, sortOrder: count },
   });
   await audit(admin.id, admin.email, 'product.image_add', 'Product', productId, null, { url });
   revalidatePath(`/lf-admin/productos/${productId}`);
@@ -663,8 +663,8 @@ export async function uploadCollectionImageAction(formData: FormData): Promise<v
   const id = String(formData.get('collectionId'));
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return;
-  const { url } = await saveUpload(file);
-  await prisma.collection.update({ where: { id }, data: { imageUrl: url } });
+  const { url, urlMobile } = await saveUpload(file);
+  await prisma.collection.update({ where: { id }, data: { imageUrl: url, imageUrlMobile: urlMobile ?? null } });
   await audit(admin.id, admin.email, 'collection.image', 'Collection', id, null, { url });
   revalidateCollections();
 }
@@ -785,14 +785,10 @@ export async function uploadUpsellCoinImageAction(formData: FormData): Promise<v
   try {
     let url: string;
     if (file instanceof File && file.size > 0) {
-      // Imagen pequeña → se guarda como data URI EN LA BD (no depende del Volume,
-      // así se ve siempre). Para galerías grandes seguimos usando disco/Volume.
-      if (file.size > 2 * 1024 * 1024) throw new Error('La imagen supera 2 MB.');
-      const okTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif'];
-      const type = file.type || 'image/png';
-      if (!okTypes.includes(type)) throw new Error('Formato no soportado (usa PNG/JPG/WEBP).');
-      const b64 = Buffer.from(await file.arrayBuffer()).toString('base64');
-      url = `data:${type};base64,${b64}`;
+      // Imagen pequeña → optimizada (WebP) y guardada como data URI EN LA BD
+      // (no depende del Volume, así se ve siempre).
+      if (file.size > 6 * 1024 * 1024) throw new Error('La imagen supera 6 MB.');
+      url = await optimizeImageToDataUri(file, 512);
     } else if (pastedUrl) {
       url = pastedUrl;
     } else {
