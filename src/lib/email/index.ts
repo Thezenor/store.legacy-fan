@@ -43,12 +43,18 @@ interface EmailConfig {
   provider: 'resend' | 'smtp' | 'console';
   from: string;
   resendApiKey: string | null;
-  smtp: { host: string | null; port: number; user: string | null; password: string | null; secure: boolean };
+  smtp: { host: string | null; port: number; user: string | null; password: string | null; secure: boolean; helo: string | null };
+}
+
+/** Extrae el dominio de un remitente ("Nombre <x@dominio>" o "x@dominio"). */
+function domainFromAddress(addr: string): string | null {
+  const m = addr.match(/@([^>\s]+)/);
+  return m ? m[1] : null;
 }
 
 /** Lee la configuración de email de la BD (grupo 'email') con respaldo a env. */
 async function getEmailConfig(): Promise<EmailConfig> {
-  const [provider, from, resendKey, host, port, user, pass, secure] = await Promise.all([
+  const [provider, from, resendKey, host, port, user, pass, secure, helo] = await Promise.all([
     getSettingString('email.provider'),
     getSettingString('email.from'),
     getSettingString('email.resend.api_key'),
@@ -57,18 +63,25 @@ async function getEmailConfig(): Promise<EmailConfig> {
     getSettingString('email.smtp.user'),
     getSettingString('email.smtp.password'),
     getSettingString('email.smtp.secure'),
+    getSettingString('email.smtp.helo'),
   ]);
   const prov = (provider || process.env.EMAIL_PROVIDER || 'console') as EmailConfig['provider'];
   const clean = (s: string | null | undefined) => (s ?? '').trim() || null;
-  const rawHost = clean(host) || clean(process.env.SMTP_HOST);
-  // Sanea el host: quita espacios, protocolo pegado por error y barras.
-  const smtpHost = rawHost
-    ? rawHost.replace(/^[a-z]+:\/\//i, '').replace(/[/\s].*$/, '').trim() || null
-    : null;
+  const sanitizeHost = (h: string | null) =>
+    h ? h.replace(/^[a-z]+:\/\//i, '').replace(/[/\s].*$/, '').replace(/[[\]]/g, '').trim() || null : null;
+  const smtpHost = sanitizeHost(clean(host) || clean(process.env.SMTP_HOST));
   const portNum = Number((clean(port) || clean(process.env.SMTP_PORT) || '587').replace(/\D/g, '')) || 587;
+  const fromValue = clean(from) || process.env.EMAIL_FROM || 'Legacy Fan <no-reply@legacy-fan.com>';
+  // Nombre para el HELO/EHLO del cliente. Debe ser un FQDN válido (nunca
+  // [127.0.0.1]/localhost). Orden: ajuste manual → dominio del remitente → host.
+  const heloName =
+    sanitizeHost(clean(helo) || clean(process.env.SMTP_HELO)) ||
+    domainFromAddress(fromValue) ||
+    smtpHost ||
+    null;
   return {
     provider: prov === 'resend' || prov === 'smtp' ? prov : 'console',
-    from: clean(from) || process.env.EMAIL_FROM || 'Legacy Fan <no-reply@legacy-fan.com>',
+    from: fromValue,
     resendApiKey: clean(resendKey) || process.env.RESEND_API_KEY || null,
     smtp: {
       host: smtpHost,
@@ -76,6 +89,7 @@ async function getEmailConfig(): Promise<EmailConfig> {
       user: clean(user) || clean(process.env.SMTP_USER),
       password: (pass ?? '').trim() || process.env.SMTP_PASSWORD || null,
       secure: (secure ?? '') !== '' ? secure === 'true' : portNum === 465,
+      helo: heloName,
     },
   };
 }
@@ -103,6 +117,10 @@ async function sendViaSmtp(cfg: EmailConfig, input: SendEmailInput): Promise<Sen
       host,
       port,
       secure,
+      // `name` es el hostname que el cliente anuncia en EHLO/HELO. Sin esto,
+      // nodemailer usa os.hostname() del contenedor de Railway, que no es un
+      // FQDN resoluble y acaba enviando "EHLO [127.0.0.1]". Forzamos un FQDN.
+      name: cfg.smtp.helo || undefined,
       auth: user ? { user, pass: password ?? '' } : undefined,
     });
     const info = await transport.sendMail({ from: cfg.from, to: input.to, subject: input.subject, html: input.html, text: input.text || htmlToText(input.html) });

@@ -67,6 +67,9 @@ export function EmailConfig({ values }: { values: Values }) {
                 <input name="email.smtp.user" defaultValue={v('email.smtp.user')} onBlur={trimOnBlur} className={inp} /></label>
               <label className="block"><span className="text-xs text-muted">Contraseña</span>
                 <input name="email.smtp.password" type="password" defaultValue="" onBlur={trimOnBlur} placeholder={set('email.smtp.password') ? '•••••••• (guardada)' : ''} className={inp} /></label>
+              <label className="block sm:col-span-2"><span className="text-xs text-muted">Nombre EHLO/HELO (FQDN)</span>
+                <input name="email.smtp.helo" defaultValue={v('email.smtp.helo')} onBlur={trimOnBlur} placeholder="store.legacy-fan.com" className={inp} />
+                <span className="mt-1 block text-[11px] text-faint">Cómo se identifica el cliente ante tu servidor. Debe ser un dominio válido (nunca localhost/[127.0.0.1]). Si lo dejas vacío, se usa el dominio del remitente.</span></label>
             </div>
             <label className="mt-3 flex items-center gap-2 text-sm text-muted">
               <input type="checkbox" name="email.smtp.secure" defaultChecked={Boolean(values['email.smtp.secure'] === true || values['email.smtp.secure'] === 'true')} />

@@ -169,6 +169,7 @@ export default async function AdminConfig() {
             'email.smtp.host': str('email.smtp.host'),
             'email.smtp.port': str('email.smtp.port'),
             'email.smtp.user': str('email.smtp.user'),
+            'email.smtp.helo': str('email.smtp.helo'),
             'email.smtp.secure': str('email.smtp.secure'),
             'email.resend.api_key.set': !!str('email.resend.api_key'),
             'email.smtp.password.set': !!str('email.smtp.password'),

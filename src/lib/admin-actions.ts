@@ -857,6 +857,7 @@ export async function saveEmailAction(formData: FormData): Promise<void> {
   await upsert('email.smtp.host', trimmed('email.smtp.host'));
   await upsert('email.smtp.port', trimmed('email.smtp.port'));
   await upsert('email.smtp.user', trimmed('email.smtp.user'));
+  await upsert('email.smtp.helo', trimmed('email.smtp.helo'));
   await upsert('email.smtp.secure', formData.get('email.smtp.secure') === 'on' ? 'true' : 'false');
   // Secretos: solo se sobrescriben si llegan con valor.
   for (const key of ['email.resend.api_key', 'email.smtp.password']) {
