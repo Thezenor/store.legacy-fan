@@ -88,8 +88,12 @@ async function sendViaSmtp(cfg: EmailConfig, input: SendEmailInput): Promise<Sen
       secure,
       auth: user ? { user, pass: password ?? '' } : undefined,
     });
-    await transport.sendMail({ from: cfg.from, to: input.to, subject: input.subject, html: input.html });
-    return { success: true, provider: 'smtp' };
+    const info = await transport.sendMail({ from: cfg.from, to: input.to, subject: input.subject, html: input.html });
+    // Si el servidor no acepta al destinatario, lo tratamos como fallo real.
+    if (info.rejected && info.rejected.length > 0) {
+      return { success: false, provider: 'smtp', error: `Rechazado: ${info.rejected.join(', ')} · ${info.response ?? ''}`.trim() };
+    }
+    return { success: true, provider: 'smtp', error: info.response ? `resp: ${info.response}` : undefined };
   } catch (e) {
     return { success: false, provider: 'smtp', error: e instanceof Error ? e.message : 'Error SMTP' };
   }

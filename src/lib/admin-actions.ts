@@ -885,7 +885,7 @@ export async function sendTestEmailConfigAction(formData: FormData): Promise<voi
     });
   }
   const msg = result.success
-    ? `OK · enviado con ${result.provider} a ${to}`
+    ? `OK · aceptado por ${result.provider} para ${to}${result.error ? ` · ${result.error}` : ''}`
     : `ERROR (${result.provider}): ${result.error ?? 'desconocido'}`;
   await prisma.systemSetting.upsert({
     where: { key: 'email.test_result' },
