@@ -101,9 +101,11 @@ export default async function LocaleLayout({
           <>
           <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
             <div className="mx-auto flex h-[74px] max-w-6xl items-center justify-between gap-3 px-4 sm:gap-5 sm:px-6">
-              <Link href="/" aria-label={t('siteName')} className="flex-none">
-                <Wordmark />
-              </Link>
+              {/* Logo → web corporativa (no al store) */}
+              <a href="https://legacy-fan.com/" aria-label={t('siteName')} className="flex-none">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/logo.webp" alt="Legacy Fan" width={200} height={60} className="h-9 w-auto sm:h-10" />
+              </a>
               <MainNav
                 menuLabel={t('menu')}
                 mobileExtra={
@@ -132,7 +134,7 @@ export default async function LocaleLayout({
                     ],
                   },
                   { kind: 'external', href: 'https://legacy-fan.com/colecciones/', label: t('navColecciones') },
-                  { kind: 'external', href: 'https://legacy-fan.com/distribuidores-puntos-de-venta/', label: t('navDistribuidor') },
+                  { kind: 'external', href: locale === 'en' ? 'https://legacy-fan.com/en/distributors-retail/' : 'https://legacy-fan.com/distribuidores-puntos-de-venta/', label: t('navDistribuidor') },
                   { kind: 'external', href: 'https://legacy-fan.com/founders-inversion/', label: t('navFounders') },
                   { kind: 'external', href: 'https://legacy-fan.com/trabaja-con-nosotros/', label: t('navTrabaja') },
                 ]}
