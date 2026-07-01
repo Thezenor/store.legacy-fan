@@ -1,8 +1,34 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Coin } from '@/components/brand/coin';
+import { CoinShowcase } from '@/components/brand/coin-showcase';
 import { SpecStrip } from '@/components/brand/spec-strip';
 import { ValuePillars } from '@/components/brand/value-pillars';
+import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+
+// Pieza destacada en portada: la moneda de la colección ACTIVA (p. ej. Ganesha),
+// prefiriendo la inaugural. Con imagen real y ficha técnica, para dar coherencia.
+async function getFeaturedCoin() {
+  const p = await prisma.product.findFirst({
+    where: { visible: true, collection: { status: 'ACTIVA' } },
+    include: {
+      images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+      collection: { select: { name: true, imageUrl: true, imageUrlMobile: true } },
+    },
+    orderBy: [{ isInauguralCoin: 'desc' }, { createdAt: 'asc' }],
+  });
+  if (!p) return null;
+  const img = p.images[0]
+    ? { url: p.images[0].url, urlMobile: p.images[0].urlMobile }
+    : p.collection?.imageUrl
+      ? { url: p.collection.imageUrl, urlMobile: p.collection.imageUrlMobile }
+      : null;
+  if (!img) return null;
+  const specs = [p.metal, p.weightLabel, p.mintYear ? String(p.mintYear) : null].filter(Boolean).join(' · ');
+  return { slug: p.slug, name: p.name, collectionName: p.collection?.name ?? '', img, specs };
+}
 
 export default async function HomePage({
   params,
@@ -13,6 +39,7 @@ export default async function HomePage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'home' });
   const c = await getTranslations({ locale, namespace: 'common' });
+  const featured = await getFeaturedCoin();
 
   return (
     <section className="animate-fade-in">
@@ -45,10 +72,34 @@ export default async function HomePage({
           </div>
         </div>
 
-        {/* Moneda acuñada con su serial */}
-        <div className="order-1 flex flex-col items-center gap-3 lg:order-2">
-          <Coin metal="silver" serial="LF · 0001" className="w-[clamp(12rem,38vw,21rem)]" />
-          <span className="serial text-[11px]">Pieza nº 0001 / 0999</span>
+        {/* Pieza destacada: imagen real + ficha, enlazada a su producto */}
+        <div className="order-1 lg:order-2">
+          {featured ? (
+            <Link href={`/producto/${featured.slug}`} className="flex flex-col items-center gap-4">
+              <CoinShowcase className="w-[clamp(12rem,38vw,21rem)]">
+                <div className="overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={featured.img.url}
+                    srcSet={featured.img.urlMobile ? `${featured.img.urlMobile} 640w, ${featured.img.url} 1200w` : undefined}
+                    sizes="(min-width: 1024px) 21rem, 38vw"
+                    alt={featured.name}
+                    className="aspect-square h-full w-full object-cover"
+                  />
+                </div>
+              </CoinShowcase>
+              <div className="text-center">
+                {featured.collectionName ? <p className="eyebrow">{featured.collectionName}</p> : null}
+                <p className="mt-1 font-display text-lg uppercase tracking-wide text-foreground">{featured.name}</p>
+                {featured.specs ? <p className="serial mt-1 text-[11px]">{featured.specs}</p> : null}
+              </div>
+            </Link>
+          ) : (
+            <div className="flex flex-col items-center gap-3">
+              <Coin metal="silver" serial="LF · 0001" className="w-[clamp(12rem,38vw,21rem)]" />
+              <span className="serial text-[11px]">Pieza nº 0001 / 0999</span>
+            </div>
+          )}
         </div>
       </div>
 
