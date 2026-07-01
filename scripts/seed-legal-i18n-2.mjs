@@ -3,7 +3,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const EMAIL = 'info@legacy-fan.com';
-const SEDE = 'Dover, Delaware (USA)';
+const SEDE = '8 The Green STE R, Dover, DE 19901 (Delaware, USA)';
 
 const DOCS = {
   en: {
@@ -74,9 +74,9 @@ const DOCS = {
 5. Contact. ${EMAIL}.` },
     'aviso-legal': { title: 'Legal notice', body: `LEGAL NOTICE AND PROVIDER IDENTIFICATION
 
-Site owner: Legacy Fan [complete legal name].
-Address: ${SEDE} [complete full registered address].
-Tax/registration: [complete EIN/tax ID and registration details].
+Site owner: Legacy Fan LLC.
+Address: ${SEDE}.
+Registration: limited liability company (LLC) formed in the State of Delaware (USA).
 Contact: ${EMAIL}.
 Website: store.legacy-fan.com.
 
@@ -158,9 +158,9 @@ Law and jurisdiction. See the corresponding section in the Terms and Conditions.
 5. Contact. ${EMAIL}.` },
     'aviso-legal': { title: 'Mentions légales', body: `MENTIONS LÉGALES ET IDENTIFICATION DU PRESTATAIRE
 
-Titulaire du site : Legacy Fan [compléter la raison sociale].
-Adresse : ${SEDE} [compléter l'adresse complète].
-Identification fiscale : [compléter EIN/numéro fiscal et données d'enregistrement].
+Titulaire du site : Legacy Fan LLC.
+Adresse : ${SEDE}.
+Enregistrement : société à responsabilité limitée (LLC) constituée dans l'État du Delaware (États-Unis).
 Contact : ${EMAIL}.
 Site web : store.legacy-fan.com.
 
@@ -242,9 +242,9 @@ Loi et juridiction. Voir la section correspondante dans les Conditions général
 5. Contatto. ${EMAIL}.` },
     'aviso-legal': { title: 'Note legali', body: `NOTE LEGALI E IDENTIFICAZIONE DEL PRESTATORE
 
-Titolare del sito: Legacy Fan [completare ragione sociale].
-Indirizzo: ${SEDE} [completare indirizzo completo].
-Identificazione fiscale: [completare EIN/codice fiscale e dati di registrazione].
+Titolare del sito: Legacy Fan LLC.
+Indirizzo: ${SEDE}.
+Registrazione: società a responsabilità limitata (LLC) costituita nello Stato del Delaware (USA).
 Contatto: ${EMAIL}.
 Sito web: store.legacy-fan.com.
 

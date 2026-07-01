@@ -13,7 +13,7 @@ const DOCS = {
       title: 'Terms and conditions',
       body: `TERMS AND CONDITIONS OF SALE AND USE
 
-1. Provider. Owner: Legacy Fan [legal name], registered office in Dover, Delaware (USA), contact ${EMAIL}.
+1. Provider. Owner: Legacy Fan LLC, registered office at 8 The Green STE R, Dover, DE 19901 (Delaware, USA), contact ${EMAIL}.
 
 2. Purpose. These terms govern membership sign-up, the reservation, payment and delivery of the Legacy Prime Club and Legacy Prestige Club memberships and their associated collectible pieces.
 
@@ -47,7 +47,7 @@ const DOCS = {
       title: 'Privacy policy',
       body: `PRIVACY POLICY (GDPR)
 
-1. Controller: Legacy Fan [legal name], Dover, Delaware. Contact: ${EMAIL}.
+1. Controller: Legacy Fan LLC, 8 The Green STE R, Dover, DE 19901 (Delaware, USA). Contact: ${EMAIL}.
 
 2. Data we process. Sign-up and profile data (first name, last name, email, phone, country), purchase and membership data, and technical browsing data. We do not store full card data: payment is processed by the gateway (PayPal).
 
@@ -89,7 +89,7 @@ const DOCS = {
       title: 'Conditions générales',
       body: `CONDITIONS GÉNÉRALES DE VENTE ET D'UTILISATION
 
-1. Prestataire. Titulaire : Legacy Fan [raison sociale], siège à Dover, Delaware (États-Unis), contact ${EMAIL}.
+1. Prestataire. Titulaire : Legacy Fan LLC, siège au 8 The Green STE R, Dover, DE 19901 (Delaware, États-Unis), contact ${EMAIL}.
 
 2. Objet. Ces conditions régissent l'adhésion, la réservation, le paiement et la livraison des abonnements Legacy Prime Club et Legacy Prestige Club et des pièces de collection associées.
 
@@ -123,7 +123,7 @@ const DOCS = {
       title: 'Politique de confidentialité',
       body: `POLITIQUE DE CONFIDENTIALITÉ (RGPD)
 
-1. Responsable du traitement : Legacy Fan [raison sociale], Dover, Delaware. Contact : ${EMAIL}.
+1. Responsable du traitement : Legacy Fan LLC, 8 The Green STE R, Dover, DE 19901 (Delaware, États-Unis). Contact : ${EMAIL}.
 
 2. Données traitées. Données d'inscription et de profil (prénom, nom, e-mail, téléphone, pays), données d'achat et d'adhésion, et données techniques de navigation. Nous ne stockons pas les données complètes de carte : le paiement est traité par la passerelle (PayPal).
 
@@ -165,7 +165,7 @@ const DOCS = {
       title: 'Termini e condizioni',
       body: `TERMINI E CONDIZIONI DI VENDITA E USO
 
-1. Prestatore. Titolare: Legacy Fan [ragione sociale], sede a Dover, Delaware (USA), contatto ${EMAIL}.
+1. Prestatore. Titolare: Legacy Fan LLC, sede in 8 The Green STE R, Dover, DE 19901 (Delaware, USA), contatto ${EMAIL}.
 
 2. Oggetto. Questi termini regolano l'iscrizione, la prenotazione, il pagamento e la consegna degli abbonamenti Legacy Prime Club e Legacy Prestige Club e dei pezzi da collezione associati.
 
@@ -199,7 +199,7 @@ const DOCS = {
       title: 'Politica sulla privacy',
       body: `POLITICA SULLA PRIVACY (GDPR)
 
-1. Titolare del trattamento: Legacy Fan [ragione sociale], Dover, Delaware. Contatto: ${EMAIL}.
+1. Titolare del trattamento: Legacy Fan LLC, 8 The Green STE R, Dover, DE 19901 (Delaware, USA). Contatto: ${EMAIL}.
 
 2. Dati trattati. Dati di registrazione e profilo (nome, cognome, email, telefono, paese), dati di acquisto e abbonamento e dati tecnici di navigazione. Non conserviamo i dati completi della carta: il pagamento è gestito dalla passerella (PayPal).
 

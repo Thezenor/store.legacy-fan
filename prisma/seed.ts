@@ -64,8 +64,10 @@ const SYSTEM_SETTINGS: { key: string; group: string; value: unknown }[] = [
   { key: 'upsell.second_coin.enabled_prime', group: 'products', value: false },
   { key: 'upsell.second_coin.enabled_prestige', group: 'products', value: true },
   // Fiscal / empresa
-  { key: 'fiscal.company_name', group: 'fiscal', value: 'Legacy Fan' },
-  { key: 'fiscal.base_country', group: 'fiscal', value: 'ES' },
+  { key: 'fiscal.company_name', group: 'fiscal', value: 'Legacy Fan LLC' },
+  { key: 'fiscal.address', group: 'fiscal', value: '8 The Green STE R, Dover, DE 19901' },
+  { key: 'fiscal.email', group: 'fiscal', value: 'info@legacy-fan.com' },
+  { key: 'fiscal.base_country', group: 'fiscal', value: 'US' },
   { key: 'fiscal.base_currency', group: 'fiscal', value: 'EUR' },
   { key: 'fiscal.invoice_series', group: 'fiscal', value: 'LF' },
   // Sistema

@@ -577,6 +577,8 @@ export async function updateOrderItemStatusAction(formData: FormData): Promise<v
 // Mapa de campos del panel de configuración: clave → tipo de coerción.
 const CONFIG_FIELDS: { key: string; type: 'string' | 'number' | 'bool' | 'money' | 'date' }[] = [
   { key: 'fiscal.company_name', type: 'string' },
+  { key: 'fiscal.address', type: 'string' },
+  { key: 'fiscal.email', type: 'string' },
   { key: 'fiscal.base_country', type: 'string' },
   { key: 'fiscal.base_currency', type: 'string' },
   { key: 'fiscal.invoice_series', type: 'string' },

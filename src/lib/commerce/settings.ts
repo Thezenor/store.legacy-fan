@@ -23,6 +23,8 @@ export type SettingKey =
   | 'upsell.second_coin.enabled_prime'
   | 'upsell.second_coin.enabled_prestige'
   | 'fiscal.company_name'
+  | 'fiscal.address'
+  | 'fiscal.email'
   | 'fiscal.base_country'
   | 'fiscal.base_currency'
   | 'fiscal.invoice_series'

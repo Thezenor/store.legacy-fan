@@ -4,18 +4,18 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-const EMPRESA = 'Legacy Fan';
+const EMPRESA = 'Legacy Fan LLC';
 const EMAIL = 'info@legacy-fan.com';
-const SEDE = 'Dover, Delaware (EE. UU.)';
+const SEDE = '8 The Green STE R, Dover, DE 19901 (Delaware, EE. UU.)';
 
 const DOCS = {
   'aviso-legal': {
     title: 'Aviso legal',
     body: `AVISO LEGAL E IDENTIFICACIÓN DEL PRESTADOR
 
-Titular del sitio: ${EMPRESA} [completar razón social].
-Domicilio: ${SEDE} [completar dirección registral completa].
-Identificación fiscal / registro: [completar NIF/EIN y datos registrales].
+Titular del sitio: ${EMPRESA}.
+Domicilio: ${SEDE}.
+Identificación / registro: sociedad de responsabilidad limitada (LLC) constituida en el Estado de Delaware (EE. UU.).
 Correo de contacto: ${EMAIL}.
 Sitio web: store.legacy-fan.com.
 
@@ -34,7 +34,7 @@ Legislación y jurisdicción. Ver el apartado correspondiente en los Términos y
     title: 'Términos y condiciones',
     body: `TÉRMINOS Y CONDICIONES DE VENTA Y USO
 
-1. Identificación. Titular: ${EMPRESA} [razón social], con domicilio en ${SEDE} y correo ${EMAIL}.
+1. Identificación. Titular: ${EMPRESA}, con domicilio en ${SEDE} y correo ${EMAIL}.
 
 2. Objeto. Regulan el alta de socio, la reserva, el pago y la entrega de las membresías Legacy Prime Club y Legacy Prestige Club y de las piezas coleccionables asociadas.
 
@@ -69,7 +69,7 @@ Legislación y jurisdicción. Ver el apartado correspondiente en los Términos y
     title: 'Política de privacidad',
     body: `POLÍTICA DE PRIVACIDAD (RGPD)
 
-1. Responsable del tratamiento: ${EMPRESA} [razón social], ${SEDE}. Contacto: ${EMAIL}.
+1. Responsable del tratamiento: ${EMPRESA}, ${SEDE}. Contacto: ${EMAIL}.
 
 2. Datos que tratamos. Datos de registro y perfil (nombre, apellidos, correo, teléfono, país), datos de compra y membresía, y datos técnicos de navegación. No almacenamos los datos completos de tarjeta: el pago lo procesa la pasarela (PayPal).
 

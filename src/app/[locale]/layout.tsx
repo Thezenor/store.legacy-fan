@@ -160,7 +160,7 @@ export default async function LocaleLayout({
                   <DisclaimerText locale={locale} />
                 </p>
                 <p className="text-[11px] tracking-wide text-faint">
-                  © 2026 Legacy Fan · 8 The Green STE R, Dover DE 19901 · info@legacy-fan.com
+                  © 2026 Legacy Fan LLC · 8 The Green STE R, Dover, DE 19901 · info@legacy-fan.com
                 </p>
               </div>
             </div>

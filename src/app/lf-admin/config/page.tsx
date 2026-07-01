@@ -62,6 +62,8 @@ export default async function AdminConfig() {
       <form action={saveConfigAction} className="mt-6 space-y-4">
         <Group title="Empresa y fiscal">
           <Field label="Nombre de empresa"><input name="fiscal.company_name" defaultValue={str('fiscal.company_name')} className={`${inp} w-56`} /></Field>
+          <Field label="Domicilio fiscal"><input name="fiscal.address" defaultValue={str('fiscal.address')} className={`${inp} w-72`} /></Field>
+          <Field label="Email de contacto"><input name="fiscal.email" defaultValue={str('fiscal.email')} className={`${inp} w-56`} /></Field>
           <Field label="País base (ISO)"><input name="fiscal.base_country" defaultValue={str('fiscal.base_country')} className={`${inp} w-24`} /></Field>
           <Field label="Moneda principal"><select name="fiscal.base_currency" defaultValue={str('fiscal.base_currency') || 'EUR'} className={`${inp}`}><option>EUR</option><option>USD</option></select></Field>
           <Field label="Serie de factura"><input name="fiscal.invoice_series" defaultValue={str('fiscal.invoice_series')} className={`${inp} w-24`} /></Field>
