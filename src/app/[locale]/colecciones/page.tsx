@@ -4,6 +4,7 @@ import type { CollectionStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { Coin } from '@/components/brand/coin';
 import { CoinShowcase } from '@/components/brand/coin-showcase';
+import { Link } from '@/i18n/navigation';
 
 export async function generateMetadata({
   params,
@@ -40,7 +41,13 @@ export default async function ColeccionesPage({
   const collections = await prisma.collection.findMany({
     where: { status: { in: ['ACTIVA', 'PROXIMA', 'AGOTADA'] } },
     orderBy: { sortOrder: 'asc' },
-    include: { products: { where: { visible: true }, select: { id: true } } },
+    include: {
+      products: {
+        where: { visible: true },
+        select: { id: true, slug: true },
+        orderBy: { createdAt: 'asc' },
+      },
+    },
   });
 
   return (
@@ -60,8 +67,8 @@ export default async function ColeccionesPage({
           {collections.map((col, i) => {
             const label = statusLabel(col.status, t);
             const soon = col.status === 'PROXIMA';
-            return (
-              <article key={col.id} className="flex flex-col items-center text-center">
+            const href = col.products[0] ? `/producto/${col.products[0].slug}` : null;
+            const media = (
                 <CoinShowcase className="w-[clamp(11rem,30vw,16rem)]">
                   {col.imageUrl ? (
                     <div className={`overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_20px_44px_-16px_rgba(0,0,0,0.8)] ${soon ? 'opacity-40 blur-[1px]' : ''}`}>
@@ -85,6 +92,9 @@ export default async function ColeccionesPage({
                     />
                   )}
                 </CoinShowcase>
+            );
+            const caption = (
+              <>
                 <h2 className="mt-5 font-display text-lg uppercase tracking-wide text-foreground">
                   {col.name}
                 </h2>
@@ -94,6 +104,21 @@ export default async function ColeccionesPage({
                     {col.products.length > 0 ? <span className="text-faint"> · {col.products.length}</span> : null}
                   </p>
                 ) : null}
+              </>
+            );
+            return (
+              <article key={col.id} className="flex flex-col items-center text-center">
+                {href ? (
+                  <Link href={href} className="flex flex-col items-center">
+                    {media}
+                    {caption}
+                  </Link>
+                ) : (
+                  <>
+                    {media}
+                    {caption}
+                  </>
+                )}
               </article>
             );
           })}
