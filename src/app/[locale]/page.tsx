@@ -14,14 +14,17 @@ async function getFeaturedCoin() {
   const p = await prisma.product.findFirst({
     where: { visible: true, collection: { status: 'ACTIVA' } },
     include: {
-      images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+      images: { orderBy: { sortOrder: 'asc' } },
       collection: { select: { name: true, imageUrl: true, imageUrlMobile: true } },
     },
     orderBy: [{ isInauguralCoin: 'desc' }, { createdAt: 'asc' }],
   });
   if (!p) return null;
-  const img = p.images[0]
-    ? { url: p.images[0].url, urlMobile: p.images[0].urlMobile }
+  // Se ignoran las imágenes /api/media (Volume, pueden no persistir); si la del
+  // producto no es usable, se usa la imagen de la colección (data URI, fiable).
+  const usable = p.images.find((im) => !im.url.startsWith('/api/media'));
+  const img = usable
+    ? { url: usable.url, urlMobile: usable.urlMobile }
     : p.collection?.imageUrl
       ? { url: p.collection.imageUrl, urlMobile: p.collection.imageUrlMobile }
       : null;

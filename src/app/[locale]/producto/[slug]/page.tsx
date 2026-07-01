@@ -50,10 +50,12 @@ export default async function ProductPage({
   const currency = await getDisplayCurrency();
   const price = pickPrice(product, currency);
 
-  // Imágenes del producto; si no tiene, se respalda con la imagen de la colección.
+  // Se ignoran las /api/media (Volume, pueden no persistir); valen las data URI.
+  // Si no hay ninguna usable, se respalda con la imagen de la colección.
+  const usable = product.images.filter((im) => !im.url.startsWith('/api/media'));
   const images: GalleryImage[] =
-    product.images.length > 0
-      ? product.images.map((im) => ({ url: im.url, urlMobile: im.urlMobile, alt: im.alt }))
+    usable.length > 0
+      ? usable.map((im) => ({ url: im.url, urlMobile: im.urlMobile, alt: im.alt }))
       : product.collection?.imageUrl
         ? [{ url: product.collection.imageUrl, urlMobile: product.collection.imageUrlMobile, alt: product.name }]
         : [];
