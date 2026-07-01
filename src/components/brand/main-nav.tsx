@@ -10,7 +10,9 @@ export type NavItem =
   | { kind: 'menu'; label: string; basePath: string; children: { href: string; label: string }[] };
 
 const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif";
-const baseLink = 'whitespace-nowrap transition';
+// Barra de "cambio de sección" verde (#65bd7d), como en legacy-fan.com: 3px bajo
+// el ítem, visible al pasar el ratón o en la sección activa.
+const baseLink = 'whitespace-nowrap border-b-[3px] pb-1 transition';
 // Menú superior clonado de legacy-fan.com: Inter 16px / peso 500 / #cccccc /
 // letter-spacing 0.015em / sin mayúsculas.
 const linkStyle = { fontSize: '16px', fontFamily: INTER, letterSpacing: '0.015em' } as const;
@@ -29,7 +31,7 @@ export function MainNav({
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
   const cls = (active: boolean) =>
-    `${baseLink} ${active ? 'font-semibold text-gold-light' : 'font-medium text-[#cccccc] hover:text-white'}`;
+    `${baseLink} ${active ? 'font-semibold text-white border-[#65bd7d]' : 'font-medium text-[#cccccc] border-transparent hover:border-[#65bd7d]'}`;
 
   return (
     <>
