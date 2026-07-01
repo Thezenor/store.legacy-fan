@@ -292,9 +292,11 @@ export default async function AccountPage({
           </p>
           <ReferralShare
             link={referral.link}
-            shareText={a('refShareText')}
+            shareText={a('refShareText', { name: profile?.firstName || fullName })}
             copyLabel={a('refCopy')}
             copiedLabel={a('refCopied')}
+            nativeLabel={a('refNativeShare')}
+            logoUrl={`${appUrl()}/brand/og-image.jpg`}
           />
           <div className="mt-3 grid grid-cols-1 gap-2 text-center text-sm sm:grid-cols-3">
             <div className="rounded border border-border p-2">

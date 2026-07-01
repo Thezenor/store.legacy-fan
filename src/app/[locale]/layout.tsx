@@ -13,6 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { auth } from '@/lib/auth';
 import { getBool } from '@/lib/commerce/settings';
 import { getAdminSession } from '@/lib/admin';
+import { appUrl } from '@/lib/app-url';
 import '../globals.css';
 // Fuentes de marca auto-alojadas: Cinzel (display, capitales grabadas) + Spectral (texto)
 import '@fontsource/spectral/300.css';
@@ -42,10 +43,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'common' });
+  const description = 'Legacy Fan — coleccionismo premium en metales preciosos.';
   return {
     title: { default: t('siteName'), template: `%s · ${t('siteName')}` },
-    description: 'Legacy Fan — coleccionismo premium en metales preciosos.',
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://store.legacy-fan.com'),
+    description,
+    metadataBase: new URL(appUrl()),
+    openGraph: {
+      title: t('siteName'),
+      description,
+      siteName: t('siteName'),
+      type: 'website',
+      images: [{ url: '/brand/og-image.jpg', width: 1200, height: 630, alt: 'Legacy Fan Club' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('siteName'),
+      description,
+      images: ['/brand/og-image.jpg'],
+    },
   };
 }
 

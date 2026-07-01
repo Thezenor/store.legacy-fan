@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Iconos SVG de marca (viewBox 24x24), monocromo blanco sobre círculo de color.
 const ICONS: Record<string, string> = {
@@ -28,15 +28,48 @@ export function ReferralShare({
   shareText,
   copyLabel,
   copiedLabel,
+  nativeLabel,
+  logoUrl,
 }: {
   link: string;
   shareText: string;
   copyLabel: string;
   copiedLabel: string;
+  nativeLabel: string;
+  logoUrl?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [canNative, setCanNative] = useState(false);
   const enc = encodeURIComponent;
   const textUrl = `${shareText} ${link}`;
+
+  useEffect(() => {
+    setCanNative(typeof navigator !== 'undefined' && typeof navigator.share === 'function');
+  }, []);
+
+  // Compartir nativo (hoja del sistema): adjunta el logo como imagen si el
+  // dispositivo lo permite; si no, comparte solo texto + enlace.
+  async function nativeShare() {
+    const data: ShareData = { title: 'Legacy Fan Club', text: shareText, url: link };
+    try {
+      if (logoUrl && typeof navigator.canShare === 'function') {
+        try {
+          const res = await fetch(logoUrl);
+          const blob = await res.blob();
+          const file = new File([blob], 'legacy-fan.jpg', { type: blob.type || 'image/jpeg' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ ...data, files: [file] });
+            return;
+          }
+        } catch {
+          /* si falla la imagen, seguimos sin ella */
+        }
+      }
+      await navigator.share(data);
+    } catch {
+      /* el usuario canceló */
+    }
+  }
 
   const nets = [
     { name: 'WhatsApp', icon: 'whatsapp', color: '#25D366', href: `https://wa.me/?text=${enc(textUrl)}` },
@@ -58,6 +91,23 @@ export function ReferralShare({
 
   return (
     <div className="mt-3">
+      {/* Compartir nativo (móvil): abre la hoja del sistema con todas las apps. */}
+      {canNative ? (
+        <button
+          type="button"
+          onClick={nativeShare}
+          className="mb-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gold px-5 text-sm font-semibold uppercase tracking-[0.14em] text-[#1a1408] transition hover:brightness-105 sm:w-auto"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
+          </svg>
+          {nativeLabel}
+        </button>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-2.5">
         {nets.map((n) => (
           <a
