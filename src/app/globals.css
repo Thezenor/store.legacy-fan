@@ -120,67 +120,45 @@ h1, h2, h3, .font-display {
    propiedades compositables por la GPU: `opacity` en el halo (el desenfoque se
    rasteriza una vez) y `transform: translate` en la pieza. Nunca animamos
    `filter`/`scale` del halo (obliga a re-rasterizar el blur en cada frame). */
+/* Flotación con leve balanceo (réplica de coinFloat del hero). */
 @keyframes lf-coin-float {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(0, -8px, 0); }
-}
-@keyframes lf-coin-glow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.85; }
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
 }
 .coin3d {
   position: relative;
   display: flex;
   justify-content: center;
-  perspective: 900px;
 }
-/* Halo dorado detrás (se rasteriza una vez; solo late su opacity). */
-.coin3d::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 108%;
-  aspect-ratio: 1;
-  transform: translate3d(-50%, -50%, 0);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(230, 200, 120, 0.55) 0%, rgba(200, 150, 60, 0.3) 46%, rgba(120, 90, 30, 0) 68%);
-  filter: blur(16px);
-  opacity: 0.5;
-  z-index: 0;
-  pointer-events: none;
-  will-change: opacity;
-  animation: lf-coin-glow 5s ease-in-out infinite;
-}
-.coin3d:hover::before { opacity: 0.8; }
-/* Flotación en reposo (se pausa al interactuar para no pelear con el tilt). */
-.coin3d-float {
-  position: relative;
-  z-index: 1;
+/* Capa que recibe la inclinación 3D (transform vía JS con suavizado rAF). */
+.coin3d-tilt {
   width: 100%;
   will-change: transform;
-  transform: translateZ(0);
-  animation: lf-coin-float 6s ease-in-out infinite;
+  transform-origin: center;
 }
-.coin3d-float[data-active='true'] { animation-play-state: paused; }
-/* Inclinación 3D suave siguiendo el puntero. */
-.coin3d-tilt {
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.15s ease-out;
+/* Halo dorado con drop-shadows apilados (siguen la forma de la moneda) +
+   realce fotográfico; se intensifica al pasar el ratón. */
+.coin3d-glow {
+  filter:
+    brightness(1.14) contrast(1.06) saturate(1.06)
+    drop-shadow(0 0 10px rgba(97, 88, 64, 0.7))
+    drop-shadow(0 0 25px rgba(131, 105, 58, 0.42))
+    drop-shadow(0 0 45px rgba(255, 210, 100, 0.24));
+  transition: filter 0.4s ease;
+}
+.coin3d:hover .coin3d-glow {
+  filter:
+    brightness(1.2) contrast(1.08) saturate(1.1)
+    drop-shadow(0 0 14px rgba(120, 105, 70, 0.8))
+    drop-shadow(0 0 34px rgba(150, 120, 65, 0.5))
+    drop-shadow(0 0 65px rgba(255, 210, 100, 0.42));
+}
+/* Flotación (la pieza), independiente del tilt del contenedor. */
+.coin3d-float {
   will-change: transform;
-}
-/* Destello que sigue al puntero (recortado a círculo, mezcla de luz). */
-.coin3d-glare {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  transition: opacity 0.2s ease-out;
+  animation: lf-coin-float 7s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .coin3d::before,
   .coin3d-float { animation: none; }
 }
 

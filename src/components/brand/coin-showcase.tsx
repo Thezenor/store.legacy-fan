@@ -1,13 +1,16 @@
 'use client';
 
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 /**
- * Realza una moneda/imagen circular con un efecto premium y fluido:
- *  - Inclinación 3D que sigue al puntero (perspectiva + rotateX/Y).
- *  - Destello de luz que se mueve con el puntero.
- *  - Flotación suave en reposo + halo dorado detrás.
- * Solo anima `transform`/`opacity` (compuesto por GPU → 60fps, sin tirones).
+ * Efecto de moneda premium replicado del hero de legacy-fan.com:
+ *  - Flotación con leve balanceo (CSS `coinFloat`).
+ *  - Halo dorado con drop-shadows apilados (sigue la forma de la moneda) que
+ *    se intensifica al pasar el ratón.
+ *  - Inclinación 3D siguiendo el puntero, suavizada con requestAnimationFrame +
+ *    interpolación (lerp) aplicada DIRECTAMENTE al DOM (sin re-render de React),
+ *    por eso es fluida a 60fps y no da tirones.
+ * En táctil/sin ratón fino no se aplica el tilt (solo flotación + halo).
  */
 export function CoinShowcase({
   children,
@@ -16,51 +19,66 @@ export function CoinShowcase({
   children: ReactNode;
   className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 50 });
-  const [active, setActive] = useState(false);
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const s = useRef({ curX: 0, curY: 0, tgtX: 0, tgtY: 0, hovering: false, raf: 0 });
 
-  function onMove(e: React.PointerEvent) {
-    const el = ref.current;
+  useEffect(() => {
+    const el = tiltRef.current;
     if (!el) return;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width; // 0..1
-    const py = (e.clientY - r.top) / r.height; // 0..1
-    const MAX = 11; // grados
-    setTilt({
-      rx: (0.5 - py) * 2 * MAX,
-      ry: (px - 0.5) * 2 * MAX,
-      gx: px * 100,
-      gy: py * 100,
-    });
-  }
+    // Solo tilt con puntero fino (ratón); en táctil se queda plano.
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    if (!fine) return;
+    const st = s.current;
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-  function onLeave() {
-    setActive(false);
-    setTilt({ rx: 0, ry: 0, gx: 50, gy: 50 });
-  }
+    function tick() {
+      st.curX = lerp(st.curX, st.tgtX, 0.12);
+      st.curY = lerp(st.curY, st.tgtY, 0.12);
+      el!.style.transform = `perspective(700px) rotateY(${st.curX.toFixed(2)}deg) rotateX(${st.curY.toFixed(2)}deg)`;
+      const settled = !st.hovering && Math.abs(st.curX) < 0.05 && Math.abs(st.curY) < 0.05;
+      if (settled) {
+        el!.style.transform = '';
+        st.raf = 0;
+        return;
+      }
+      st.raf = requestAnimationFrame(tick);
+    }
+    function ensure() {
+      if (!st.raf) st.raf = requestAnimationFrame(tick);
+    }
+    function onMove(e: PointerEvent) {
+      const r = el!.getBoundingClientRect();
+      st.tgtX = ((e.clientX - r.left) / r.width - 0.5) * 22; // rotateY
+      st.tgtY = -((e.clientY - r.top) / r.height - 0.5) * 18; // rotateX
+      ensure();
+    }
+    function onEnter() {
+      st.hovering = true;
+      ensure();
+    }
+    function onLeave() {
+      st.hovering = false;
+      st.tgtX = 0;
+      st.tgtY = 0;
+      ensure();
+    }
+
+    el.addEventListener('pointerenter', onEnter);
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerleave', onLeave);
+    return () => {
+      el.removeEventListener('pointerenter', onEnter);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerleave', onLeave);
+      if (st.raf) cancelAnimationFrame(st.raf);
+    };
+  }, []);
 
   return (
-    <div
-      ref={ref}
-      className={`coin3d ${className ?? ''}`}
-      onPointerEnter={() => setActive(true)}
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
-    >
-      <div className="coin3d-float" data-active={active}>
-        <div
-          className="coin3d-tilt"
-          style={{ transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)` }}
-        >
-          {children}
-          <span
-            className="coin3d-glare"
-            style={{
-              opacity: active ? 1 : 0,
-              background: `radial-gradient(circle at ${tilt.gx}% ${tilt.gy}%, rgba(255,248,225,0.45), rgba(255,255,255,0) 45%)`,
-            }}
-          />
+    <div className={`coin3d ${className ?? ''}`}>
+      <div ref={tiltRef} className="coin3d-tilt">
+        <div className="coin3d-glow">
+          <div className="coin3d-float">{children}</div>
         </div>
       </div>
     </div>
