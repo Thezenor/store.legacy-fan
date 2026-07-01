@@ -29,9 +29,9 @@
   "clubIntro": {
     "eyebrow": "REJOIGNEZ LE LEGS",
     "title": "Le métal s'hérite. L'appartenance se choisit.",
-    "lead": "Legacy Fan n'est pas une boutique : c'est un cercle de collectionneurs qui apprécient l'argent et le cuivre .999 pour ce qu'ils sont vraiment, un art qui perdure. Devenir membre, c'est accéder en premier, posséder ce que peu détiendront et appartenir à plus grand que la pièce elle-même.",
+    "lead": "Legacy Fan n'est pas une boutique : c'est un cercle de collectionneurs qui apprécient l'argent .999 et le cuivre .999 pour ce qu'ils sont vraiment, un art qui perdure. Devenir membre, c'est accéder en premier, posséder ce que peu détiendront et appartenir à plus grand que la pièce elle-même.",
     "reasons": [
-      { "title": "Un savoir-faire qui perdure", "body": "Chaque pièce en argent et cuivre .999 naît du métier, de la précision et d'un soin du détail qui distingue une véritable collection d'un simple objet." },
+      { "title": "Un savoir-faire qui perdure", "body": "Chaque pièce en argent .999 et cuivre .999 naît du métier, de la précision et d'un soin du détail qui distingue une véritable collection d'un simple objet." },
       { "title": "L'accès avant tous les autres", "body": "Les membres entrent en premier : préventes anticipées, éditions limitées et lancements réservés à ceux qui appartiennent au cercle." },
       { "title": "Une communauté, un legs", "body": "Un numéro de membre, une communauté privée et la certitude de collectionner aux côtés de ceux qui partagent la même passion du détail." }
     ],
@@ -40,16 +40,16 @@
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Collection premium en métaux précieux pour ceux qui arrivent les premiers.",
-    "heroBody": "Choisissez votre niveau d'accès et rejoignez la première génération de membres Legacy Fan : pièces physiques en argent et cuivre .999, Mystery Boxes, numéro de membre, communauté privée et priorité sur les collections futures.",
+    "heroBody": "Choisissez votre niveau d'accès et rejoignez la première génération de membres Legacy Fan : pièces physiques en argent .999 et cuivre .999, Mystery Boxes, numéro de membre, communauté privée et priorité sur les collections futures.",
     "heroEyebrow": "Art · Argent .999 · Édition limitée",
-    "heroL1": "Où l'Art",
-    "heroL2": "Transcende",
-    "heroAccent": "le Métal",
-    "marquee": "Édition limitée · Argent .999 · Or pur · Ultra High Relief · Art de collection · Licence officielle",
+    "heroL1": "Exclusive Art",
+    "heroL2": "and Collectible Value",
+    "heroAccent": "for Fan",
+    "marquee": "Édition limitée · Argent .999 · Cuivre .999 · Ultra High Relief · Art de collection · Licence officielle",
     "specs": ["Argent .999", "2 oz", "Tirage 999", "MMXXVI", "Ø 38 mm"],
     "pillarsEyebrow": "Pourquoi Legacy Fan",
     "pillars": [
-      { "n": "01", "title": "Argent .999 & Or pur", "body": "Métaux précieux certifiés, frappés en éditions limitées et numérotées." },
+      { "n": "01", "title": "Argent .999 & Cuivre .999", "body": "Métaux précieux certifiés, frappés en éditions limitées et numérotées." },
       { "n": "02", "title": "Ultra High Relief", "body": "Frappe en haut-relief pour un détail et une profondeur exceptionnels." },
       { "n": "03", "title": "Licences officielles", "body": "Pièces sous licence officielle avec certificat d'authenticité nominal." }
     ]
@@ -181,7 +181,7 @@
     "refSaved": "Code mis à jour !",
     "refPlaceholder": "VOTRECODE",
     "refShare": "Partagez votre lien",
-    "refShareText": "{name} vous invite au Legacy Fan Club ✦ Collectionnez des pièces en argent, or et cuivre .999 en éditions limitées et numérotées, à valeur réelle. Rejoignez-nous avec son lien :",
+    "refShareText": "{name} vous invite au Legacy Fan Club ✦ Collectionnez des pièces en argent .999 et cuivre .999 en éditions limitées et numérotées, à valeur réelle. Rejoignez-nous avec son lien :",
     "refCopy": "Copier le lien",
     "refCopied": "Copié !",
     "refNativeShare": "Partager",

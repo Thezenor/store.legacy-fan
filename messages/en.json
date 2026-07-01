@@ -29,9 +29,9 @@
   "clubIntro": {
     "eyebrow": "JOIN THE LEGACY",
     "title": "Metal is inherited. Belonging is chosen.",
-    "lead": "Legacy Fan is not a store: it is a circle of collectors who value silver and copper .999 for what they truly are, art that endures. Membership means accessing first, owning what few will hold and belonging to something greater than any single piece.",
+    "lead": "Legacy Fan is not a store: it is a circle of collectors who value silver .999 and copper .999 for what they truly are, art that endures. Membership means accessing first, owning what few will hold and belonging to something greater than any single piece.",
     "reasons": [
-      { "title": "Craftsmanship that endures", "body": "Every piece in silver and copper .999 is born of craft, precision and an attention to detail that sets a true collection apart from a mere object." },
+      { "title": "Craftsmanship that endures", "body": "Every piece in silver .999 and copper .999 is born of craft, precision and an attention to detail that sets a true collection apart from a mere object." },
       { "title": "Access before anyone else", "body": "Members enter first: early presales, limited editions and launches reserved for those who belong to the circle." },
       { "title": "One community, one legacy", "body": "A member number, a private community and the certainty of collecting alongside those who share the same passion for detail." }
     ],
@@ -40,16 +40,16 @@
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Premium precious-metal collecting for those who arrive first.",
-    "heroBody": "Choose your access level and join the first generation of Legacy Fan members: physical .999 silver and copper pieces, Mystery Boxes, a member number, a private community and priority on future collections.",
+    "heroBody": "Choose your access level and join the first generation of Legacy Fan members: physical silver .999 and copper .999 pieces, Mystery Boxes, a member number, a private community and priority on future collections.",
     "heroEyebrow": "Art · .999 Silver · Limited edition",
-    "heroL1": "Where Art",
-    "heroL2": "Transcends",
-    "heroAccent": "the Metal",
-    "marquee": "Limited edition · .999 silver · Pure gold · Ultra High Relief · Collectible art · Official license",
+    "heroL1": "Exclusive Art",
+    "heroL2": "and Collectible Value",
+    "heroAccent": "for Fan",
+    "marquee": "Limited edition · silver .999 · copper .999 · Ultra High Relief · Collectible art · Official license",
     "specs": ["Silver .999", "2 oz", "Edition 999", "MMXXVI", "Ø 38 mm"],
     "pillarsEyebrow": "Why Legacy Fan",
     "pillars": [
-      { "n": "01", "title": ".999 Silver & Pure Gold", "body": "Certified precious metals, minted in limited, numbered editions." },
+      { "n": "01", "title": "Silver .999 & Copper .999", "body": "Certified precious metals, minted in limited, numbered editions." },
       { "n": "02", "title": "Ultra High Relief", "body": "High-relief minting for exceptional detail and depth." },
       { "n": "03", "title": "Official Licenses", "body": "Officially licensed pieces with a nominal certificate of authenticity." }
     ]
@@ -94,7 +94,7 @@
     "includes": [
       "3 oz .999 silver inaugural coin",
       "Additional gift: 1 kg .999 colorized copper piece",
-      ".999 silver and copper Mystery Boxes",
+      "Silver .999 and copper .999 Mystery Boxes",
       "Member ID card and nominal certification",
       "Signed Legacy Prestige Club packaging",
       "Member pricing: −5% permanently",
@@ -181,7 +181,7 @@
     "refSaved": "Code updated!",
     "refPlaceholder": "YOURCODE",
     "refShare": "Share your link",
-    "refShareText": "{name} invites you to Legacy Fan Club ✦ Collect .999 silver, gold and copper coins in limited, numbered editions with real value. Join with their link:",
+    "refShareText": "{name} invites you to Legacy Fan Club ✦ Collect silver .999 and copper .999 coins in limited, numbered editions with real value. Join with their link:",
     "refCopy": "Copy link",
     "refCopied": "Copied!",
     "refNativeShare": "Share",

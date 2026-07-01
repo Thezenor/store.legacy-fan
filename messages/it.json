@@ -29,9 +29,9 @@
   "clubIntro": {
     "eyebrow": "UNISCITI AL LASCITO",
     "title": "Il metallo si eredita. L'appartenenza si sceglie.",
-    "lead": "Legacy Fan non è un negozio: è un circolo di collezionisti che apprezzano l'argento e il rame .999 per ciò che sono davvero, arte che perdura. Diventare socio significa accedere per primi, possedere ciò che in pochi avranno e appartenere a qualcosa che trascende la singola pezza.",
+    "lead": "Legacy Fan non è un negozio: è un circolo di collezionisti che apprezzano l'argento .999 e il rame .999 per ciò che sono davvero, arte che perdura. Diventare socio significa accedere per primi, possedere ciò che in pochi avranno e appartenere a qualcosa che trascende la singola pezza.",
     "reasons": [
-      { "title": "Maestria che perdura", "body": "Ogni pezzo in argento e rame .999 nasce dal mestiere, dalla precisione e da una cura del dettaglio che distingue una vera collezione da un semplice oggetto." },
+      { "title": "Maestria che perdura", "body": "Ogni pezzo in argento .999 e rame .999 nasce dal mestiere, dalla precisione e da una cura del dettaglio che distingue una vera collezione da un semplice oggetto." },
       { "title": "Accesso prima di tutti", "body": "I soci entrano per primi: prevendite anticipate, edizioni limitate e lanci riservati a chi appartiene al circolo." },
       { "title": "Una comunità, un lascito", "body": "Un numero di socio, una comunità privata e la certezza di collezionare accanto a chi condivide la stessa passione per il dettaglio." }
     ],
@@ -40,16 +40,16 @@
   "home": {
     "heroTitle": "Legacy Fan",
     "heroTagline": "Collezionismo premium in metalli preziosi per chi arriva per primo.",
-    "heroBody": "Scegli il tuo livello di accesso ed entra a far parte della prima generazione di soci Legacy Fan: pezzi fisici in argento e rame .999, Mystery Box, numero di socio, comunità privata e priorità sulle collezioni future.",
+    "heroBody": "Scegli il tuo livello di accesso ed entra a far parte della prima generazione di soci Legacy Fan: pezzi fisici in argento .999 e rame .999, Mystery Box, numero di socio, comunità privata e priorità sulle collezioni future.",
     "heroEyebrow": "Arte · Argento .999 · Edizione limitata",
-    "heroL1": "Dove l'Arte",
-    "heroL2": "Trascende",
-    "heroAccent": "il Metallo",
-    "marquee": "Edizione limitata · Argento .999 · Oro puro · Ultra High Relief · Arte da collezione · Licenza ufficiale",
+    "heroL1": "Exclusive Art",
+    "heroL2": "and Collectible Value",
+    "heroAccent": "for Fan",
+    "marquee": "Edizione limitata · Argento .999 · Rame .999 · Ultra High Relief · Arte da collezione · Licenza ufficiale",
     "specs": ["Argento .999", "2 oz", "Tiratura 999", "MMXXVI", "Ø 38 mm"],
     "pillarsEyebrow": "Perché Legacy Fan",
     "pillars": [
-      { "n": "01", "title": "Argento .999 & Oro puro", "body": "Metalli preziosi certificati, coniati in edizioni limitate e numerate." },
+      { "n": "01", "title": "Argento .999 & Rame .999", "body": "Metalli preziosi certificati, coniati in edizioni limitate e numerate." },
       { "n": "02", "title": "Ultra High Relief", "body": "Conio in altorilievo per un dettaglio e una profondità eccezionali." },
       { "n": "03", "title": "Licenze ufficiali", "body": "Pezzi con licenza ufficiale e certificato di autenticità nominale." }
     ]
@@ -181,7 +181,7 @@
     "refSaved": "Codice aggiornato!",
     "refPlaceholder": "ILTUOCODICE",
     "refShare": "Condividi il tuo link",
-    "refShareText": "{name} ti invita al Legacy Fan Club ✦ Colleziona monete d'argento, oro e rame .999 in edizioni limitate e numerate, dal valore reale. Unisciti con il suo link:",
+    "refShareText": "{name} ti invita al Legacy Fan Club ✦ Colleziona monete d'argento .999 e rame .999 in edizioni limitate e numerate, dal valore reale. Unisciti con il suo link:",
     "refCopy": "Copia link",
     "refCopied": "Copiato!",
     "refNativeShare": "Condividi",
