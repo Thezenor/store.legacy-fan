@@ -47,6 +47,7 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
   const prefix = locale === 'es' ? '' : `/${locale}`;
   const link = (path: string, label: string) =>
     `<a href="${base}${prefix}${path}" style="color:#9C7E1C;text-decoration:none">${label}</a>`;
+  const serif = "Georgia,'Times New Roman',serif";
   return `<!doctype html>
 <html lang="${locale}">
 <head>
@@ -55,27 +56,49 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>Legacy Fan</title>
 </head>
-<body style="margin:0;padding:0;background:#eceae4">
-  <div style="max-width:600px;margin:0 auto;padding:24px 12px;font-family:Georgia,'Times New Roman',serif">
-    <!-- Cabecera / logo -->
-    <div style="background:#0a0a0c;border-radius:10px 10px 0 0;padding:30px 24px;text-align:center">
-      <div style="font-size:24px;letter-spacing:6px;color:#c8a24b;font-weight:bold">LEGACY FAN</div>
-      <div style="font-size:10px;letter-spacing:5px;color:#9a8038;margin-top:6px">PRECIOUS METALS</div>
-    </div>
-    <div style="height:2px;background:#c8a24b"></div>
-    <!-- Cuerpo -->
-    <div style="background:#ffffff;padding:32px 28px;color:#1a1a1a;font-size:15px;line-height:1.65">
-      ${bodyHtml}
-    </div>
-    <!-- Pie -->
-    <div style="background:#f4f3ef;border-radius:0 0 10px 10px;padding:22px 28px;color:#7a776f;font-size:11px;line-height:1.6">
-      <p style="margin:0">${f.disclaimer}</p>
-      <p style="margin:10px 0 0">${f.data}</p>
-      <p style="margin:12px 0 0">${link('/legal/privacy', f.privacy)} &nbsp;·&nbsp; ${link('/legal/terms', f.terms)} &nbsp;·&nbsp; ${link('/legal/cookies', f.cookies)}</p>
-      <p style="margin:14px 0 0;color:#a8a49b">Legacy Fan LLC · 8 The Green STE R, Dover, DE 19901 (Delaware, USA) · info@legacy-fan.com</p>
-      <p style="margin:2px 0 0;color:#b7b3aa">© 2026 Legacy Fan LLC. ${f.rights}</p>
-    </div>
-  </div>
+<body style="margin:0;padding:0;background:#e9e6df;font-family:${serif}">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9e6df">
+    <tr><td align="center" style="padding:30px 12px">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:#ffffff;border:1px solid #e4dcc4;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.08)">
+
+        <!-- Cabecera / logo Art Deco -->
+        <tr><td style="background:#0b0b0d;padding:32px 24px 26px;text-align:center;border-bottom:2px solid #c8a24b">
+          <div style="font-size:11px;letter-spacing:5px;color:#8a7433;margin-bottom:12px">&#10022;&nbsp;&nbsp;MMXXVI&nbsp;&nbsp;&#10022;</div>
+          <div style="font-size:27px;letter-spacing:9px;color:#c8a24b;font-weight:bold;font-family:${serif}">LEGACY&nbsp;FAN</div>
+          <div style="font-size:10px;letter-spacing:5px;color:#9a8038;margin-top:9px">PRECIOUS&nbsp;METALS</div>
+        </td></tr>
+
+        <!-- Cuerpo -->
+        <tr><td style="padding:34px 34px 8px;color:#1f1e1c;font-size:15px;line-height:1.7;font-family:${serif}">
+          ${bodyHtml}
+        </td></tr>
+
+        <!-- Ornamento dorado -->
+        <tr><td style="padding:22px 34px 8px" align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+            <td style="width:120px;border-bottom:1px solid #e2d9c2">&nbsp;</td>
+            <td style="padding:0 12px;color:#c8a24b;font-size:13px">&#10022;</td>
+            <td style="width:120px;border-bottom:1px solid #e2d9c2">&nbsp;</td>
+          </tr></table>
+        </td></tr>
+
+        <!-- Pie -->
+        <tr><td style="background:#faf8f3;padding:24px 32px;color:#807d75;font-size:11px;line-height:1.65;font-family:${serif};border-top:1px solid #efeae0">
+          <p style="margin:0">${f.disclaimer}</p>
+          <p style="margin:10px 0 0">${f.data}</p>
+          <p style="margin:14px 0 0;text-align:center">${link('/legal/privacy', f.privacy)} &nbsp;&#10022;&nbsp; ${link('/legal/terms', f.terms)} &nbsp;&#10022;&nbsp; ${link('/legal/cookies', f.cookies)}</p>
+        </td></tr>
+      </table>
+
+      <!-- Datos de empresa bajo la tarjeta -->
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px">
+        <tr><td style="padding:16px 12px 0;text-align:center;color:#9c988e;font-size:10.5px;line-height:1.6;font-family:${serif}">
+          Legacy Fan LLC &nbsp;·&nbsp; 8 The Green STE R, Dover, DE 19901 (Delaware, USA) &nbsp;·&nbsp; info@legacy-fan.com<br/>
+          © 2026 Legacy Fan LLC. ${f.rights}
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
 }
