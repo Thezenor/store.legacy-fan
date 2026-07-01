@@ -850,12 +850,13 @@ export async function saveEmailAction(formData: FormData): Promise<void> {
     });
 
   const provider = String(formData.get('email.provider') ?? 'console');
+  const trimmed = (k: string) => String(formData.get(k) ?? '').trim();
   await upsert('email.provider', ['resend', 'smtp', 'console'].includes(provider) ? provider : 'console');
-  await upsert('email.from', String(formData.get('email.from') ?? ''));
-  // SMTP: campos no secretos.
-  await upsert('email.smtp.host', String(formData.get('email.smtp.host') ?? ''));
-  await upsert('email.smtp.port', String(formData.get('email.smtp.port') ?? ''));
-  await upsert('email.smtp.user', String(formData.get('email.smtp.user') ?? ''));
+  await upsert('email.from', trimmed('email.from'));
+  // SMTP: campos no secretos (recortados para evitar espacios/caracteres ocultos).
+  await upsert('email.smtp.host', trimmed('email.smtp.host'));
+  await upsert('email.smtp.port', trimmed('email.smtp.port'));
+  await upsert('email.smtp.user', trimmed('email.smtp.user'));
   await upsert('email.smtp.secure', formData.get('email.smtp.secure') === 'on' ? 'true' : 'false');
   // Secretos: solo se sobrescriben si llegan con valor.
   for (const key of ['email.resend.api_key', 'email.smtp.password']) {

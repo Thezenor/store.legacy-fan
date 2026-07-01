@@ -42,16 +42,23 @@ async function getEmailConfig(): Promise<EmailConfig> {
     getSettingString('email.smtp.secure'),
   ]);
   const prov = (provider || process.env.EMAIL_PROVIDER || 'console') as EmailConfig['provider'];
+  const clean = (s: string | null | undefined) => (s ?? '').trim() || null;
+  const rawHost = clean(host) || clean(process.env.SMTP_HOST);
+  // Sanea el host: quita espacios, protocolo pegado por error y barras.
+  const smtpHost = rawHost
+    ? rawHost.replace(/^[a-z]+:\/\//i, '').replace(/[/\s].*$/, '').trim() || null
+    : null;
+  const portNum = Number((clean(port) || clean(process.env.SMTP_PORT) || '587').replace(/\D/g, '')) || 587;
   return {
     provider: prov === 'resend' || prov === 'smtp' ? prov : 'console',
-    from: from || process.env.EMAIL_FROM || 'Legacy Fan <no-reply@legacy-fan.com>',
-    resendApiKey: resendKey || process.env.RESEND_API_KEY || null,
+    from: clean(from) || process.env.EMAIL_FROM || 'Legacy Fan <no-reply@legacy-fan.com>',
+    resendApiKey: clean(resendKey) || process.env.RESEND_API_KEY || null,
     smtp: {
-      host: host || process.env.SMTP_HOST || null,
-      port: Number(port || process.env.SMTP_PORT || 587),
-      user: user || process.env.SMTP_USER || null,
-      password: pass || process.env.SMTP_PASSWORD || null,
-      secure: (secure ?? '') !== '' ? secure === 'true' : Number(port || process.env.SMTP_PORT || 587) === 465,
+      host: smtpHost,
+      port: portNum,
+      user: clean(user) || clean(process.env.SMTP_USER),
+      password: (pass ?? '').trim() || process.env.SMTP_PASSWORD || null,
+      secure: (secure ?? '') !== '' ? secure === 'true' : portNum === 465,
     },
   };
 }
