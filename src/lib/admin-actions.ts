@@ -212,18 +212,22 @@ export async function updateProductAction(formData: FormData): Promise<void> {
   redirect('/lf-admin/productos?saved=1');
 }
 
-/** Sube una imagen y la asocia al producto (galería). */
+/** Sube una imagen y la asocia al producto (galería). Data URI en BD (no
+    depende del Volume; misma solución que monedas/colecciones). */
 export async function uploadProductImageAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const productId = String(formData.get('productId'));
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return;
-  const { url, urlMobile } = await saveUpload(file);
+  const [url, urlMobile] = await Promise.all([
+    optimizeImageToDataUri(file, 1200),
+    optimizeImageToDataUri(file, 640),
+  ]);
   const count = await prisma.productImage.count({ where: { productId } });
   await prisma.productImage.create({
-    data: { productId, url, urlMobile: urlMobile ?? null, alt: String(formData.get('alt') ?? '') || null, sortOrder: count },
+    data: { productId, url, urlMobile, alt: String(formData.get('alt') ?? '') || null, sortOrder: count },
   });
-  await audit(admin.id, admin.email, 'product.image_add', 'Product', productId, null, { url });
+  await audit(admin.id, admin.email, 'product.image_add', 'Product', productId, null, { bytes: file.size });
   revalidatePath(`/lf-admin/productos/${productId}`);
 }
 
