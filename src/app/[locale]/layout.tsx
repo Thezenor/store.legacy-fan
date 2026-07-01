@@ -158,18 +158,21 @@ export default async function LocaleLayout({
           <main className="mx-auto min-h-[70vh] max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
             {children}
           </main>
-          <footer className="border-t border-border px-4 py-12 sm:px-6">
+          <footer className="border-t border-border bg-[#070707] px-4 py-12 text-[#cccccc] sm:px-6">
             <div className="mx-auto max-w-6xl">
-              <div className="hairline-gold mb-8" />
+              <div className="mb-8 h-px bg-[#65bd7d]/40" />
               <div className="flex flex-col items-center gap-4 text-center">
-                <Wordmark />
-                <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted">
-                  <Link href="/legal/terms" className="hover:text-foreground">{t('legalTerms')}</Link>
-                  <Link href="/legal/privacy" className="hover:text-foreground">{t('legalPrivacy')}</Link>
-                  <Link href="/legal/cookies" className="hover:text-foreground">{t('legalCookies')}</Link>
-                  <Link href="/legal/returns" className="hover:text-foreground">{t('legalReturns')}</Link>
-                  <Link href="/legal/membership" className="hover:text-foreground">{t('legalMembership')}</Link>
-                  <Link href="/legal/aviso-legal" className="hover:text-foreground">{t('legalNotice')}</Link>
+                <a href="https://legacy-fan.com/" aria-label={t('siteName')}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/brand/logo.webp" alt="Legacy Fan" width={200} height={60} className="h-10 w-auto" />
+                </a>
+                <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#cccccc]/80">
+                  <Link href="/legal/terms" className="hover:text-[#65bd7d]">{t('legalTerms')}</Link>
+                  <Link href="/legal/privacy" className="hover:text-[#65bd7d]">{t('legalPrivacy')}</Link>
+                  <Link href="/legal/cookies" className="hover:text-[#65bd7d]">{t('legalCookies')}</Link>
+                  <Link href="/legal/returns" className="hover:text-[#65bd7d]">{t('legalReturns')}</Link>
+                  <Link href="/legal/membership" className="hover:text-[#65bd7d]">{t('legalMembership')}</Link>
+                  <Link href="/legal/aviso-legal" className="hover:text-[#65bd7d]">{t('legalNotice')}</Link>
                 </nav>
                 <p className="max-w-2xl text-xs leading-relaxed text-faint">
                   {/* Disclaimer obligatorio (doc 15) */}
