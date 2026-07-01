@@ -44,7 +44,7 @@ export default async function PrestigePage({
   const renewalNote = plan?.renewalNote || t('renewalNote');
   const includes = plan?.benefits?.length ? plan.benefits : (t.raw('includes') as string[]);
   const conditions = plan?.conditions?.length ? plan.conditions : (t.raw('conditions') as string[]);
-  const faqItems = faqT.raw('items') as { q: string; a: string }[];
+  const faqItems = t.raw('faq') as { q: string; a: string }[];
 
   const jsonLd = [
     productOffer({

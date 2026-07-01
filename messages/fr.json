@@ -55,6 +55,13 @@
     ]
   },
   "prime": {
+    "faq": [
+      { "q": "Que comprend Prime Club ?", "a": "Carte de membre, Mystery Box en argent .999 et en cuivre .999, un numéro de membre permanent, une communauté privée, des points sur les achats et un accès prioritaire aux préventes." },
+      { "q": "Prime m'attribue-t-il un numéro de membre ?", "a": "Oui. Le numéro de membre est attribué lorsque vous réglez l'abonnement et il est permanent. La réservation n'attribue pas de numéro." },
+      { "q": "Puis-je passer à Prestige plus tard ?", "a": "Oui. Vous pouvez évoluer vers un niveau supérieur en conservant votre numéro de membre." },
+      { "q": "Que contient la Mystery Box ?", "a": "Des pièces en argent .999 et cuivre .999 avec un effet de surprise et une valeur minimale garantie." },
+      { "q": "L'abonnement se renouvelle-t-il ?", "a": "Abonnement annuel renouvelable ; votre statut et votre numéro de membre sont permanents." }
+    ],
     "title": "Prime Club",
     "tagline": "Votre porte d'entrée dans l'univers Legacy Fan.",
     "body": "Le premier palier premium de l'écosystème Legacy Fan : une expérience d'entrée avec du métal réel, une Mystery Box, une communauté privée et un accès privilégié au contenu, aux avantages, aux points et aux préventes. Accessible, à collectionner et aspirationnel.",
@@ -84,6 +91,13 @@
     ]
   },
   "prestige": {
+    "faq": [
+      { "q": "En quoi Prestige diffère-t-il de Prime ?", "a": "Prestige réunit les pièces inaugurales, la numérotation la plus basse et les privilèges de membre les plus élevés de l'écosystème Legacy Fan." },
+      { "q": "Prestige garantit-il une numérotation basse ?", "a": "Oui. Les membres Prestige obtiennent la numérotation la plus basse disponible." },
+      { "q": "Quest-ce que le prix membre −5% ?", "a": "Une remise permanente pour les membres Prestige, appliquée sur le premium, jamais sur la valeur spot du métal." },
+      { "q": "Comment fonctionnent la réservation et le paiement ?", "a": "Le montant de la réservation est déduit du paiement final ; le solde est réglé à la clôture. La réservation n'attribue pas de numéro de membre." },
+      { "q": "Que comprend la pièce inaugurale ?", "a": "Une pièce inaugurale de 3 oz en argent .999, plus un cadeau de 1 kg de cuivre .999 colorisé et des Mystery Box en argent .999 et cuivre .999." }
+    ],
     "title": "Prestige Club",
     "tagline": "Des pièces uniques et des privilèges réservés à ceux qui arrivent les premiers.",
     "body": "Legacy Prestige Club réunit les pièces inaugurales, la numérotation la plus basse et les privilèges de membre les plus élevés de l'écosystème Legacy Fan.",

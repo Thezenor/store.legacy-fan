@@ -55,6 +55,13 @@
     ]
   },
   "prime": {
+    "faq": [
+      { "q": "Cosa include Prime Club?", "a": "Tessera socio, Mystery Box in argento .999 e in rame .999, un numero di socio permanente, una comunità privata, punti sugli acquisti e accesso prioritario alle prevendite." },
+      { "q": "Prime mi assegna un numero di socio?", "a": "Sì. Il numero di socio viene assegnato al completamento del pagamento dell’abbonamento ed è permanente. La prenotazione non assegna un numero." },
+      { "q": "Posso passare a Prestige in seguito?", "a": "Sì. Puoi effettuare l’upgrade a un livello superiore mantenendo il tuo numero di socio." },
+      { "q": "Cosa contiene la Mystery Box?", "a": "Pezzi in argento .999 e rame .999 con fattore sorpresa e un valore minimo garantito." },
+      { "q": "L’abbonamento si rinnova?", "a": "Abbonamento annuale rinnovabile; lo stato e il numero di socio sono permanenti." }
+    ],
     "title": "Prime Club",
     "tagline": "La tua porta d'ingresso all'universo Legacy Fan.",
     "body": "Il primo livello premium dell'ecosistema Legacy Fan: un'esperienza d'ingresso con metallo reale, una Mystery Box, una comunità privata e accesso preferenziale a contenuti, vantaggi, punti e prevendite. Accessibile, da collezione e aspirazionale.",
@@ -84,6 +91,13 @@
     ]
   },
   "prestige": {
+    "faq": [
+      { "q": "In cosa Prestige è diverso da Prime?", "a": "Prestige riunisce i pezzi inaugurali, la numerazione più bassa e i privilegi di socio più alti dell’ecosistema Legacy Fan." },
+      { "q": "Prestige garantisce una numerazione bassa?", "a": "Sì. I soci Prestige ottengono la numerazione più bassa disponibile." },
+      { "q": "Cos’è il prezzo socio −5%?", "a": "Uno sconto permanente per i soci Prestige, applicato sul premium, mai sul valore spot del metallo." },
+      { "q": "Come funzionano la prenotazione e il pagamento?", "a": "L’importo della prenotazione viene detratto dal pagamento finale; il saldo si versa alla chiusura. La prenotazione non assegna un numero di socio." },
+      { "q": "Cosa include la moneta inaugurale?", "a": "Una moneta inaugurale da 3 oz in argento .999, oltre a un regalo da 1 kg di rame .999 colorato e Mystery Box in argento .999 e rame .999." }
+    ],
     "title": "Prestige Club",
     "tagline": "Pezzi unici e privilegi riservati a chi arriva per primo.",
     "body": "Legacy Prestige Club riunisce i pezzi inaugurali, la numerazione più bassa e i privilegi di socio più alti dell'ecosistema Legacy Fan.",

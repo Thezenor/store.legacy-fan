@@ -55,6 +55,13 @@
     ]
   },
   "prime": {
+    "faq": [
+      { "q": "What does Prime Club include?", "a": "Member card, silver .999 and copper .999 Mystery Boxes, a permanent member number, a private community, points on purchases and priority access to pre-sales." },
+      { "q": "Does Prime assign me a member number?", "a": "Yes. The member number is assigned when you complete the membership payment and is permanent. The reservation does not assign a number." },
+      { "q": "Can I upgrade to Prestige later?", "a": "Yes. You can upgrade to a higher tier while keeping your member number." },
+      { "q": "What's inside the Mystery Box?", "a": "Pieces in silver .999 and copper .999 with an element of surprise and a guaranteed minimum value." },
+      { "q": "Does the membership renew?", "a": "It's an annual renewable membership; your member status and number are permanent." }
+    ],
     "title": "Prime Club",
     "tagline": "Your gateway to the Legacy Fan universe.",
     "body": "The first premium tier of the Legacy Fan ecosystem: an entry experience with real metal, a Mystery Box, a private community and preferred access to content, benefits, points and pre-sales. Accessible, collectible and aspirational.",
@@ -84,6 +91,13 @@
     ]
   },
   "prestige": {
+    "faq": [
+      { "q": "How is Prestige different from Prime?", "a": "Prestige brings together the inaugural pieces, the lowest numbering and the highest member privileges of the Legacy Fan ecosystem." },
+      { "q": "Does Prestige guarantee low numbering?", "a": "Yes. Prestige members get the lowest available numbering." },
+      { "q": "What is the −5% member price?", "a": "A permanent discount for Prestige members, applied to the premium, never to the metal spot value." },
+      { "q": "How do the reservation and payment work?", "a": "The reservation amount is deducted from the final payment; the balance is paid at closing. The reservation does not assign a member number." },
+      { "q": "What does the inaugural coin include?", "a": "A 3 oz inaugural coin in silver .999, plus a 1 kg colorized copper .999 gift and silver .999 and copper .999 Mystery Boxes." }
+    ],
     "title": "Prestige Club",
     "tagline": "Unique pieces and privileges reserved for those who arrive first.",
     "body": "Legacy Prestige Club brings together the inaugural pieces, the lowest numbering and the highest member privileges of the Legacy Fan ecosystem.",
