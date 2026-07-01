@@ -12,12 +12,24 @@ function interpolate(text: string, vars: Record<string, string>): string {
 }
 
 function shell(bodyHtml: string): string {
-  return `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;color:#16161a">
-    <h1 style="color:#9C7E1C;font-size:20px">Legacy Fan</h1>
+  return `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Legacy Fan</title>
+</head>
+<body style="margin:0;padding:24px;background:#f4f3ef">
+  <div style="font-family:Georgia,'Times New Roman',serif;max-width:480px;margin:0 auto;background:#ffffff;border-radius:8px;padding:28px;color:#16161a">
+    <h1 style="color:#9C7E1C;font-size:20px;margin:0 0 12px">Legacy Fan</h1>
     <div style="font-size:15px;line-height:1.6">${bodyHtml}</div>
     <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-    <p style="font-size:12px;color:#888">Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura.</p>
-  </div>`;
+    <p style="font-size:12px;color:#888;margin:0">Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura.</p>
+    <p style="font-size:11px;color:#aaa;margin:8px 0 0">Legacy Fan LLC · 8 The Green STE R, Dover, DE 19901 · info@legacy-fan.com</p>
+  </div>
+</body>
+</html>`;
 }
 
 /**

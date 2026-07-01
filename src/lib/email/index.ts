@@ -8,7 +8,24 @@ export interface SendEmailInput {
   to: string;
   subject: string;
   html: string;
+  /** Versión texto plano; si no se da, se deriva del HTML (evita MIME_HTML_ONLY). */
+  text?: string;
   locale?: 'es' | 'en' | 'fr' | 'it';
+}
+
+/** Deriva texto plano legible a partir del HTML (para el multipart). */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<(br|\/p|\/div|\/h[1-6]|\/tr)>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .trim();
 }
 
 export interface SendEmailResult {
@@ -68,7 +85,7 @@ async function sendViaResend(cfg: EmailConfig, input: SendEmailInput): Promise<S
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${cfg.resendApiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: cfg.from, to: input.to, subject: input.subject, html: input.html }),
+    body: JSON.stringify({ from: cfg.from, to: input.to, subject: input.subject, html: input.html, text: input.text || htmlToText(input.html) }),
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
@@ -88,7 +105,7 @@ async function sendViaSmtp(cfg: EmailConfig, input: SendEmailInput): Promise<Sen
       secure,
       auth: user ? { user, pass: password ?? '' } : undefined,
     });
-    const info = await transport.sendMail({ from: cfg.from, to: input.to, subject: input.subject, html: input.html });
+    const info = await transport.sendMail({ from: cfg.from, to: input.to, subject: input.subject, html: input.html, text: input.text || htmlToText(input.html) });
     // Si el servidor no acepta al destinatario, lo tratamos como fallo real.
     if (info.rejected && info.rejected.length > 0) {
       return { success: false, provider: 'smtp', error: `Rechazado: ${info.rejected.join(', ')} · ${info.response ?? ''}`.trim() };

@@ -878,7 +878,8 @@ export async function sendTestEmailConfigAction(formData: FormData): Promise<voi
     result = await getEmailProvider().send({
       to,
       subject: 'Prueba de envío · Legacy Fan',
-      html: '<p>Este es un email de prueba de Legacy Fan. Si lo recibes, la configuración de correo funciona ✅</p>',
+      html: `<!doctype html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Legacy Fan</title></head><body style="margin:0;padding:24px;background:#f4f3ef"><div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;background:#fff;border-radius:8px;padding:28px;color:#16161a"><h1 style="color:#9C7E1C;font-size:20px;margin:0 0 12px">Legacy Fan</h1><p style="font-size:15px;line-height:1.6">Este es un email de prueba de Legacy Fan. Si lo recibes, la configuración de correo funciona correctamente.</p><p style="font-size:11px;color:#aaa;margin:16px 0 0">Legacy Fan LLC · 8 The Green STE R, Dover, DE 19901 · info@legacy-fan.com</p></div></body></html>`,
+      text: 'Este es un email de prueba de Legacy Fan. Si lo recibes, la configuracion de correo funciona correctamente.',
     });
     await prisma.emailLog.create({
       data: { toEmail: to, provider: result.provider, success: result.success, error: result.error ?? null },
