@@ -99,12 +99,12 @@ export default async function LocaleLayout({
             </div>
           ) : (
           <>
-          <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
-            <div className="mx-auto flex h-[74px] max-w-6xl items-center justify-between gap-3 px-4 sm:gap-5 sm:px-6">
-              {/* Logo → web corporativa (no al store) */}
+          <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md md:border-transparent md:bg-[#070707] md:backdrop-blur-none">
+            <div className="mx-auto flex h-[74px] max-w-6xl items-center justify-between gap-3 px-4 sm:gap-5 sm:px-6 md:h-[122px] md:px-[30px]">
+              {/* Logo → web corporativa (no al store). En escritorio, 60px como en legacy-fan.com */}
               <a href="https://legacy-fan.com/" aria-label={t('siteName')} className="flex-none">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/logo.webp" alt="Legacy Fan" width={200} height={60} className="h-9 w-auto sm:h-10" />
+                <img src="/brand/logo.webp" alt="Legacy Fan" width={200} height={60} className="h-9 w-auto sm:h-10 md:h-[60px]" />
               </a>
               <MainNav
                 menuLabel={t('menu')}

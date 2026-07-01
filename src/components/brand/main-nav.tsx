@@ -11,8 +11,9 @@ export type NavItem =
 
 const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif";
 const baseLink = 'whitespace-nowrap transition';
-// Menú superior en Inter 16px (petición de marca).
-const linkStyle = { fontSize: '16px', fontFamily: INTER } as const;
+// Menú superior clonado de legacy-fan.com: Inter 16px / peso 500 / #cccccc /
+// letter-spacing 0.015em / sin mayúsculas.
+const linkStyle = { fontSize: '16px', fontFamily: INTER, letterSpacing: '0.015em' } as const;
 
 export function MainNav({
   items,
@@ -28,12 +29,12 @@ export function MainNav({
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
   const cls = (active: boolean) =>
-    `${baseLink} ${active ? 'font-semibold text-gold-light' : 'font-medium text-muted hover:text-foreground'}`;
+    `${baseLink} ${active ? 'font-semibold text-gold-light' : 'font-medium text-[#cccccc] hover:text-white'}`;
 
   return (
     <>
       {/* Desktop */}
-      <nav className="hidden flex-1 items-center justify-center gap-6 md:flex">
+      <nav className="hidden flex-1 items-center justify-center gap-8 md:flex">
         {items.map((it) => {
           if (it.kind === 'external') {
             return (
