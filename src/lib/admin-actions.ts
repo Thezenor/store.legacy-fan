@@ -14,6 +14,7 @@ import { prisma } from './prisma';
 import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
 import { sendTemplatedEmail } from './email/templates';
+import { getEmailProvider } from './email';
 import { saveUpload, optimizeImageToDataUri } from './storage';
 import { getSubscriptionProviderForAdmin, testGatewayConnection } from './payments';
 import { getClubPricing, getPlan } from './commerce';
@@ -834,6 +835,64 @@ export async function generateWalletSecretAction(): Promise<void> {
   });
   await audit(admin.id, admin.email, 'wallet.secret.generate', 'SystemSetting', 'wallet.token_secret', null, null);
   revalidatePath('/lf-admin/carnet');
+}
+
+// ───────────────── Envío de correos (proveedor + credenciales) ─────────────────
+
+/** Guarda la configuración de envío de emails (proveedor, remitente, credenciales). */
+export async function saveEmailAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const upsert = (key: string, value: string | boolean) =>
+    prisma.systemSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value, group: 'email' },
+    });
+
+  const provider = String(formData.get('email.provider') ?? 'console');
+  await upsert('email.provider', ['resend', 'smtp', 'console'].includes(provider) ? provider : 'console');
+  await upsert('email.from', String(formData.get('email.from') ?? ''));
+  // SMTP: campos no secretos.
+  await upsert('email.smtp.host', String(formData.get('email.smtp.host') ?? ''));
+  await upsert('email.smtp.port', String(formData.get('email.smtp.port') ?? ''));
+  await upsert('email.smtp.user', String(formData.get('email.smtp.user') ?? ''));
+  await upsert('email.smtp.secure', formData.get('email.smtp.secure') === 'on' ? 'true' : 'false');
+  // Secretos: solo se sobrescriben si llegan con valor.
+  for (const key of ['email.resend.api_key', 'email.smtp.password']) {
+    const value = String(formData.get(key) ?? '');
+    if (value !== '') await upsert(key, value);
+  }
+  await audit(admin.id, admin.email, 'email.save', 'SystemSetting', 'email', null, { provider });
+  revalidatePath('/lf-admin/config');
+}
+
+/** Envía un email de prueba (conectividad del proveedor) y guarda el resultado. */
+export async function sendTestEmailConfigAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const to = String(formData.get('to') ?? '').trim() || admin.email || '';
+  let result: { success: boolean; provider: string; error?: string };
+  if (!to) {
+    result = { success: false, provider: 'none', error: 'Falta el destinatario' };
+  } else {
+    result = await getEmailProvider().send({
+      to,
+      subject: 'Prueba de envío · Legacy Fan',
+      html: '<p>Este es un email de prueba de Legacy Fan. Si lo recibes, la configuración de correo funciona ✅</p>',
+    });
+    await prisma.emailLog.create({
+      data: { toEmail: to, provider: result.provider, success: result.success, error: result.error ?? null },
+    });
+  }
+  const msg = result.success
+    ? `OK · enviado con ${result.provider} a ${to}`
+    : `ERROR (${result.provider}): ${result.error ?? 'desconocido'}`;
+  await prisma.systemSetting.upsert({
+    where: { key: 'email.test_result' },
+    update: { value: msg },
+    create: { key: 'email.test_result', value: msg, group: 'email' },
+  });
+  await audit(admin.id, admin.email, 'email.test', 'SystemSetting', 'email', null, { to, success: result.success });
+  revalidatePath('/lf-admin/config');
 }
 
 /**

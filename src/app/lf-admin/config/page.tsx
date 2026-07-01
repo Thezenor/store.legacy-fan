@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { saveConfigAction, uploadUpsellCoinImageAction } from '@/lib/admin-actions';
 import { GatewayConfig } from '@/components/admin/gateway-config';
+import { EmailConfig } from '@/components/admin/email-config';
 import { getClubPricing } from '@/lib/commerce';
 
 const inp = 'mt-1 rounded border border-border bg-background px-2 py-1.5 text-foreground';
@@ -156,6 +157,23 @@ export default async function AdminConfig() {
             'payments.stripe.enabled': bool('payments.stripe.enabled'),
           }}
           subPlanInfo={subPlanInfo}
+        />
+      </div>
+
+      {/* Envío de correos */}
+      <div className="mt-4">
+        <EmailConfig
+          values={{
+            'email.provider': str('email.provider'),
+            'email.from': str('email.from'),
+            'email.smtp.host': str('email.smtp.host'),
+            'email.smtp.port': str('email.smtp.port'),
+            'email.smtp.user': str('email.smtp.user'),
+            'email.smtp.secure': str('email.smtp.secure'),
+            'email.resend.api_key.set': !!str('email.resend.api_key'),
+            'email.smtp.password.set': !!str('email.smtp.password'),
+            'email.test_result': str('email.test_result'),
+          }}
         />
       </div>
     </div>

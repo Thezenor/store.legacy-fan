@@ -1,5 +1,8 @@
-// Capa de abstracción de email (doc 10). Implementación inicial: Resend.
-// 'console' útil en desarrollo; preparado para Brevo/otros en el futuro.
+// Capa de abstracción de email (doc 10). Configurable desde el superadmin
+// (SystemSetting grupo 'email') con respaldo a variables de entorno.
+// Proveedores: 'resend' (API), 'smtp' (nodemailer) y 'console' (desarrollo).
+
+import { getSettingString } from '../commerce/settings';
 
 export interface SendEmailInput {
   to: string;
@@ -19,44 +22,88 @@ export interface EmailProvider {
   send(input: SendEmailInput): Promise<SendEmailResult>;
 }
 
-class ConsoleEmailProvider implements EmailProvider {
-  readonly key = 'console';
+interface EmailConfig {
+  provider: 'resend' | 'smtp' | 'console';
+  from: string;
+  resendApiKey: string | null;
+  smtp: { host: string | null; port: number; user: string | null; password: string | null; secure: boolean };
+}
+
+/** Lee la configuración de email de la BD (grupo 'email') con respaldo a env. */
+async function getEmailConfig(): Promise<EmailConfig> {
+  const [provider, from, resendKey, host, port, user, pass, secure] = await Promise.all([
+    getSettingString('email.provider'),
+    getSettingString('email.from'),
+    getSettingString('email.resend.api_key'),
+    getSettingString('email.smtp.host'),
+    getSettingString('email.smtp.port'),
+    getSettingString('email.smtp.user'),
+    getSettingString('email.smtp.password'),
+    getSettingString('email.smtp.secure'),
+  ]);
+  const prov = (provider || process.env.EMAIL_PROVIDER || 'console') as EmailConfig['provider'];
+  return {
+    provider: prov === 'resend' || prov === 'smtp' ? prov : 'console',
+    from: from || process.env.EMAIL_FROM || 'Legacy Fan <no-reply@legacy-fan.com>',
+    resendApiKey: resendKey || process.env.RESEND_API_KEY || null,
+    smtp: {
+      host: host || process.env.SMTP_HOST || null,
+      port: Number(port || process.env.SMTP_PORT || 587),
+      user: user || process.env.SMTP_USER || null,
+      password: pass || process.env.SMTP_PASSWORD || null,
+      secure: (secure ?? '') !== '' ? secure === 'true' : Number(port || process.env.SMTP_PORT || 587) === 465,
+    },
+  };
+}
+
+async function sendViaResend(cfg: EmailConfig, input: SendEmailInput): Promise<SendEmailResult> {
+  if (!cfg.resendApiKey) return { success: false, provider: 'resend', error: 'Falta la API key de Resend' };
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${cfg.resendApiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: cfg.from, to: input.to, subject: input.subject, html: input.html }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    return { success: false, provider: 'resend', error: `HTTP ${res.status} ${detail.slice(0, 120)}` };
+  }
+  return { success: true, provider: 'resend' };
+}
+
+async function sendViaSmtp(cfg: EmailConfig, input: SendEmailInput): Promise<SendEmailResult> {
+  const { host, port, user, password, secure } = cfg.smtp;
+  if (!host) return { success: false, provider: 'smtp', error: 'Falta el host SMTP' };
+  try {
+    const nodemailer = (await import('nodemailer')).default;
+    const transport = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: user ? { user, pass: password ?? '' } : undefined,
+    });
+    await transport.sendMail({ from: cfg.from, to: input.to, subject: input.subject, html: input.html });
+    return { success: true, provider: 'smtp' };
+  } catch (e) {
+    return { success: false, provider: 'smtp', error: e instanceof Error ? e.message : 'Error SMTP' };
+  }
+}
+
+/** Proveedor "despachador": lee la config en cada envío y usa el proveedor activo. */
+class ConfiguredEmailProvider implements EmailProvider {
+  readonly key = 'configured';
   async send(input: SendEmailInput): Promise<SendEmailResult> {
+    const cfg = await getEmailConfig();
+    if (cfg.provider === 'resend') return sendViaResend(cfg, input);
+    if (cfg.provider === 'smtp') return sendViaSmtp(cfg, input);
+    // console: útil en desarrollo / cuando no hay proveedor configurado.
     // eslint-disable-next-line no-console
     console.info(`[email:console] -> ${input.to} | ${input.subject}`);
-    return { success: true, provider: this.key };
+    return { success: true, provider: 'console' };
   }
 }
 
-class ResendEmailProvider implements EmailProvider {
-  readonly key = 'resend';
-  async send(input: SendEmailInput): Promise<SendEmailResult> {
-    const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.EMAIL_FROM ?? 'Legacy Fan <no-reply@legacy-fan.com>';
-    if (!apiKey) {
-      return { success: false, provider: this.key, error: 'RESEND_API_KEY no configurada' };
-    }
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ from, to: input.to, subject: input.subject, html: input.html }),
-    });
-    if (!res.ok) {
-      return { success: false, provider: this.key, error: `HTTP ${res.status}` };
-    }
-    return { success: true, provider: this.key };
-  }
-}
+const provider = new ConfiguredEmailProvider();
 
 export function getEmailProvider(): EmailProvider {
-  switch (process.env.EMAIL_PROVIDER) {
-    case 'resend':
-      return new ResendEmailProvider();
-    case 'console':
-    default:
-      return new ConsoleEmailProvider();
-  }
+  return provider;
 }
