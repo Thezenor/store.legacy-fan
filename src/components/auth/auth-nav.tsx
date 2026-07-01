@@ -26,7 +26,7 @@ export function AuthNav({
     return (
       <Link
         href="/login"
-        className="inline-flex min-h-[40px] items-center text-sm text-muted hover:text-foreground"
+        className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-4 py-1.5 text-sm font-medium text-gold-light transition hover:bg-gold/20 hover:text-gold"
       >
         {loginLabel}
       </Link>

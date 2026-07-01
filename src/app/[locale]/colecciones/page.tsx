@@ -61,12 +61,27 @@ export default async function ColeccionesPage({
             const soon = col.status === 'PROXIMA';
             return (
               <article key={col.id} className="flex flex-col items-center text-center">
-                <Coin
-                  metal={METALS[i % METALS.length]}
-                  serial={col.name.slice(0, 14)}
-                  legend={`${col.name.toUpperCase()} · LEGACY FAN ·`}
-                  className={`w-[clamp(11rem,30vw,16rem)] ${soon ? 'opacity-35 blur-[1px]' : ''}`}
-                />
+                {col.imageUrl ? (
+                  <div className={`w-[clamp(11rem,30vw,16rem)] overflow-hidden rounded-2xl border border-border bg-surface ${soon ? 'opacity-40 blur-[1px]' : ''}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={col.imageUrl}
+                      srcSet={col.imageUrlMobile ? `${col.imageUrlMobile} 640w, ${col.imageUrl} 1200w` : undefined}
+                      sizes="(min-width: 1024px) 16rem, (min-width: 640px) 30vw, 11rem"
+                      alt={col.name}
+                      className="aspect-square h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                ) : (
+                  <Coin
+                    metal={METALS[i % METALS.length]}
+                    serial={col.name.slice(0, 14)}
+                    legend={`${col.name.toUpperCase()} · LEGACY FAN ·`}
+                    className={`w-[clamp(11rem,30vw,16rem)] ${soon ? 'opacity-35 blur-[1px]' : ''}`}
+                  />
+                )}
                 <h2 className="mt-5 font-display text-lg uppercase tracking-wide text-foreground">
                   {col.name}
                 </h2>

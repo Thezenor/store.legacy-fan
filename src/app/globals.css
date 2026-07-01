@@ -29,8 +29,8 @@
   --lf-surface: 255 255 255;
   --lf-surface-elevated: 244 243 239;
   --lf-foreground: 23 22 20;
-  --lf-muted: 92 90 84;
-  --lf-faint: 120 117 110;
+  --lf-muted: 82 80 74; /* algo más oscuro para AA sobre fondo claro */
+  --lf-faint: 104 101 94; /* subido de 120/117/110 para que el texto tenue se lea */
   --lf-border: 222 220 213;
 }
 
@@ -93,10 +93,21 @@ h1, h2, h3, .font-display {
   color: #9a5a2e;
 }
 
+/* Texto de avisos (éxito/error) legible en ambos modos: claro sobre fondo
+   oscuro (por defecto) y oscuro sobre fondo claro (.light). */
+.alert-error { color: #fca5a5; }
+.alert-success { color: #86efac; }
+.light .alert-error { color: #b91c1c; }
+.light .alert-success { color: #15803d; }
+
 /* Filo dorado sutil (líneas Art Deco) */
 .hairline-gold {
   background: linear-gradient(90deg, transparent, rgba(200, 162, 75, 0.55), transparent);
   height: 1px;
+}
+/* En modo claro el oro pálido casi desaparece: oro más oscuro. */
+.light .hairline-gold {
+  background: linear-gradient(90deg, transparent, rgba(138, 109, 34, 0.5), transparent);
 }
 
 /* Esquinas biseladas Art Deco (chaflán en 2 esquinas opuestas) */
@@ -107,4 +118,8 @@ h1, h2, h3, .font-display {
 /* Texto grabado en relieve (doble sombra clara/oscura) */
 .engraved {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.12), 0 -1px 0 rgba(0, 0, 0, 0.6);
+}
+/* En modo claro se invierten las sombras (si no, queda sucio sobre fondo claro). */
+.light .engraved {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 -1px 0 rgba(0, 0, 0, 0.12);
 }

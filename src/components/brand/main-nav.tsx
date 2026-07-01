@@ -28,7 +28,7 @@ export function MainNav({
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
   const cls = (active: boolean) =>
-    `${baseLink} ${active ? 'font-semibold text-gold-light' : 'font-medium text-[#cbc8c0] hover:text-foreground'}`;
+    `${baseLink} ${active ? 'font-semibold text-gold-light' : 'font-medium text-muted hover:text-foreground'}`;
 
   return (
     <>
@@ -58,7 +58,7 @@ export function MainNav({
               <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                 <div className="min-w-[160px] border border-border bg-surface py-2 shadow-card">
                   {it.children.map((c) => (
-                    <Link key={c.href} href={c.href} style={{ fontFamily: INTER, fontSize: '15px' }} className="block px-4 py-2 text-[#cbc8c0] hover:bg-surface-elevated hover:text-foreground">
+                    <Link key={c.href} href={c.href} style={{ fontFamily: INTER, fontSize: '15px' }} className="block px-4 py-2 text-muted hover:bg-surface-elevated hover:text-foreground">
                       {c.label}
                     </Link>
                   ))}
@@ -92,14 +92,14 @@ export function MainNav({
             {items.map((it) => {
               if (it.kind === 'external') {
                 return (
-                  <a key={it.label} href={it.href} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="border-b border-border/60 py-3 text-base tracking-[0.01em] text-[#cbc8c0]">
+                  <a key={it.label} href={it.href} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="border-b border-border/60 py-3 text-base tracking-[0.01em] text-muted">
                     {it.label}
                   </a>
                 );
               }
               if (it.kind === 'link') {
                 return (
-                  <Link key={it.href} href={it.href} onClick={() => setOpen(false)} className={`border-b border-border/60 py-3 text-base tracking-[0.01em] ${isActive(it.href) ? 'font-semibold text-gold-light' : 'text-[#cbc8c0]'}`}>
+                  <Link key={it.href} href={it.href} onClick={() => setOpen(false)} className={`border-b border-border/60 py-3 text-base tracking-[0.01em] ${isActive(it.href) ? 'font-semibold text-gold-light' : 'text-muted'}`}>
                     {it.label}
                   </Link>
                 );
@@ -109,7 +109,7 @@ export function MainNav({
                   <span className="text-base font-semibold text-foreground">{it.label}</span>
                   <div className="mt-2 flex flex-col gap-1 pl-3">
                     {it.children.map((c) => (
-                      <Link key={c.href} href={c.href} onClick={() => setOpen(false)} className="py-1 text-base text-[#cbc8c0]">
+                      <Link key={c.href} href={c.href} onClick={() => setOpen(false)} className="py-1 text-base text-muted">
                         {c.label}
                       </Link>
                     ))}

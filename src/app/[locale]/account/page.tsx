@@ -460,10 +460,10 @@ export default async function AccountPage({
         <p
           className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
             banner.kind === 'ok'
-              ? 'border-green-500/40 bg-green-500/10 text-green-300'
+              ? 'border-green-500/40 bg-green-500/10 alert-success'
               : banner.kind === 'warn'
                 ? 'border-gold/40 bg-gold/10 text-foreground'
-                : 'border-red-500/40 bg-red-500/10 text-red-300'
+                : 'border-red-500/40 bg-red-500/10 alert-error'
           }`}
         >
           {banner.msg}

@@ -55,8 +55,8 @@ export function SubmitButton({ label, pendingLabel }: { label: string; pendingLa
 export function Alert({ kind, children }: { kind: 'error' | 'success'; children: React.ReactNode }) {
   const cls =
     kind === 'error'
-      ? 'border-red-500/40 bg-red-500/10 text-red-300'
-      : 'border-green-500/40 bg-green-500/10 text-green-300';
+      ? 'border-red-500/40 bg-red-500/10 alert-error'
+      : 'border-green-500/40 bg-green-500/10 alert-success';
   return <div className={`rounded-lg border px-3 py-2 text-sm ${cls}`}>{children}</div>;
 }
 

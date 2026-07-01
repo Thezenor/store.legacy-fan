@@ -28,7 +28,7 @@ export function ThemeToggle({ label }: { label: string }) {
       type="button"
       onClick={toggle}
       aria-label={label}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-sm text-foreground transition hover:bg-surface-elevated"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-xs text-foreground transition hover:bg-surface-elevated"
     >
       {light ? '☀️' : '🌙'}
     </button>

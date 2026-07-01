@@ -12,8 +12,8 @@ export function Wordmark({ className }: { className?: string }) {
         style={{ background: 'linear-gradient(90deg, transparent, #c8a24b 20%, #c8a24b 80%, transparent)' }}
       />
       <span
-        className="font-sans"
-        style={{ fontSize: '8px', letterSpacing: '0.42em', color: '#c8a24b' }}
+        className="font-sans text-metal-gold"
+        style={{ fontSize: '8px', letterSpacing: '0.42em' }}
       >
         PRECIOUS METALS
       </span>

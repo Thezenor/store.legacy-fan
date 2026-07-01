@@ -666,9 +666,14 @@ export async function uploadCollectionImageAction(formData: FormData): Promise<v
   const id = String(formData.get('collectionId'));
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return;
-  const { url, urlMobile } = await saveUpload(file);
-  await prisma.collection.update({ where: { id }, data: { imageUrl: url, imageUrlMobile: urlMobile ?? null } });
-  await audit(admin.id, admin.email, 'collection.image', 'Collection', id, null, { url });
+  // Data URI en BD (no depende del Volume; misma solución que las monedas):
+  // variante escritorio (1000px) + móvil (640px).
+  const [url, urlMobile] = await Promise.all([
+    optimizeImageToDataUri(file, 1000),
+    optimizeImageToDataUri(file, 640),
+  ]);
+  await prisma.collection.update({ where: { id }, data: { imageUrl: url, imageUrlMobile: urlMobile } });
+  await audit(admin.id, admin.email, 'collection.image', 'Collection', id, null, { bytes: file.size });
   revalidateCollections();
 }
 
