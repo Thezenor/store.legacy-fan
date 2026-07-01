@@ -115,16 +115,18 @@ h1, h2, h3, .font-display {
   clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
 }
 
-/* Efecto de moneda (colecciones): halo dorado luminoso detrás + flotación
-   suave, inspirado en la moneda de la home. El aura late lentamente y la
-   pieza flota; al pasar el ratón, el halo se intensifica. */
+/* Efecto de moneda (colecciones): halo dorado ceñido detrás + flotación suave,
+   como la moneda de la home. Para que sea FLUIDO (sin tirones) solo animamos
+   propiedades compositables por la GPU: `opacity` en el halo (el desenfoque se
+   rasteriza una vez) y `transform: translate` en la pieza. Nunca animamos
+   `filter`/`scale` del halo (obliga a re-rasterizar el blur en cada frame). */
 @keyframes lf-coin-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
 }
 @keyframes lf-coin-glow {
-  0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.68; transform: translate(-50%, -50%) scale(1.06); }
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.85; }
 }
 .coin-fx {
   position: relative;
@@ -136,25 +138,24 @@ h1, h2, h3, .font-display {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 120%;
+  width: 106%;
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0);
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 32%, #fff7e3, #e6c878 28%, #b88a32 58%, rgba(94, 68, 26, 0) 72%);
-  filter: blur(16px);
-  opacity: 0.5;
+  background: radial-gradient(circle, rgba(230, 200, 120, 0.6) 0%, rgba(200, 150, 60, 0.32) 46%, rgba(120, 90, 30, 0) 68%);
+  filter: blur(14px);
+  opacity: 0.55;
   z-index: 0;
   pointer-events: none;
-  animation: lf-coin-glow 6s ease-in-out infinite;
+  will-change: opacity;
+  animation: lf-coin-glow 5s ease-in-out infinite;
 }
 .coin-fx > * {
   position: relative;
   z-index: 1;
-  animation: lf-coin-float 7s ease-in-out infinite;
-}
-.coin-fx:hover::before {
-  opacity: 0.85;
-  filter: blur(20px);
+  will-change: transform;
+  transform: translateZ(0);
+  animation: lf-coin-float 6s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .coin-fx::before,
