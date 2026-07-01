@@ -18,6 +18,7 @@ export async function getReferralSummary(userId: string) {
 
   return {
     code: code.code,
+    customized: code.customized,
     rewardMode: code.rewardMode,
     link: `${appUrl()}/register?ref=${code.code}`,
     registered,

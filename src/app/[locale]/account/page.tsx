@@ -13,6 +13,7 @@ import { CancelSubscriptionFlow } from '@/components/account/cancel-subscription
 import { AccountTabs, type AccountTab } from '@/components/account/account-tabs';
 import { ChangePasswordForm } from '@/components/account/change-password-form';
 import { LogoutButton } from '@/components/account/logout-button';
+import { ReferralCodeEditor } from '@/components/account/referral-code-editor';
 import { updateOwnProfileAction, updateOwnAddressAction } from '@/lib/account-actions';
 import { COUNTRIES } from '@/lib/countries';
 import { Link } from '@/i18n/navigation';
@@ -304,6 +305,23 @@ export default async function AccountPage({
               <div className="text-[11px] text-muted">{a('generated')}</div>
             </div>
           </div>
+          <ReferralCodeEditor
+            currentCode={referral.code}
+            customized={referral.customized}
+            labels={{
+              hint: a('refCustomizeHint'),
+              locked: a('refLocked'),
+              checking: a('refChecking'),
+              available: a('refAvailable'),
+              taken: a('refTaken'),
+              invalid: a('refInvalid'),
+              tooShort: a('refTooShort'),
+              tooLong: a('refTooLong'),
+              save: a('refSave'),
+              saved: a('refSaved'),
+              placeholder: a('refPlaceholder'),
+            }}
+          />
         </Section>
       ),
     });

@@ -6,8 +6,49 @@ import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
 import { auth } from './auth';
 import { cancelSubscription } from './subscriptions';
+import { normalizeReferralCode, validateReferralCodeFormat } from './referrals/code';
 
 export type PasswordChangeResult = { ok: true } | { ok: false; code: string };
+
+export type ReferralCodeResult = { ok: true; value: string } | { ok: false; reason: string };
+
+/**
+ * El socio personaliza su código de referido UNA sola vez. Valida formato y
+ * unicidad; marca `customized` para que no se pueda volver a cambiar.
+ */
+export async function updateReferralCodeAction(
+  _prev: ReferralCodeResult | null,
+  formData: FormData,
+): Promise<ReferralCodeResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { ok: false, reason: 'unauthenticated' };
+  const userId = session.user.id;
+
+  const code = normalizeReferralCode(String(formData.get('code') ?? ''));
+  const fmt = validateReferralCodeFormat(code);
+  if (fmt) return { ok: false, reason: fmt };
+
+  const existing = await prisma.referralCode.findUnique({ where: { userId } });
+  if (!existing) return { ok: false, reason: 'no_code' };
+  if (existing.customized) return { ok: false, reason: 'already_customized' };
+  if (existing.code === code) return { ok: false, reason: 'same' };
+
+  const clash = await prisma.referralCode.findUnique({ where: { code }, select: { userId: true } });
+  if (clash && clash.userId !== userId) return { ok: false, reason: 'taken' };
+
+  try {
+    await prisma.referralCode.update({
+      where: { userId },
+      data: { code, customized: true },
+    });
+  } catch {
+    // Carrera con otro alta del mismo código → único constraint.
+    return { ok: false, reason: 'taken' };
+  }
+
+  revalidatePath('/account');
+  return { ok: true, value: code };
+}
 
 // El propio usuario cambia su contraseña (verifica la actual).
 export async function changeOwnPasswordAction(
