@@ -54,6 +54,7 @@ export default async function AccountPage({
   const t = await getTranslations({ locale, namespace: 'auth' });
   const a = await getTranslations({ locale, namespace: 'account' });
   const co = await getTranslations({ locale, namespace: 'checkout' });
+  const common = await getTranslations({ locale, namespace: 'common' });
   const checkoutErrors = {
     unauthenticated: co('errors.unauthenticated'),
     unverified: co('errors.unverified'),
@@ -509,7 +510,7 @@ export default async function AccountPage({
 
       {/* Carnet digital (anverso + reverso). Permanente desde el primer pago. */}
       {isMember ? (
-        <div className="mt-6 grid max-w-md gap-4 sm:max-w-2xl sm:grid-cols-2">
+        <div className="mx-auto mt-6 grid max-w-md gap-4 sm:max-w-2xl sm:grid-cols-2">
           <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} side="front" />
           <DigitalMemberCard
             name={fullName}
@@ -519,7 +520,7 @@ export default async function AccountPage({
           />
         </div>
       ) : reservation ? (
-        <div className="mt-6 max-w-md">
+        <div className="mx-auto mt-6 max-w-md">
           <DigitalMemberCard
             name={fullName}
             number="LF-——————"
@@ -529,7 +530,7 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      <AccountTabs items={tabs} footer={<LogoutButton label={t('logout')} />} />
+      <AccountTabs items={tabs} footer={<LogoutButton label={common('logout')} />} />
     </section>
   );
 }
