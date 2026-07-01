@@ -131,7 +131,7 @@ export default async function LocaleLayout({
                       { href: '/club', label: t('comparePlans') },
                     ],
                   },
-                  { kind: 'link', href: '/colecciones', label: t('navColecciones') },
+                  { kind: 'external', href: 'https://legacy-fan.com/colecciones/', label: t('navColecciones') },
                   { kind: 'external', href: 'https://legacy-fan.com/punto-de-venta/', label: t('navPuntoVenta') },
                   { kind: 'external', href: 'https://legacy-fan.com/distribuidores/', label: t('navDistribuidor') },
                   { kind: 'external', href: 'https://legacy-fan.com/founders-inversion/', label: t('navFounders') },
