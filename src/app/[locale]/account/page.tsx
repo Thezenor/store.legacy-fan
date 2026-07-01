@@ -14,6 +14,7 @@ import { AccountTabs, type AccountTab } from '@/components/account/account-tabs'
 import { ChangePasswordForm } from '@/components/account/change-password-form';
 import { LogoutButton } from '@/components/account/logout-button';
 import { ReferralCodeEditor } from '@/components/account/referral-code-editor';
+import { ReferralShare } from '@/components/account/referral-share';
 import { updateOwnProfileAction, updateOwnAddressAction } from '@/lib/account-actions';
 import { COUNTRIES } from '@/lib/countries';
 import { Link } from '@/i18n/navigation';
@@ -289,6 +290,12 @@ export default async function AccountPage({
           <p className="mt-1 text-xs text-muted">
             {a('yourLink')}: <span className="block break-all text-foreground">{referral.link}</span>
           </p>
+          <ReferralShare
+            link={referral.link}
+            shareText={a('refShareText')}
+            copyLabel={a('refCopy')}
+            copiedLabel={a('refCopied')}
+          />
           <div className="mt-3 grid grid-cols-1 gap-2 text-center text-sm sm:grid-cols-3">
             <div className="rounded border border-border p-2">
               <div className="text-lg text-foreground">{referral.registered}</div>
