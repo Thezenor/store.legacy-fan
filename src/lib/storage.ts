@@ -48,7 +48,8 @@ export async function saveUpload(file: File): Promise<SavedUpload> {
     return { name, url: `/api/media/${name}` };
   }
 
-  // Imagen: optimizar a WebP (escritorio + móvil).
+  // Imagen: optimizar a WebP (escritorio + móvil) y guardarla como DATA URI en
+  // la BD. Así NO depende del Volume y NUNCA hay que re-subirla tras un deploy.
   try {
     const sharp = (await import('sharp')).default;
     const base = sharp(input, { animated: ext === 'gif' }).rotate(); // respeta orientación EXIF
@@ -56,18 +57,14 @@ export async function saveUpload(file: File): Promise<SavedUpload> {
       base.clone().resize({ width: DESKTOP_W, withoutEnlargement: true }).webp({ quality: 80 }).toBuffer(),
       base.clone().resize({ width: MOBILE_W, withoutEnlargement: true }).webp({ quality: 78 }).toBuffer(),
     ]);
-    const nameD = `${rand}.webp`;
-    const nameM = `${rand}-m.webp`;
-    await Promise.all([
-      writeFile(path.join(DIR, nameD), desktop),
-      writeFile(path.join(DIR, nameM), mobile),
-    ]);
-    return { name: nameD, url: `/api/media/${nameD}`, urlMobile: `/api/media/${nameM}` };
+    return {
+      name: `${rand}.webp`,
+      url: `data:image/webp;base64,${desktop.toString('base64')}`,
+      urlMobile: `data:image/webp;base64,${mobile.toString('base64')}`,
+    };
   } catch {
-    // Fallback: guardar el original sin optimizar.
-    const name = `${rand}.${ext}`;
-    await writeFile(path.join(DIR, name), input);
-    return { name, url: `/api/media/${name}` };
+    // Fallback: data URI del original sin optimizar.
+    return { name: `${rand}.${ext}`, url: `data:${CONTENT_TYPE[ext] ?? 'application/octet-stream'};base64,${input.toString('base64')}` };
   }
 }
 
