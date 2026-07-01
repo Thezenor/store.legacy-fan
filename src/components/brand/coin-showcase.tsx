@@ -78,7 +78,11 @@ export function CoinShowcase({
     <div className={`coin3d ${className ?? ''}`}>
       <div ref={tiltRef} className="coin3d-tilt">
         <div className="coin3d-glow">
-          <div className="coin3d-float">{children}</div>
+          <div className="coin3d-float">
+            {children}
+            {/* Borde de luz: el aura nace desde el propio borde de la moneda. */}
+            <span className="coin3d-rim" aria-hidden />
+          </div>
         </div>
       </div>
     </div>
