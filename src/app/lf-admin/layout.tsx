@@ -26,6 +26,7 @@ const NAV = [
   { href: '/lf-admin/colecciones', label: 'Colecciones' },
   { href: '/lf-admin/productos', label: 'Productos' },
   { href: '/lf-admin/emails', label: 'Emails' },
+  { href: '/lf-admin/emails/log', label: 'Log de correos' },
   { href: '/lf-admin/faq', label: 'FAQ' },
   { href: '/lf-admin/seo', label: 'SEO / GEO' },
   { href: '/lf-admin/legal', label: 'Legal' },

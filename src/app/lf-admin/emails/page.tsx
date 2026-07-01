@@ -71,7 +71,10 @@ export default async function AdminEmails() {
       </div>
 
       {/* Logs de envío */}
-      <h2 className="mt-10 font-display text-xl text-gold-light">Últimos envíos</h2>
+      <div className="mt-10 flex items-center justify-between">
+        <h2 className="font-display text-xl text-gold-light">Últimos envíos</h2>
+        <Link href="/lf-admin/emails/log" className="text-sm text-muted hover:text-foreground">Ver log completo →</Link>
+      </div>
       <div className="mt-3 overflow-x-auto rounded-card border border-border">
         <table className="w-full text-left text-sm">
           <thead className="bg-surface text-xs uppercase tracking-wider text-faint">
