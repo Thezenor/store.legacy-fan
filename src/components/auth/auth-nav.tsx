@@ -1,27 +1,23 @@
 'use client';
 
-import { useTransition } from 'react';
-import { Link, useRouter } from '@/i18n/navigation';
-import { logoutAction } from '@/lib/auth-actions';
+import { Link } from '@/i18n/navigation';
 
+// El cierre de sesión ya NO va aquí: se muestra al final del menú de la cuenta
+// (ver LogoutButton en /account). La cabecera solo enlaza Panel y Mi cuenta.
 export function AuthNav({
   isLoggedIn,
   isAdmin,
   accountLabel,
   adminLabel,
   loginLabel,
-  logoutLabel,
 }: {
   isLoggedIn: boolean;
   isAdmin?: boolean;
   accountLabel: string;
   adminLabel: string;
   loginLabel: string;
-  logoutLabel: string;
+  logoutLabel?: string;
 }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
   if (!isLoggedIn) {
     return (
       <Link
@@ -50,20 +46,6 @@ export function AuthNav({
       >
         {accountLabel}
       </Link>
-      <button
-        type="button"
-        disabled={pending}
-        onClick={() =>
-          startTransition(async () => {
-            await logoutAction();
-            router.push('/');
-            router.refresh();
-          })
-        }
-        className="inline-flex min-h-[40px] items-center text-sm text-muted hover:text-foreground disabled:opacity-60"
-      >
-        {logoutLabel}
-      </button>
     </div>
   );
 }

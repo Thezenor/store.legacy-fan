@@ -12,6 +12,7 @@ import { FullPaymentButton } from '@/components/checkout/full-payment-button';
 import { CancelSubscriptionFlow } from '@/components/account/cancel-subscription-flow';
 import { AccountTabs, type AccountTab } from '@/components/account/account-tabs';
 import { ChangePasswordForm } from '@/components/account/change-password-form';
+import { LogoutButton } from '@/components/account/logout-button';
 import { updateOwnProfileAction, updateOwnAddressAction } from '@/lib/account-actions';
 import { COUNTRIES } from '@/lib/countries';
 import { Link } from '@/i18n/navigation';
@@ -501,7 +502,7 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      <AccountTabs items={tabs} />
+      <AccountTabs items={tabs} footer={<LogoutButton label={t('logout')} />} />
     </section>
   );
 }

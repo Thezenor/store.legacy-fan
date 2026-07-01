@@ -11,7 +11,7 @@ export interface AccountTab {
 // Panel de usuario por secciones: muestra UNA sección a la vez.
 //  - Móvil/tablet: barra de chips siempre visible (scroll horizontal).
 //  - Escritorio: menú lateral fijo.
-export function AccountTabs({ items }: { items: AccountTab[] }) {
+export function AccountTabs({ items, footer }: { items: AccountTab[]; footer?: ReactNode }) {
   const [active, setActive] = useState(items[0]?.id);
   const current = items.find((i) => i.id === active) ?? items[0];
 
@@ -38,6 +38,8 @@ export function AccountTabs({ items }: { items: AccountTab[] }) {
             </button>
           ))}
         </div>
+        {/* Móvil: salida debajo del menú de secciones */}
+        {footer ? <div className="mt-3">{footer}</div> : null}
       </div>
 
       {/* Escritorio: menú lateral */}
@@ -57,6 +59,8 @@ export function AccountTabs({ items }: { items: AccountTab[] }) {
             {it.label}
           </button>
         ))}
+        {/* Salida al final del menú (debajo de Contraseña) */}
+        {footer ? <div className="mt-3 border-t border-border/60 pt-3">{footer}</div> : null}
       </nav>
 
       <div className="min-w-0">{current?.node}</div>
