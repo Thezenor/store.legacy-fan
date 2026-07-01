@@ -128,38 +128,60 @@ h1, h2, h3, .font-display {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 0.85; }
 }
-.coin-fx {
+.coin3d {
   position: relative;
   display: flex;
   justify-content: center;
+  perspective: 900px;
 }
-.coin-fx::before {
+/* Halo dorado detrás (se rasteriza una vez; solo late su opacity). */
+.coin3d::before {
   content: '';
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 106%;
+  width: 108%;
   aspect-ratio: 1;
   transform: translate3d(-50%, -50%, 0);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(230, 200, 120, 0.6) 0%, rgba(200, 150, 60, 0.32) 46%, rgba(120, 90, 30, 0) 68%);
-  filter: blur(14px);
-  opacity: 0.55;
+  background: radial-gradient(circle, rgba(230, 200, 120, 0.55) 0%, rgba(200, 150, 60, 0.3) 46%, rgba(120, 90, 30, 0) 68%);
+  filter: blur(16px);
+  opacity: 0.5;
   z-index: 0;
   pointer-events: none;
   will-change: opacity;
   animation: lf-coin-glow 5s ease-in-out infinite;
 }
-.coin-fx > * {
+.coin3d:hover::before { opacity: 0.8; }
+/* Flotación en reposo (se pausa al interactuar para no pelear con el tilt). */
+.coin3d-float {
   position: relative;
   z-index: 1;
+  width: 100%;
   will-change: transform;
   transform: translateZ(0);
   animation: lf-coin-float 6s ease-in-out infinite;
 }
+.coin3d-float[data-active='true'] { animation-play-state: paused; }
+/* Inclinación 3D suave siguiendo el puntero. */
+.coin3d-tilt {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+/* Destello que sigue al puntero (recortado a círculo, mezcla de luz). */
+.coin3d-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity 0.2s ease-out;
+}
 @media (prefers-reduced-motion: reduce) {
-  .coin-fx::before,
-  .coin-fx > * { animation: none; }
+  .coin3d::before,
+  .coin3d-float { animation: none; }
 }
 
 /* Texto grabado en relieve (doble sombra clara/oscura) */

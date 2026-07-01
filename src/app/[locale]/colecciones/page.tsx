@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { CollectionStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { Coin } from '@/components/brand/coin';
+import { CoinShowcase } from '@/components/brand/coin-showcase';
 
 export async function generateMetadata({
   params,
@@ -61,7 +62,7 @@ export default async function ColeccionesPage({
             const soon = col.status === 'PROXIMA';
             return (
               <article key={col.id} className="flex flex-col items-center text-center">
-                <div className="coin-fx w-[clamp(11rem,30vw,16rem)]">
+                <CoinShowcase className="w-[clamp(11rem,30vw,16rem)]">
                   {col.imageUrl ? (
                     <div className={`overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_20px_44px_-16px_rgba(0,0,0,0.8)] ${soon ? 'opacity-40 blur-[1px]' : ''}`}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -83,7 +84,7 @@ export default async function ColeccionesPage({
                       className={`w-full ${soon ? 'opacity-35 blur-[1px]' : ''}`}
                     />
                   )}
-                </div>
+                </CoinShowcase>
                 <h2 className="mt-5 font-display text-lg uppercase tracking-wide text-foreground">
                   {col.name}
                 </h2>
