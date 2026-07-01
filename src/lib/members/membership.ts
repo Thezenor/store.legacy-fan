@@ -63,6 +63,40 @@ export async function activateMembershipTx(
 }
 
 /**
+ * Asigna el número de socio YA en la reserva (nuevo modelo: el depósito de 50
+ * €/$ reserva el número). Crea la membresía en estado RESERVA_PENDIENTE si no
+ * existe y le asigna número. Idempotente: si ya tiene número, lo conserva; no
+ * degrada una membresía ya activa. El club es provisional (se fija en el pago
+ * completo); si la reserva es genérica se usa PRIME como marcador.
+ */
+export async function reserveMembershipTx(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  club: ClubType | null,
+) {
+  const existing = await tx.membership.findUnique({ where: { userId } });
+  const membership =
+    existing ??
+    (await tx.membership.create({
+      data: { userId, club: club ?? 'PRIME', status: 'RESERVA_PENDIENTE' },
+    }));
+
+  const number = await assignMemberNumber(tx, membership.id);
+
+  await tx.auditLog.create({
+    data: {
+      actorId: userId,
+      action: 'membership.reserved',
+      entity: 'Membership',
+      entityId: membership.id,
+      newValue: { memberNumber: number.formatted, club: membership.club },
+    },
+  });
+
+  return { membership, number };
+}
+
+/**
  * Renueva la membresía un ciclo más (suscripción anual). Extiende endsAt (al
  * periodo de la pasarela si se conoce, o +1 año) CONSERVANDO el número de socio
  * y la fecha de alta. Reactiva si estaba caducada/suspendida. Idempotente por

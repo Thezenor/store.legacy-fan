@@ -57,7 +57,7 @@
   "prime": {
     "faq": [
       { "q": "What does Prime Club include?", "a": "Member card, silver .999 and copper .999 Mystery Boxes, a permanent member number, a private community, points on purchases and priority access to pre-sales." },
-      { "q": "Does Prime assign me a member number?", "a": "Yes. The member number is assigned when you complete the membership payment and is permanent. The reservation does not assign a number." },
+      { "q": "Does Prime assign me a member number?", "a": "Yes. When you make the reservation ($50/€50) your member number is assigned and is permanent. It is deducted from the full payment." },
       { "q": "Can I upgrade to Prestige later?", "a": "Yes. You can upgrade to a higher tier while keeping your member number." },
       { "q": "What's inside the Mystery Box?", "a": "Pieces in silver .999 and copper .999 with an element of surprise and a guaranteed minimum value." },
       { "q": "Does the membership renew?", "a": "It's an annual renewable membership; your member status and number are permanent." }
@@ -95,7 +95,7 @@
       { "q": "How is Prestige different from Prime?", "a": "Prestige brings together the inaugural pieces, the lowest numbering and the highest member privileges of the Legacy Fan ecosystem." },
       { "q": "Does Prestige guarantee low numbering?", "a": "Yes. Prestige members get the lowest available numbering." },
       { "q": "What is the −5% member price?", "a": "A permanent discount for Prestige members, applied to the premium, never to the metal spot value." },
-      { "q": "How do the reservation and payment work?", "a": "The reservation amount is deducted from the final payment; the balance is paid at closing. The reservation does not assign a member number." },
+      { "q": "How do the reservation and payment work?", "a": "The reservation amount is deducted from the final payment; the balance is paid at closing. The reservation already assigns your member number." },
       { "q": "What does the inaugural coin include?", "a": "A 3 oz inaugural coin in silver .999, plus a 1 kg colorized copper .999 gift and silver .999 and copper .999 Mystery Boxes." }
     ],
     "title": "Prestige Club",
@@ -132,7 +132,7 @@
     "items": [
       {
         "q": "Does the reservation assign me a member number?",
-        "a": "No. The member number is only assigned with full payment of the membership. The reservation amount is deducted from the total."
+        "a": "Yes. When you reserve ($50/€50) your member number is assigned immediately. The amount is deducted from the full payment."
       },
       {
         "q": "Can I choose or change club when I pay?",
@@ -148,12 +148,12 @@
     "from": "From",
     "currentPhase": "Current phase",
     "reservation": "Reservation",
-    "reservationNote": "The reservation does not assign a member number and is deducted from the full payment.",
+    "reservationNote": "The reservation assigns your member number and is deducted from the full payment.",
     "freeShippingEs": "Free shipping in Spain",
     "includes": "What's included",
     "officialPrice": "Official price",
     "fullPrice": "Full club price",
-    "reserveFrom": "Reserve your spot for",
+    "reserveFrom": "Reserve your member number for",
     "conditionsTitle": "Model and conditions"
   },
   "account": {
@@ -161,7 +161,7 @@
     "statusReservaPendiente": "Reservation pending full payment",
     "paid": "Paid",
     "remaining": "Remaining",
-    "noMemberNumberYet": "You don't have a member number yet (assigned on full payment).",
+    "noMemberNumberYet": "You don't have a member number yet (assigned when you reserve for $50/€50).",
     "completeSoon": "Full payment will be available shortly.",
     "currency": "Preferred currency",
     "summaryTitle": "Summary",

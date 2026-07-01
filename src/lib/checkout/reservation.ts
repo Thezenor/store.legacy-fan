@@ -5,6 +5,7 @@ import { getPaymentProviderUnchecked, isGatewayEnabled } from '../payments';
 import { getClubPricing, getReservationTerms } from '../commerce';
 import { getSetting } from '../commerce/settings';
 import { saveShippingToProfile } from '../members/shipping';
+import { reserveMembershipTx } from '../members/membership';
 
 import { appUrl } from '../app-url';
 
@@ -128,26 +129,32 @@ export async function captureReservationByOrder(orderId: string): Promise<string
   const result = await provider.capturePayment(orderId);
   if (result.status !== 'COMPLETED') return payment.reservationId;
 
-  await prisma.$transaction([
-    prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: 'PAGO_COMPLETO', rawPayload: result.raw as object },
-    }),
-    prisma.reservation.update({
-      where: { id: payment.reservationId },
-      // Depósito pagado: reserva activa, pendiente de pago completo (doc 08).
-      data: { status: 'RESERVA_PENDIENTE', amountPaidCents: result.amountCents },
-    }),
-    prisma.auditLog.create({
-      data: {
-        actorId: payment.userId,
-        action: 'reservation.deposit_captured',
-        entity: 'Reservation',
-        entityId: payment.reservationId,
-        newValue: { amountCents: result.amountCents, orderId },
-      },
-    }),
-  ]);
+  const reservationClub = payment.reservation?.club ?? null;
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: 'PAGO_COMPLETO', rawPayload: result.raw as object },
+      });
+      await tx.reservation.update({
+        where: { id: payment.reservationId! },
+        // Depósito pagado: reserva activa, pendiente de pago completo (doc 08).
+        data: { status: 'RESERVA_PENDIENTE', amountPaidCents: result.amountCents },
+      });
+      // Nuevo modelo: la reserva de 50 €/$ YA asigna el número de socio.
+      await reserveMembershipTx(tx, payment.userId, reservationClub);
+      await tx.auditLog.create({
+        data: {
+          actorId: payment.userId,
+          action: 'reservation.deposit_captured',
+          entity: 'Reservation',
+          entityId: payment.reservationId!,
+          newValue: { amountCents: result.amountCents, orderId },
+        },
+      });
+    },
+    { maxWait: 15000, timeout: 30000 },
+  );
 
   // Guarda la dirección de envío facilitada por PayPal en el perfil.
   await saveShippingToProfile(payment.userId, result.shipping);
@@ -182,22 +189,27 @@ export async function reconcileReservationPaid(customId: string, amountCents: nu
     return; // no marcar pagado si el importe no cuadra
   }
 
-  await prisma.$transaction([
-    prisma.reservation.update({
-      where: { id: customId },
-      data: { status: 'RESERVA_PENDIENTE', amountPaidCents: amountCents },
-    }),
-    prisma.payment.updateMany({
-      where: { reservationId: customId, status: 'PENDIENTE_DE_PAGO' },
-      data: { status: 'PAGO_COMPLETO' },
-    }),
-    prisma.auditLog.create({
-      data: {
-        action: 'reservation.deposit_reconciled_webhook',
-        entity: 'Reservation',
-        entityId: customId,
-        newValue: { amountCents },
-      },
-    }),
-  ]);
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.reservation.update({
+        where: { id: customId },
+        data: { status: 'RESERVA_PENDIENTE', amountPaidCents: amountCents },
+      });
+      await tx.payment.updateMany({
+        where: { reservationId: customId, status: 'PENDIENTE_DE_PAGO' },
+        data: { status: 'PAGO_COMPLETO' },
+      });
+      // Nuevo modelo: la reserva ya asigna el número de socio.
+      await reserveMembershipTx(tx, reservation.userId, reservation.club);
+      await tx.auditLog.create({
+        data: {
+          action: 'reservation.deposit_reconciled_webhook',
+          entity: 'Reservation',
+          entityId: customId,
+          newValue: { amountCents },
+        },
+      });
+    },
+    { maxWait: 15000, timeout: 30000 },
+  );
 }

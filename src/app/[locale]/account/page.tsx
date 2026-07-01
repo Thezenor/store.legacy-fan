@@ -100,6 +100,9 @@ export default async function AccountPage({
   const fullName = profile ? `${profile.firstName} ${profile.lastName}` : (session.user.email ?? '');
   const currency = profile?.preferredCurrency ?? 'EUR';
   const isMember = membership?.status === 'SOCIO_ACTIVO' && !!membership.memberNumber;
+  // El número se asigna YA en la reserva: se muestra el carnet en cuanto exista
+  // número, aunque la membresía siga pendiente del pago completo.
+  const memberNumberFmt = membership?.memberNumber?.formatted ?? null;
 
   // Carnet digital: QR firmado para el reverso (solo si el sistema está activo
   // en el panel y hay secreto configurado). El QR lleva un token firmado, no
@@ -508,16 +511,24 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      {/* Carnet digital (anverso + reverso). Permanente desde el primer pago. */}
-      {isMember ? (
-        <div className="mx-auto mt-6 grid max-w-md gap-4 sm:max-w-2xl sm:grid-cols-2">
-          <DigitalMemberCard name={fullName} number={membership!.memberNumber!.formatted} side="front" />
-          <DigitalMemberCard
-            name={fullName}
-            number={membership!.memberNumber!.formatted}
-            side="back"
-            qrDataUri={memberQrDataUri}
-          />
+      {/* Carnet digital (anverso + reverso). El número se asigna al reservar;
+          el carnet es permanente desde entonces. */}
+      {memberNumberFmt ? (
+        <div className="mx-auto mt-6 max-w-md sm:max-w-2xl">
+          {!isMember ? (
+            <p className="mb-3 text-center text-xs uppercase tracking-[0.16em] text-gold-light">
+              {a('statusReservaPendiente')}
+            </p>
+          ) : null}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DigitalMemberCard name={fullName} number={memberNumberFmt} side="front" />
+            <DigitalMemberCard
+              name={fullName}
+              number={memberNumberFmt}
+              side="back"
+              qrDataUri={memberQrDataUri}
+            />
+          </div>
         </div>
       ) : reservation ? (
         <div className="mx-auto mt-6 max-w-md">

@@ -57,7 +57,7 @@
   "prime": {
     "faq": [
       { "q": "¿Qué incluye Prime Club?", "a": "Tarjeta de socio, Mystery Box de plata .999 y de cobre .999, número de socio permanente, comunidad privada, puntos por compras y acceso prioritario a preventas." },
-      { "q": "¿Prime me asigna número de socio?", "a": "Sí. El número de socio se asigna al completar el pago de la membresía y es permanente. La reserva no asigna número." },
+      { "q": "¿Prime me asigna número de socio?", "a": "Sí. Al hacer la reserva (50 €/$) se te asigna tu número de socio, y es permanente. Se descuenta del pago completo." },
       { "q": "¿Puedo subir a Prestige más adelante?", "a": "Sí. Puedes hacer upgrade a un nivel superior conservando tu número de socio." },
       { "q": "¿Qué contiene la Mystery Box?", "a": "Piezas en plata .999 y cobre .999 con factor sorpresa y un valor mínimo garantizado." },
       { "q": "¿La suscripción se renueva?", "a": "Es anual renovable; tu estado de socio y tu número son permanentes." }
@@ -95,7 +95,7 @@
       { "q": "¿Qué diferencia a Prestige de Prime?", "a": "Prestige reúne las piezas inaugurales, la numeración más baja y los mayores privilegios de socio del ecosistema Legacy Fan." },
       { "q": "¿Prestige garantiza numeración baja?", "a": "Sí. Los socios Prestige acceden a la numeración más baja disponible." },
       { "q": "¿Qué es el precio de socio −5%?", "a": "Un descuento permanente para socios Prestige, aplicado sobre el premium, nunca sobre el valor spot del metal." },
-      { "q": "¿Cómo funcionan la reserva y el pago?", "a": "El importe de la reserva se descuenta del pago final; el resto se abona al cierre. La reserva no asigna número de socio." },
+      { "q": "¿Cómo funcionan la reserva y el pago?", "a": "El importe de la reserva se descuenta del pago final; el resto se abona al cierre. La reserva ya te asigna tu número de socio." },
       { "q": "¿Qué incluye la moneda inaugural?", "a": "Una moneda inaugural de 3 oz en plata .999, además de un regalo de 1 kg de cobre .999 colorized y Mystery Box de plata .999 y cobre .999." }
     ],
     "title": "Prestige Club",
@@ -132,7 +132,7 @@
     "items": [
       {
         "q": "¿La reserva me asigna número de socio?",
-        "a": "No. El número de socio solo se asigna con el pago completo de la membresía. El importe de la reserva se descuenta del total."
+        "a": "Sí. Al reservar (50 €/$) se te asigna tu número de socio de inmediato. El importe se descuenta del pago completo."
       },
       {
         "q": "¿Puedo elegir o cambiar de club al pagar?",
@@ -148,12 +148,12 @@
     "from": "Desde",
     "currentPhase": "Fase actual",
     "reservation": "Reserva",
-    "reservationNote": "La reserva no asigna número de socio y se descuenta del pago completo.",
+    "reservationNote": "La reserva te asigna tu número de socio y se descuenta del pago completo.",
     "freeShippingEs": "Envío gratis en España",
     "includes": "Qué incluye",
     "officialPrice": "Precio oficial",
     "fullPrice": "Pago completo del club",
-    "reserveFrom": "Reserva tu plaza por",
+    "reserveFrom": "Reserva tu número de socio por",
     "conditionsTitle": "Modelo y condiciones"
   },
   "account": {
@@ -161,7 +161,7 @@
     "statusReservaPendiente": "Reserva pendiente de pago completo",
     "paid": "Pagado",
     "remaining": "Restante",
-    "noMemberNumberYet": "Aún no tienes número de socio (se asigna con el pago completo).",
+    "noMemberNumberYet": "Aún no tienes número de socio (se asigna al reservar por 50 €/$).",
     "completeSoon": "El pago completo estará disponible en breve.",
     "currency": "Moneda preferida",
     "summaryTitle": "Resumen",
