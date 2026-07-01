@@ -2,7 +2,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Coin } from '@/components/brand/coin';
 import { CoinShowcase } from '@/components/brand/coin-showcase';
-import { SpecStrip } from '@/components/brand/spec-strip';
 import { ValuePillars } from '@/components/brand/value-pillars';
 import { prisma } from '@/lib/prisma';
 
@@ -106,8 +105,9 @@ export default async function HomePage({
         </div>
       </div>
 
-      {/* Cartela de especificación (sustituye la marquesina) */}
-      <SpecStrip items={t.raw('specs') as string[]} />
+      {/* Separador (se retiró la cartela de specs genéricas que no cuadraban con
+          la moneda destacada). */}
+      <div className="hairline-gold my-10" />
 
       {/* Pilares de valor */}
       <ValuePillars
