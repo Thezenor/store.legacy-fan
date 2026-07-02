@@ -7,6 +7,7 @@ import {
 } from '@/lib/admin-actions';
 import { ConfirmButton } from '@/components/admin/confirm-button';
 import { prisma } from '@/lib/prisma';
+import { collectionImg } from '@/lib/img';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,21 @@ const inp = 'rounded border border-border bg-background px-2 py-1.5 text-foregro
 export default async function AdminColecciones() {
   const [collections, products] = await Promise.all([
     prisma.collection.findMany({
-      include: { products: { select: { id: true, name: true } }, _count: { select: { products: true } } },
+      // Sin las imágenes (data URIs): se detecta si hay imagen y se sirve por
+      // /api/img. `imageUrl: { not: null }` no se puede seleccionar como bool,
+      // así que se trae solo para saber si existe (1 fila por colección, admin).
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        status: true,
+        sortOrder: true,
+        updatedAt: true,
+        imageUrl: true,
+        products: { select: { id: true, name: true } },
+        _count: { select: { products: true } },
+      },
       orderBy: { sortOrder: 'asc' },
     }),
     prisma.product.findMany({ select: { id: true, name: true, collectionId: true }, orderBy: { name: 'asc' } }),
@@ -43,7 +58,7 @@ export default async function AdminColecciones() {
               {/* Imagen */}
               <div className="w-28 shrink-0">
                 {c.imageUrl ? (
-                  <img src={c.imageUrl} alt={c.name} className="h-20 w-28 rounded border border-border object-cover" />
+                  <img src={collectionImg(c.id, c.updatedAt, true)} alt={c.name} className="h-20 w-28 rounded border border-border object-cover" />
                 ) : (
                   <div className="flex h-20 w-28 items-center justify-center rounded border border-dashed border-border text-[10px] text-faint">sin imagen</div>
                 )}

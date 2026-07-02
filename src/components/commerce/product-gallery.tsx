@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { CoinShowcase } from '@/components/brand/coin-showcase';
 
 export interface GalleryImage {
-  url: string;
-  urlMobile?: string | null;
+  src: string;
+  thumb?: string | null;
   alt?: string | null;
 }
 
@@ -21,10 +21,9 @@ export function ProductGallery({ images, name }: { images: GalleryImage[]; name:
       <div className="flex justify-center">
         <CoinShowcase className="w-[clamp(15rem,62vw,24rem)]">
           <div className="overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]">
-            {/* Una sola variante: con data URIs el srcSet duplicaba el HTML. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={main.url}
+              src={main.src}
               alt={main.alt ?? name}
               className="aspect-square h-full w-full object-cover"
             />
@@ -46,7 +45,7 @@ export function ProductGallery({ images, name }: { images: GalleryImage[]; name:
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={im.urlMobile ?? im.url} alt="" className="h-full w-full object-cover" />
+              <img src={im.thumb ?? im.src} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
         </div>

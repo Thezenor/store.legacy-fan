@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { formatMoney, pickPrice } from '@/lib/commerce/money';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { ProductGallery, type GalleryImage } from '@/components/commerce/product-gallery';
+import { productImg, collectionImg } from '@/lib/img';
 import { Link } from '@/i18n/navigation';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +18,7 @@ const getProduct = cache(async (slug: string) => {
     where: { slug, visible: true },
     include: {
       images: { orderBy: { sortOrder: 'asc' } },
-      collection: { select: { name: true, slug: true, imageUrl: true, imageUrlMobile: true } },
+      collection: { select: { id: true, name: true, slug: true, imageUrl: true, updatedAt: true } },
     },
   });
 });
@@ -56,14 +57,21 @@ export default async function ProductPage({
   const currency = await getDisplayCurrency();
   const price = pickPrice(product, currency);
 
-  // Se ignoran las /api/media (Volume, pueden no persistir); valen las data URI.
-  // Si no hay ninguna usable, se respalda con la imagen de la colección.
-  const usable = product.images.filter((im) => !im.url.startsWith('/api/media'));
+  // Imágenes servidas por /api/img (no se incrustan los data URIs). Se ignoran
+  // las /api/media (Volume, pueden no persistir); si no hay ninguna usable, se
+  // respalda con la imagen de la colección.
+  const usable = product.images.filter((im) => im.url.startsWith('data:'));
   const images: GalleryImage[] =
     usable.length > 0
-      ? usable.map((im) => ({ url: im.url, urlMobile: im.urlMobile, alt: im.alt }))
+      ? usable.map((im) => ({ src: productImg(im.id), thumb: productImg(im.id, true), alt: im.alt }))
       : product.collection?.imageUrl
-        ? [{ url: product.collection.imageUrl, urlMobile: product.collection.imageUrlMobile, alt: product.name }]
+        ? [
+            {
+              src: collectionImg(product.collection.id, product.collection.updatedAt),
+              thumb: collectionImg(product.collection.id, product.collection.updatedAt, true),
+              alt: product.name,
+            },
+          ]
         : [];
 
   const specs: { label: string; value: string | number }[] = [];

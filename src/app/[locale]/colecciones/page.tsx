@@ -4,6 +4,7 @@ import type { CollectionStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { Coin } from '@/components/brand/coin';
 import { CoinShowcase } from '@/components/brand/coin-showcase';
+import { collectionImg } from '@/lib/img';
 import { Link } from '@/i18n/navigation';
 
 export async function generateMetadata({
@@ -37,18 +38,31 @@ export default async function ColeccionesPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'collections' });
 
-  // Colecciones públicas (no borrador/oculta).
-  const collections = await prisma.collection.findMany({
-    where: { status: { in: ['ACTIVA', 'PROXIMA', 'AGOTADA'] } },
-    orderBy: { sortOrder: 'asc' },
-    include: {
-      products: {
-        where: { visible: true },
-        select: { id: true, slug: true },
-        orderBy: { createdAt: 'asc' },
+  // Colecciones públicas (no borrador/oculta). NO se seleccionan las imágenes
+  // (data URIs ~150 KB): se sirven por /api/img. Una consulta ligera aparte
+  // dice qué colecciones tienen imagen.
+  const [collections, withImage] = await Promise.all([
+    prisma.collection.findMany({
+      where: { status: { in: ['ACTIVA', 'PROXIMA', 'AGOTADA'] } },
+      orderBy: { sortOrder: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        updatedAt: true,
+        products: {
+          where: { visible: true },
+          select: { id: true, slug: true },
+          orderBy: { createdAt: 'asc' },
+        },
       },
-    },
-  });
+    }),
+    prisma.collection.findMany({
+      where: { status: { in: ['ACTIVA', 'PROXIMA', 'AGOTADA'] }, imageUrl: { not: null } },
+      select: { id: true },
+    }),
+  ]);
+  const hasImage = new Set(withImage.map((c) => c.id));
 
   return (
     <section className="animate-fade-in">
@@ -70,13 +84,12 @@ export default async function ColeccionesPage({
             const href = col.products[0] ? `/producto/${col.products[0].slug}` : null;
             const media = (
                 <CoinShowcase className="w-[clamp(11rem,30vw,16rem)]">
-                  {col.imageUrl ? (
+                  {hasImage.has(col.id) ? (
                     <div className={`overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_20px_44px_-16px_rgba(0,0,0,0.8)] ${soon ? 'opacity-40 blur-[1px]' : ''}`}>
-                      {/* Una sola variante: con data URIs el srcSet duplicaba el HTML.
-                          La móvil (640px) cubre 2x el tamaño mostrado (≤16rem). */}
+                      {/* Imagen servida por /api/img (cacheable), no incrustada. */}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={col.imageUrlMobile ?? col.imageUrl}
+                        src={collectionImg(col.id, col.updatedAt, true)}
                         alt={col.name}
                         className="aspect-square h-full w-full object-cover"
                         loading="lazy"

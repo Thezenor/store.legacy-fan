@@ -1,6 +1,17 @@
 import type { Currency } from '@prisma/client';
-import { getBool, getSettingString, getImageSetting } from './settings';
+import { prisma } from '../prisma';
+import { getBool, getSettingString } from './settings';
+import { settingImg } from '../img';
 import { formatMoney } from './money';
+
+/** src para el cliente de la imagen de una moneda del upsell: si es data URI se
+ *  sirve por /api/img (cacheable); si es URL externa se usa tal cual. */
+async function coinImageSrc(key: string): Promise<string | null> {
+  const row = await prisma.systemSetting.findUnique({ where: { key }, select: { value: true, updatedAt: true } });
+  const v = row?.value == null ? null : String(row.value);
+  if (!v) return null;
+  return v.startsWith('data:') ? settingImg(key, row!.updatedAt) : v;
+}
 
 export interface UpsellCoin {
   name: string;
@@ -41,9 +52,9 @@ export async function getSecondCoinUpsell(
   const cur = currency === 'USD' ? 'usd' : 'eur';
   const [aName, aImg, bName, bImg, priceRaw, listRaw] = await Promise.all([
     getSettingString('upsell.coin.a.name'),
-    getImageSetting('upsell.coin.a.image'),
+    coinImageSrc('upsell.coin.a.image'),
     getSettingString('upsell.coin.b.name'),
-    getImageSetting('upsell.coin.b.image'),
+    coinImageSrc('upsell.coin.b.image'),
     getSettingString(`upsell.second_coin.price_${cur}`),
     getSettingString(`upsell.second_coin.list_${cur}`),
   ]);

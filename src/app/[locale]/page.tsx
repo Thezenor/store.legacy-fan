@@ -4,6 +4,7 @@ import { Coin } from '@/components/brand/coin';
 import { CoinShowcase } from '@/components/brand/coin-showcase';
 import { ValuePillars } from '@/components/brand/value-pillars';
 import { prisma } from '@/lib/prisma';
+import { productImg, collectionImg } from '@/lib/img';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,23 +14,24 @@ async function getFeaturedCoin() {
   const p = await prisma.product.findFirst({
     where: { visible: true, collection: { status: 'ACTIVA' } },
     include: {
-      images: { orderBy: { sortOrder: 'asc' }, select: { url: true, urlMobile: true } },
-      collection: { select: { name: true, imageUrl: true, imageUrlMobile: true } },
+      images: { orderBy: { sortOrder: 'asc' }, select: { id: true, url: true } },
+      collection: { select: { name: true, id: true, imageUrl: true, updatedAt: true } },
     },
     orderBy: [{ isInauguralCoin: 'desc' }, { createdAt: 'asc' }],
   });
   if (!p) return null;
-  // Se ignoran las imágenes /api/media (Volume, pueden no persistir); si la del
-  // producto no es usable, se usa la imagen de la colección (data URI, fiable).
-  const usable = p.images.find((im) => !im.url.startsWith('/api/media'));
-  const img = usable
-    ? { url: usable.url, urlMobile: usable.urlMobile }
+  // Se sirve la imagen por /api/img (no se incrusta el data URI). Se prefiere una
+  // imagen de la pieza que sea data URI (las /api/media del Volume pueden no
+  // persistir); si no, la imagen de la colección.
+  const usable = p.images.find((im) => im.url.startsWith('data:'));
+  const imgSrc = usable
+    ? productImg(usable.id, true)
     : p.collection?.imageUrl
-      ? { url: p.collection.imageUrl, urlMobile: p.collection.imageUrlMobile }
+      ? collectionImg(p.collection.id, p.collection.updatedAt, true)
       : null;
-  if (!img) return null;
+  if (!imgSrc) return null;
   const specs = [p.metal, p.weightLabel, p.mintYear ? String(p.mintYear) : null].filter(Boolean).join(' · ');
-  return { slug: p.slug, name: p.name, collectionName: p.collection?.name ?? '', img, specs };
+  return { slug: p.slug, name: p.name, collectionName: p.collection?.name ?? '', imgSrc, specs };
 }
 
 export default async function HomePage({
@@ -80,11 +82,10 @@ export default async function HomePage({
             <Link href={`/producto/${featured.slug}`} className="flex flex-col items-center gap-4">
               <CoinShowcase className="w-[clamp(12rem,38vw,21rem)]">
                 <div className="overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]">
-                  {/* Una sola variante (móvil 640px = 2x del tamaño mostrado):
-                      con data URIs el srcSet duplicaba el peso del HTML del LCP. */}
+                  {/* Imagen servida por /api/img (cacheable), no incrustada. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={featured.img.urlMobile ?? featured.img.url}
+                    src={featured.imgSrc}
                     alt={featured.name}
                     className="aspect-square h-full w-full object-cover"
                   />
