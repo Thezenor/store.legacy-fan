@@ -36,6 +36,21 @@ function interpolate(text: string, vars: Record<string, string>): string {
   });
 }
 
+/** Botón dorado (CTA) para emails, con estilos en línea (email-safe). */
+export function emailButton(href: string, label: string): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0"><tr><td style="border-radius:8px;background:#c8a24b">
+    <a href="${href}" style="display:inline-block;padding:13px 26px;font-family:Georgia,serif;font-size:14px;font-weight:bold;letter-spacing:0.04em;color:#1a1408;text-decoration:none">${label}</a>
+  </td></tr></table>`;
+}
+
+/** Bloque destacado (dato clave: número de socio, importe, fecha…). */
+export function emailHighlight(label: string, value: string): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0;border:1px solid #eadfbf;border-radius:10px;background:#faf6ea"><tr><td style="padding:14px 18px">
+    <div style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9a8038">${label}</div>
+    <div style="font-family:Georgia,serif;font-size:20px;color:#1a1408;margin-top:3px">${value}</div>
+  </td></tr></table>`;
+}
+
 /**
  * Envuelve el cuerpo en la plantilla de email profesional (cabecera con
  * wordmark, cuerpo y pie con protección de datos y enlaces legales).
@@ -107,6 +122,13 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
  * Renderiza una plantilla de email de la BD (gestionada desde superadmin).
  * Fallback de idioma a ES. Devuelve null si la plantilla no existe o está inactiva.
  */
+const ACCOUNT_CTA: Record<Locale, string> = {
+  es: 'Ir a mi cuenta',
+  en: 'Go to my account',
+  fr: 'Accéder à mon compte',
+  it: 'Vai al mio account',
+};
+
 export async function renderTemplate(
   key: string,
   locale: Locale,
@@ -123,9 +145,18 @@ export async function renderTemplate(
     template.translations.find((t) => t.locale === 'es');
   if (!tr) return null;
 
+  // Variable por defecto: enlace a la cuenta (para el CTA de estos correos).
+  const accountUrl = `${appUrl()}${locale === 'es' ? '' : `/${locale}`}/account`;
+  const allVars = { accountUrl, ...vars };
+
+  // Cuerpo (texto con {{vars}} y saltos de línea) + botón "Ir a mi cuenta".
+  const bodyHtml =
+    interpolate(tr.body, allVars).replace(/\n/g, '<br/>') +
+    emailButton(accountUrl, ACCOUNT_CTA[locale] ?? ACCOUNT_CTA.es);
+
   return {
-    subject: interpolate(tr.subject, vars),
-    html: emailShell(interpolate(tr.body, vars).replace(/\n/g, '<br/>'), locale),
+    subject: interpolate(tr.subject, allVars),
+    html: emailShell(bodyHtml, locale),
   };
 }
 

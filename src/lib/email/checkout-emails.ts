@@ -1,81 +1,101 @@
 import { getEmailProvider } from './index';
+import { emailShell, emailButton, emailHighlight } from './templates';
+import { appUrl } from '../app-url';
 
 type Locale = 'es' | 'en' | 'fr' | 'it';
 
-import { appUrl } from '../app-url';
+const accountHref = (locale: Locale) => `${appUrl()}/${locale === 'es' ? '' : `${locale}/`}account`;
 
-function shell(title: string, bodyHtml: string): string {
-  return `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;color:#16161a">
-    <h1 style="color:#9C7E1C;font-size:20px">Legacy Fan</h1>
-    <h2 style="font-size:18px">${title}</h2>
-    ${bodyHtml}
-    <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-    <p style="font-size:12px;color:#888">Los productos Legacy Fan son artículos coleccionables. No constituyen producto financiero ni promesa de rentabilidad futura.</p>
-  </div>`;
-}
-
-const T = {
+// ── Reserva recibida (depósito de 50 €/$). La reserva YA asigna número. ──
+const R = {
   es: {
-    subject: 'Reserva recibida · Legacy Fan',
-    title: 'Hemos recibido tu reserva',
-    intro: (amt: string) =>
-      `Tu reserva de <strong>${amt}</strong> está confirmada. Recuerda: la reserva no asigna número de socio y se descontará del pago completo.`,
+    subject: 'Reserva confirmada · Legacy Fan',
+    heading: 'Hemos recibido tu reserva',
+    hlLabel: 'Depósito recibido',
+    intro: 'Tu reserva está confirmada. Con ella queda asignado tu número de socio, que es permanente. El importe del depósito se descontará del pago completo cuando lo finalices.',
+    next: 'Puedes ver tu número de socio, tu carnet y completar el pago cuando quieras desde tu cuenta.',
     cta: 'Ir a mi cuenta',
   },
   en: {
-    subject: 'Reservation received · Legacy Fan',
-    title: 'We received your reservation',
-    intro: (amt: string) =>
-      `Your reservation of <strong>${amt}</strong> is confirmed. Note: the reservation does not assign a member number and will be deducted from the full payment.`,
+    subject: 'Reservation confirmed · Legacy Fan',
+    heading: 'We received your reservation',
+    hlLabel: 'Deposit received',
+    intro: 'Your reservation is confirmed. It assigns your member number, which is permanent. The deposit will be deducted from the full payment when you complete it.',
+    next: 'You can see your member number, your card and complete the payment anytime from your account.',
     cta: 'Go to my account',
   },
   fr: {
-    subject: 'Réservation reçue · Legacy Fan',
-    title: 'Nous avons reçu votre réservation',
-    intro: (amt: string) =>
-      `Votre réservation de <strong>${amt}</strong> est confirmée. Remarque : la réservation n'attribue pas de numéro de membre et sera déduite du paiement complet.`,
+    subject: 'Réservation confirmée · Legacy Fan',
+    heading: 'Nous avons reçu votre réservation',
+    hlLabel: 'Acompte reçu',
+    intro: 'Votre réservation est confirmée. Elle attribue votre numéro de membre, qui est permanent. L’acompte sera déduit du paiement complet.',
+    next: 'Vous pouvez voir votre numéro de membre, votre carte et finaliser le paiement à tout moment depuis votre compte.',
     cta: 'Accéder à mon compte',
   },
   it: {
-    subject: 'Prenotazione ricevuta · Legacy Fan',
-    title: 'Abbiamo ricevuto la tua prenotazione',
-    intro: (amt: string) =>
-      `La tua prenotazione di <strong>${amt}</strong> è confermata. Nota: la prenotazione non assegna un numero di socio e verrà detratta dal pagamento completo.`,
+    subject: 'Prenotazione confermata · Legacy Fan',
+    heading: 'Abbiamo ricevuto la tua prenotazione',
+    hlLabel: 'Deposito ricevuto',
+    intro: 'La tua prenotazione è confermata. Assegna il tuo numero di socio, che è permanente. Il deposito sarà detratto dal pagamento completo.',
+    next: 'Puoi vedere il tuo numero di socio, la tua tessera e completare il pagamento quando vuoi dal tuo account.',
     cta: 'Vai al mio account',
   },
 } as const;
 
-const TF = {
-  es: { subject: 'Bienvenido al Legacy Fan Club', title: 'Pago confirmado · Eres socio', intro: (n: string) => `Tu pago se ha confirmado y tu membresía está activa. Tu número de socio es <strong>${n}</strong>. Encontrarás tu carnet, productos incluidos y factura en tu cuenta.`, cta: 'Ir a mi cuenta' },
-  en: { subject: 'Welcome to the Legacy Fan Club', title: 'Payment confirmed · You are a member', intro: (n: string) => `Your payment is confirmed and your membership is active. Your member number is <strong>${n}</strong>. Your card, included products and invoice are in your account.`, cta: 'Go to my account' },
-  fr: { subject: 'Bienvenue au Legacy Fan Club', title: 'Paiement confirmé · Vous êtes membre', intro: (n: string) => `Votre paiement est confirmé et votre abonnement est actif. Votre numéro de membre est <strong>${n}</strong>. Votre carte, produits inclus et facture sont dans votre compte.`, cta: 'Accéder à mon compte' },
-  it: { subject: 'Benvenuto nel Legacy Fan Club', title: 'Pagamento confermato · Sei socio', intro: (n: string) => `Il tuo pagamento è confermato e il tuo abbonamento è attivo. Il tuo numero di socio è <strong>${n}</strong>. La tua tessera, i prodotti inclusi e la fattura sono nel tuo account.`, cta: 'Vai al mio account' },
+// ── Pago completo · socio activo ──
+const F = {
+  es: {
+    subject: '¡Bienvenido al Legacy Fan Club!',
+    heading: 'Pago confirmado · Ya eres socio',
+    hlLabel: 'Tu número de socio',
+    intro: 'Tu pago se ha confirmado y tu membresía está activa. ¡Bienvenido al círculo Legacy Fan!',
+    next: 'En tu cuenta encontrarás tu carnet de socio, los productos incluidos, tu factura y el acceso a la comunidad privada.',
+    cta: 'Ver mi cuenta',
+  },
+  en: {
+    subject: 'Welcome to the Legacy Fan Club!',
+    heading: 'Payment confirmed · You are now a member',
+    hlLabel: 'Your member number',
+    intro: 'Your payment is confirmed and your membership is active. Welcome to the Legacy Fan circle!',
+    next: 'In your account you will find your member card, included products, your invoice and access to the private community.',
+    cta: 'View my account',
+  },
+  fr: {
+    subject: 'Bienvenue au Legacy Fan Club !',
+    heading: 'Paiement confirmé · Vous êtes membre',
+    hlLabel: 'Votre numéro de membre',
+    intro: 'Votre paiement est confirmé et votre abonnement est actif. Bienvenue dans le cercle Legacy Fan !',
+    next: 'Dans votre compte : votre carte de membre, les produits inclus, votre facture et l’accès à la communauté privée.',
+    cta: 'Voir mon compte',
+  },
+  it: {
+    subject: 'Benvenuto nel Legacy Fan Club!',
+    heading: 'Pagamento confermato · Sei socio',
+    hlLabel: 'Il tuo numero di socio',
+    intro: 'Il tuo pagamento è confermato e il tuo abbonamento è attivo. Benvenuto nel circolo Legacy Fan!',
+    next: 'Nel tuo account trovi la tessera socio, i prodotti inclusi, la fattura e l’accesso alla comunità privata.',
+    cta: 'Vai al mio account',
+  },
 } as const;
 
-export async function sendFullPaymentEmail(to: string, locale: Locale, memberNumber: string) {
-  const t = TF[locale] ?? TF.es;
-  const href = `${appUrl()}/${locale === 'es' ? '' : `${locale}/`}account`;
-  return getEmailProvider().send({
-    to,
-    subject: t.subject,
-    locale,
-    html: shell(
-      t.title,
-      `<p>${t.intro(memberNumber)}</p><p><a href="${href}" style="display:inline-block;background:#C9A227;color:#0d0d0f;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">${t.cta}</a></p>`,
-    ),
-  });
+export async function sendReservationReceivedEmail(to: string, locale: Locale, amountFormatted: string) {
+  const t = R[locale] ?? R.es;
+  const body = `
+    <h2 style="font-family:Georgia,serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
+    <p style="margin:0 0 4px">${t.intro}</p>
+    ${emailHighlight(t.hlLabel, amountFormatted)}
+    <p style="margin:0 0 4px">${t.next}</p>
+    ${emailButton(accountHref(locale), t.cta)}`;
+  return getEmailProvider().send({ to, subject: t.subject, locale, html: emailShell(body, locale) });
 }
 
-export async function sendReservationReceivedEmail(to: string, locale: Locale, amountFormatted: string) {
-  const t = T[locale] ?? T.es;
-  const href = `${appUrl()}/${locale === 'es' ? '' : `${locale}/`}account`;
-  return getEmailProvider().send({
-    to,
-    subject: t.subject,
-    locale,
-    html: shell(
-      t.title,
-      `<p>${t.intro(amountFormatted)}</p><p><a href="${href}" style="display:inline-block;background:#C9A227;color:#0d0d0f;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">${t.cta}</a></p>`,
-    ),
-  });
+export async function sendFullPaymentEmail(to: string, locale: Locale, memberNumber: string) {
+  const t = F[locale] ?? F.es;
+  const body = `
+    <h2 style="font-family:Georgia,serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
+    <p style="margin:0 0 4px">${t.intro}</p>
+    ${emailHighlight(t.hlLabel, memberNumber)}
+    <p style="margin:0 0 4px">${t.next}</p>
+    ${emailButton(accountHref(locale), t.cta)}`;
+  return getEmailProvider().send({ to, subject: t.subject, locale, html: emailShell(body, locale) });
 }
