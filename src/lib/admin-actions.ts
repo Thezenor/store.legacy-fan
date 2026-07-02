@@ -503,6 +503,33 @@ export async function refundPaymentAction(formData: FormData): Promise<void> {
   revalidatePath('/lf-admin/pagos');
 }
 
+/** Caduca manualmente una reserva pendiente (libera al socio para reintentar). */
+export async function expireReservationAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('reservationId'));
+  const r = await prisma.reservation.findUnique({ where: { id } });
+  if (!r || !['RESERVA_PENDIENTE', 'PENDIENTE_DE_PAGO'].includes(r.status)) return;
+  await prisma.reservation.update({ where: { id }, data: { status: 'RESERVA_CADUCADA' } });
+  await audit(admin.id, admin.email, 'reservation.expire', 'Reservation', id, { status: r.status }, { status: 'RESERVA_CADUCADA' });
+  revalidatePath('/lf-admin/pagos');
+}
+
+/** Reembolsa el depósito de una reserva (estado interno + auditoría). La
+ * devolución real en PayPal se hará al activar la API de reembolsos. */
+export async function refundDepositAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('reservationId'));
+  const r = await prisma.reservation.findUnique({ where: { id } });
+  if (!r || r.status === 'REEMBOLSADO') return;
+  await prisma.reservation.update({ where: { id }, data: { status: 'REEMBOLSADO' } });
+  await prisma.payment.updateMany({
+    where: { reservationId: id, status: 'PAGO_COMPLETO' },
+    data: { status: 'REEMBOLSADO' },
+  });
+  await audit(admin.id, admin.email, 'reservation.refund_deposit', 'Reservation', id, { status: r.status }, { status: 'REEMBOLSADO' });
+  revalidatePath('/lf-admin/pagos');
+}
+
 // ───────────────── Roles ─────────────────
 
 /** Asigna un rol a un usuario por email (doc 09). */
