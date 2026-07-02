@@ -36,6 +36,7 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
       user: {
         include: {
           profile: true,
+          subscription: true,
           pointsWallet: { include: { transactions: { orderBy: { createdAt: 'desc' }, take: 20 } } },
           referralCode: true,
           referralsMade: true,
@@ -100,6 +101,22 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
           <span className="text-xs text-muted">Alta: {fmtDate(m.startsAt)} · Fin: {fmtDate(m.endsAt)}</span>
           <button className={btn}>Guardar</button>
         </form>
+      </Card>
+
+      {/* Suscripción (renovación anual) */}
+      <Card title="Suscripción">
+        {u.subscription ? (
+          <div className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+            <div className="flex justify-between gap-2"><span className="text-muted">Estado</span><span className="text-foreground">{u.subscription.status.replaceAll('_', ' ').toLowerCase()}</span></div>
+            <div className="flex justify-between gap-2"><span className="text-muted">Club</span><span className="text-foreground">{u.subscription.club}</span></div>
+            <div className="flex justify-between gap-2"><span className="text-muted">Importe/año</span><span className="text-foreground">{formatMoney(u.subscription.amountCents, u.subscription.currency, 'es')}</span></div>
+            <div className="flex justify-between gap-2"><span className="text-muted">Próxima renovación</span><span className="text-foreground">{fmtDate(u.subscription.currentPeriodEnd)}</span></div>
+            <div className="flex justify-between gap-2"><span className="text-muted">Cancela al vencer</span><span className="text-foreground">{u.subscription.cancelAtPeriodEnd ? 'Sí' : 'No'}</span></div>
+            <div className="flex justify-between gap-2"><span className="text-muted">Pasarela</span><span className="serial text-xs">{u.subscription.provider} · {u.subscription.providerSubscriptionId ?? '—'}</span></div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted">Sin suscripción recurrente (pago único o reserva).</p>
+        )}
       </Card>
 
       {/* Pagos (con ID PayPal) */}

@@ -13,28 +13,59 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const NAV = [
-  { href: '/lf-admin', label: 'Dashboard' },
-  { href: '/lf-admin/registros', label: 'Registros' },
-  { href: '/lf-admin/socios', label: 'Socios' },
-  { href: '/lf-admin/numeracion', label: 'Numeración' },
-  { href: '/lf-admin/pagos', label: 'Reservas y pagos' },
-  { href: '/lf-admin/bajas', label: 'Bajas y retención' },
-  { href: '/lf-admin/carnet', label: 'Carnet y Wallet' },
-  { href: '/lf-admin/pedidos', label: 'Pedidos y envíos' },
-  { href: '/lf-admin/clubs', label: 'Clubs' },
-  { href: '/lf-admin/colecciones', label: 'Colecciones' },
-  { href: '/lf-admin/productos', label: 'Productos' },
-  { href: '/lf-admin/emails', label: 'Emails' },
-  { href: '/lf-admin/emails/log', label: 'Log de correos' },
-  { href: '/lf-admin/faq', label: 'FAQ' },
-  { href: '/lf-admin/seo', label: 'SEO / GEO' },
-  { href: '/lf-admin/legal', label: 'Legal' },
-  { href: '/lf-admin/roles', label: 'Roles' },
-  { href: '/lf-admin/config', label: 'Configuración' },
-  { href: '/lf-admin/fases', label: 'Fases y precios' },
-  { href: '/lf-admin/ajustes', label: 'Ajustes (avanzado)' },
-  { href: '/lf-admin/auditoria', label: 'Auditoría' },
+// Navegación agrupada por áreas (mejor organización que una lista plana).
+const NAV_GROUPS = [
+  {
+    title: 'Panel',
+    items: [{ href: '/lf-admin', label: 'Dashboard' }],
+  },
+  {
+    title: 'Socios',
+    items: [
+      { href: '/lf-admin/registros', label: 'Registros' },
+      { href: '/lf-admin/socios', label: 'Socios' },
+      { href: '/lf-admin/numeracion', label: 'Numeración' },
+      { href: '/lf-admin/suscripciones', label: 'Suscripciones' },
+      { href: '/lf-admin/referidos', label: 'Referidos' },
+      { href: '/lf-admin/bajas', label: 'Bajas y retención' },
+      { href: '/lf-admin/carnet', label: 'Carnet y Wallet' },
+    ],
+  },
+  {
+    title: 'Ventas',
+    items: [
+      { href: '/lf-admin/pagos', label: 'Reservas y pagos' },
+      { href: '/lf-admin/pedidos', label: 'Pedidos y envíos' },
+    ],
+  },
+  {
+    title: 'Catálogo',
+    items: [
+      { href: '/lf-admin/clubs', label: 'Clubs' },
+      { href: '/lf-admin/colecciones', label: 'Colecciones' },
+      { href: '/lf-admin/productos', label: 'Productos' },
+      { href: '/lf-admin/fases', label: 'Fases y precios' },
+    ],
+  },
+  {
+    title: 'Contenido',
+    items: [
+      { href: '/lf-admin/emails', label: 'Emails' },
+      { href: '/lf-admin/emails/log', label: 'Log de correos' },
+      { href: '/lf-admin/faq', label: 'FAQ' },
+      { href: '/lf-admin/legal', label: 'Legal' },
+      { href: '/lf-admin/seo', label: 'SEO / GEO' },
+    ],
+  },
+  {
+    title: 'Sistema',
+    items: [
+      { href: '/lf-admin/config', label: 'Configuración' },
+      { href: '/lf-admin/roles', label: 'Roles' },
+      { href: '/lf-admin/ajustes', label: 'Ajustes (avanzado)' },
+      { href: '/lf-admin/auditoria', label: 'Auditoría' },
+    ],
+  },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -50,7 +81,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               LEGACY FAN
             </div>
             <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-faint">Superadmin</p>
-            <AdminNav items={NAV} />
+            <AdminNav groups={NAV_GROUPS} />
             <AdminBottomNav />
           </aside>
 
