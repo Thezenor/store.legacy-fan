@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { verifyMemberByToken } from '@/lib/members/verify';
+import { RL, clientIpFromHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -10,6 +11,9 @@ export const runtime = 'nodejs';
  * Para una pantalla amable de puerta, usar la página /verify?token=...
  */
 export async function GET(req: NextRequest) {
+  if (!RL.verifyMember(clientIpFromHeaders(req.headers)).success) {
+    return NextResponse.json({ valid: false, reason: 'rate_limited' }, { status: 429 });
+  }
   const token = new URL(req.url).searchParams.get('token') ?? '';
   const r = await verifyMemberByToken(token);
 

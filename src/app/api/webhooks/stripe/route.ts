@@ -1,50 +1,28 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import {
-  reconcileSubscriptionActivated,
-  reconcileSubscriptionRenewed,
-  reconcileSubscriptionCancelled,
-  reconcileSubscriptionSuspended,
-} from '@/lib/subscriptions';
 
 /**
  * Webhook de Stripe — PREPARADO pero DESACTIVADO (PAYMENTS_STRIPE_ENABLED).
- * Cuando se active, hay que:
- *  1) Verificar la firma con stripe.webhooks.constructEvent(body, sig, secret).
- *  2) Mapear los eventos a las mismas funciones de ciclo de vida que PayPal.
- * El id de suscripción local se reconcilia por providerSubscriptionId (= sub de Stripe).
+ *
+ * FAIL-CLOSED (auditoría 2026-07-02): mientras la verificación de firma no esté
+ * implementada, este webhook NO procesa eventos aunque se active el flag — sin
+ * firma, cualquiera podría forjar `invoice.paid` y activar membresías gratis.
+ *
+ * Para activarlo de verdad:
+ *  1) Verificar la firma: stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET).
+ *  2) Mapear eventos a las funciones de ciclo de vida (como PayPal):
+ *     customer.subscription.created / checkout.session.completed → reconcileSubscriptionActivated(subId)
+ *     invoice.paid → reconcileSubscriptionRenewed(subId, periodEnd)
+ *     customer.subscription.deleted → reconcileSubscriptionCancelled(subId)
+ *     invoice.payment_failed → reconcileSubscriptionSuspended(subId)
+ *     (en '@/lib/subscriptions'; el id local se reconcilia por providerSubscriptionId)
+ *  3) Sustituir el 501 por el procesado.
  */
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   if (process.env.PAYMENTS_STRIPE_ENABLED !== 'true') {
     return NextResponse.json({ ok: true, skipped: 'stripe_disabled' });
   }
-
-  try {
-    // TODO(stripe): verificar firma (Stripe-Signature) con el webhook secret.
-    const event = (await req.json()) as {
-      type?: string;
-      data?: { object?: { id?: string; subscription?: string; current_period_end?: number } };
-    };
-    const obj = event.data?.object;
-    const subId = obj?.subscription || obj?.id;
-    const periodEnd = obj?.current_period_end ? new Date(obj.current_period_end * 1000) : undefined;
-
-    switch (event.type) {
-      case 'customer.subscription.created':
-      case 'checkout.session.completed':
-        if (subId) await reconcileSubscriptionActivated(subId);
-        break;
-      case 'invoice.paid':
-        if (subId) await reconcileSubscriptionRenewed(subId, periodEnd);
-        break;
-      case 'customer.subscription.deleted':
-        if (subId) await reconcileSubscriptionCancelled(subId);
-        break;
-      case 'invoice.payment_failed':
-        if (subId) await reconcileSubscriptionSuspended(subId);
-        break;
-    }
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 500 });
-  }
+  return NextResponse.json(
+    { ok: false, error: 'signature_verification_not_implemented' },
+    { status: 501 },
+  );
 }

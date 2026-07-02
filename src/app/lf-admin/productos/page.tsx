@@ -10,9 +10,18 @@ export default async function AdminProductos({
   searchParams: Promise<{ saved?: string }>;
 }) {
   const { saved } = await searchParams;
+  // Selects ajustados: las imágenes son data URIs grandes; el listado solo
+  // necesita la miniatura móvil y el nombre de la colección.
   const [products, collections, soldGroups] = await Promise.all([
-    prisma.product.findMany({ orderBy: { createdAt: 'desc' }, take: 200, include: { collection: true, images: { take: 1, orderBy: { sortOrder: 'asc' } } } }),
-    prisma.collection.findMany({ orderBy: { name: 'asc' } }),
+    prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      include: {
+        collection: { select: { name: true } },
+        images: { take: 1, orderBy: { sortOrder: 'asc' }, select: { url: true, urlMobile: true } },
+      },
+    }),
+    prisma.collection.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
     prisma.orderItem.groupBy({ by: ['productId'], _count: { _all: true }, where: { productId: { not: null } } }),
   ]);
   const sold = new Map(soldGroups.map((g) => [g.productId, g._count._all]));
@@ -68,7 +77,7 @@ export default async function AdminProductos({
                 <tr key={p.id} className="border-t border-border">
                   <td className="px-4 py-3">
                     <Link href={`/lf-admin/productos/${p.id}`} className="flex items-center gap-2 text-gold-light hover:underline">
-                      {p.images[0] ? <span className="h-6 w-6 overflow-hidden rounded-full border border-border"><img src={p.images[0].url} alt="" className="h-full w-full object-cover" /></span> : null}
+                      {p.images[0] ? <span className="h-6 w-6 overflow-hidden rounded-full border border-border"><img src={p.images[0].urlMobile ?? p.images[0].url} alt="" className="h-full w-full object-cover" /></span> : null}
                       {p.name}
                     </Link>
                   </td>

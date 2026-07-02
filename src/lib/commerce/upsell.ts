@@ -1,5 +1,5 @@
 import type { Currency } from '@prisma/client';
-import { getBool, getSettingString } from './settings';
+import { getBool, getSettingString, getImageSetting } from './settings';
 import { formatMoney } from './money';
 
 export interface UpsellCoin {
@@ -41,9 +41,9 @@ export async function getSecondCoinUpsell(
   const cur = currency === 'USD' ? 'usd' : 'eur';
   const [aName, aImg, bName, bImg, priceRaw, listRaw] = await Promise.all([
     getSettingString('upsell.coin.a.name'),
-    getSettingString('upsell.coin.a.image'),
+    getImageSetting('upsell.coin.a.image'),
     getSettingString('upsell.coin.b.name'),
-    getSettingString('upsell.coin.b.image'),
+    getImageSetting('upsell.coin.b.image'),
     getSettingString(`upsell.second_coin.price_${cur}`),
     getSettingString(`upsell.second_coin.list_${cur}`),
   ]);

@@ -13,7 +13,7 @@ async function getFeaturedCoin() {
   const p = await prisma.product.findFirst({
     where: { visible: true, collection: { status: 'ACTIVA' } },
     include: {
-      images: { orderBy: { sortOrder: 'asc' } },
+      images: { orderBy: { sortOrder: 'asc' }, select: { url: true, urlMobile: true } },
       collection: { select: { name: true, imageUrl: true, imageUrlMobile: true } },
     },
     orderBy: [{ isInauguralCoin: 'desc' }, { createdAt: 'asc' }],
@@ -80,11 +80,11 @@ export default async function HomePage({
             <Link href={`/producto/${featured.slug}`} className="flex flex-col items-center gap-4">
               <CoinShowcase className="w-[clamp(12rem,38vw,21rem)]">
                 <div className="overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]">
+                  {/* Una sola variante (móvil 640px = 2x del tamaño mostrado):
+                      con data URIs el srcSet duplicaba el peso del HTML del LCP. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={featured.img.url}
-                    srcSet={featured.img.urlMobile ? `${featured.img.urlMobile} 640w, ${featured.img.url} 1200w` : undefined}
-                    sizes="(min-width: 1024px) 21rem, 38vw"
+                    src={featured.img.urlMobile ?? featured.img.url}
                     alt={featured.name}
                     className="aspect-square h-full w-full object-cover"
                   />

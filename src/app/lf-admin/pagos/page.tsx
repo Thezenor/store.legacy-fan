@@ -4,8 +4,19 @@ import { formatMoney } from '@/lib/commerce/money';
 import { refundPaymentAction } from '@/lib/admin-actions';
 
 export default async function AdminPagos() {
+  // select ajustado: sin rawPayload (JSON de PayPal de 5-20 KB por fila).
   const payments = await prisma.payment.findMany({
-    include: { user: { include: { membership: true } } },
+    select: {
+      id: true,
+      createdAt: true,
+      amountCents: true,
+      currency: true,
+      mode: true,
+      provider: true,
+      providerRef: true,
+      status: true,
+      user: { select: { email: true, membership: { select: { id: true } } } },
+    },
     orderBy: { createdAt: 'desc' },
     take: 100,
   });

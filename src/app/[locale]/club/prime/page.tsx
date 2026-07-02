@@ -32,12 +32,15 @@ export default async function PrimePage({
   const { locale } = await params;
   setRequestLocale(locale);
   if (!(await isClubActive('PRIME'))) notFound();
-  const t = await getTranslations({ locale, namespace: 'prime' });
-  const pricingT = await getTranslations({ locale, namespace: 'pricing' });
-  const faqT = await getTranslations({ locale, namespace: 'faq' });
-  const currency = await getDisplayCurrency();
+  // En paralelo (antes 6 awaits en serie).
+  const [t, pricingT, faqT, currency, plan] = await Promise.all([
+    getTranslations({ locale, namespace: 'prime' }),
+    getTranslations({ locale, namespace: 'pricing' }),
+    getTranslations({ locale, namespace: 'faq' }),
+    getDisplayCurrency(),
+    getPlan('PRIME'),
+  ]);
   const pricing = await getClubPricing('PRIME', currency, locale);
-  const plan = await getPlan('PRIME');
   // Contenido editable desde el superadmin (respaldo: textos i18n).
   const body = plan?.body || t('body');
   const slogan = plan?.slogan || t('slogan');

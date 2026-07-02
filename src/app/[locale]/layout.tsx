@@ -16,11 +16,9 @@ import { getAdminSession } from '@/lib/admin';
 import { appUrl } from '@/lib/app-url';
 import '../globals.css';
 // Fuentes de marca auto-alojadas: Cinzel (display, capitales grabadas) + Spectral (texto)
-import '@fontsource/spectral/300.css';
 import '@fontsource/spectral/400.css';
 import '@fontsource/spectral/500.css';
 import '@fontsource/spectral/600.css';
-import '@fontsource/spectral/400-italic.css';
 import '@fontsource/cinzel/600.css';
 import '@fontsource/cinzel/700.css';
 // Inter para el menú superior (UI)
@@ -75,13 +73,16 @@ export default async function LocaleLayout({
   if (!routing.locales.includes(locale as AppLocale)) notFound();
   setRequestLocale(locale);
 
-  const t = await getTranslations({ locale, namespace: 'common' });
-  const messages = await getMessages();
-  const session = await auth();
+  // En paralelo: este layout corre en TODAS las páginas (antes 5 awaits en serie).
+  const [t, messages, session, maintenance] = await Promise.all([
+    getTranslations({ locale, namespace: 'common' }),
+    getMessages(),
+    auth(),
+    getBool('system.maintenance_mode'),
+  ]);
   const adminInfo = session?.user?.id ? await getAdminSession() : null;
   const isAdmin = !!adminInfo;
   // Modo mantenimiento (doc 09): si está activo, solo los admin ven la web.
-  const maintenance = await getBool('system.maintenance_mode');
   const showMaintenance = maintenance && !isAdmin;
 
   return (

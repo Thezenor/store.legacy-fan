@@ -50,10 +50,21 @@ const DEFAULTS: Record<string, unknown> = {
 };
 
 const loadAll = cache(async (): Promise<Map<string, unknown>> => {
-  const rows = await prisma.systemSetting.findMany();
+  // Las imágenes en data URI (~170 KB) se excluyen: cargarlas aquí las metía en
+  // CADA petición de CADA página (el layout lee settings). Usar getImageSetting.
+  const rows = await prisma.systemSetting.findMany({
+    where: { NOT: { key: { endsWith: '.image' } } },
+  });
   const map = new Map<string, unknown>();
   for (const r of rows) map.set(r.key, r.value);
   return map;
+});
+
+/** Ajustes de imagen (data URI grandes): consulta directa y cacheada por request. */
+export const getImageSetting = cache(async (key: string): Promise<string | null> => {
+  const row = await prisma.systemSetting.findUnique({ where: { key } });
+  const v = row?.value;
+  return v == null ? null : String(v);
 });
 
 export async function getSetting<T = unknown>(key: SettingKey): Promise<T> {

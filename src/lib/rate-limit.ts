@@ -49,6 +49,23 @@ if (typeof setInterval !== 'undefined') {
   if (typeof timer.unref === 'function') timer.unref();
 }
 
+/**
+ * IP real del cliente a partir de las cabeceras. Detrás de Cloudflare la única
+ * fiable es `cf-connecting-ip`; `x-forwarded-for` (extremo izquierdo) la pone
+ * el cliente y es falsificable (permitiría saltarse los límites de login).
+ */
+export function clientIpFromHeaders(h: { get(name: string): string | null }): string {
+  const cf = h.get('cf-connecting-ip');
+  if (cf) return cf.trim();
+  const fwd = h.get('x-forwarded-for');
+  if (fwd) {
+    // El último salto lo añade nuestro proxy (confiable); los primeros, el cliente.
+    const parts = fwd.split(',').map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 0) return parts[parts.length - 1];
+  }
+  return h.get('x-real-ip') || 'unknown';
+}
+
 /** Presets comunes. */
 export const RL = {
   login: (id: string) => rateLimit(`login:${id}`, 5, 15 * 60 * 1000), // 5 / 15 min
@@ -56,4 +73,6 @@ export const RL = {
   forgot: (id: string) => rateLimit(`forgot:${id}`, 3, 60 * 60 * 1000), // 3 / h
   verifyResend: (id: string) => rateLimit(`verify:${id}`, 3, 60 * 60 * 1000),
   emailCheck: (id: string) => rateLimit(`emailcheck:${id}`, 30, 10 * 60 * 1000), // 30 / 10 min
+  verifyMember: (id: string) => rateLimit(`verifymember:${id}`, 60, 60 * 1000), // 60 / min (puerta de eventos)
+  tokenConsume: (id: string) => rateLimit(`token:${id}`, 10, 15 * 60 * 1000), // verificar email / reset pass
 };

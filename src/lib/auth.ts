@@ -41,7 +41,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // Necesario detrás de proxies (Railway/Cloudflare) para validar el host.
   trustHost: true,
   secret: resolveAuthSecret(),
-  session: { strategy: 'jwt' },
+  // 7 días (antes 30 por defecto): limita la ventana de un token robado y de
+  // cuentas bloqueadas con sesión viva.
+  session: { strategy: 'jwt', maxAge: 7 * 24 * 60 * 60 },
   pages: {
     signIn: '/login',
   },
@@ -75,10 +77,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
+      const REVALIDATE_MS = 10 * 60 * 1000; // re-chequeo de estado cada 10 min
       if (user) {
         token.uid = user.id;
         token.emailVerified = (user as { emailVerified?: Date | null }).emailVerified ?? null;
+        token.checkedAt = Date.now();
+        return token;
+      }
+      // Revalidación periódica contra BD: un usuario bloqueado/desactivado pierde
+      // la sesión en ≤10 min (antes conservaba el JWT hasta 30 días). También
+      // refresca emailVerified sin exigir re-login.
+      const checkedAt = typeof token.checkedAt === 'number' ? token.checkedAt : 0;
+      if (token.uid && Date.now() - checkedAt > REVALIDATE_MS) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.uid as string },
+          select: { isBlocked: true, isActive: true, emailVerified: true },
+        });
+        if (!dbUser || dbUser.isBlocked || !dbUser.isActive) return null; // invalida la sesión
+        token.emailVerified = dbUser.emailVerified;
+        token.checkedAt = Date.now();
       }
       return token;
     },

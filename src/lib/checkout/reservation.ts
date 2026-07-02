@@ -129,6 +129,27 @@ export async function captureReservationByOrder(orderId: string): Promise<string
   const result = await provider.capturePayment(orderId);
   if (result.status !== 'COMPLETED') return payment.reservationId;
 
+  // Integridad (auditoría): lo cobrado debe cubrir el importe esperado y en la
+  // misma divisa; si no, no se marca pagada (queda constancia en auditoría).
+  if (result.amountCents < payment.amountCents || result.currency !== payment.currency) {
+    await prisma.auditLog.create({
+      data: {
+        actorId: payment.userId,
+        action: 'reservation.capture_amount_mismatch',
+        entity: 'Reservation',
+        entityId: payment.reservationId,
+        newValue: {
+          expectedCents: payment.amountCents,
+          paidCents: result.amountCents,
+          expectedCurrency: payment.currency,
+          paidCurrency: result.currency,
+          orderId,
+        },
+      },
+    });
+    return payment.reservationId;
+  }
+
   const reservationClub = payment.reservation?.club ?? null;
   await prisma.$transaction(
     async (tx) => {

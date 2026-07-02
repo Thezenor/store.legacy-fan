@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
@@ -9,7 +10,9 @@ import { Link } from '@/i18n/navigation';
 
 export const dynamic = 'force-dynamic';
 
-async function getProduct(slug: string) {
+// cache(): generateMetadata y la página comparten UNA consulta por request
+// (antes se ejecutaba dos veces, con ~160 KB de data URIs cada una).
+const getProduct = cache(async (slug: string) => {
   return prisma.product.findFirst({
     where: { slug, visible: true },
     include: {
@@ -17,7 +20,7 @@ async function getProduct(slug: string) {
       collection: { select: { name: true, slug: true, imageUrl: true, imageUrlMobile: true } },
     },
   });
-}
+});
 
 export async function generateMetadata({
   params,
@@ -27,11 +30,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) return { title: 'Legacy Fan' };
+  // og:image solo si es una URL real: los scrapers ignoran data URIs y solo
+  // inflarían el <head> (~100 KB).
   const cover = product.images[0]?.url ?? product.collection?.imageUrl ?? undefined;
+  const ogImage = cover && !cover.startsWith('data:') ? cover : undefined;
   return {
     title: product.name,
     description: product.description ?? undefined,
-    openGraph: cover ? { images: [{ url: cover }] } : undefined,
+    openGraph: ogImage ? { images: [{ url: ogImage }] } : undefined,
   };
 }
 

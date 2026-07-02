@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from './auth';
 import { prisma } from './prisma';
@@ -12,7 +13,9 @@ function superEmails(): string[] {
     .filter(Boolean);
 }
 
-export async function getAdminSession() {
+// cache(): una sola consulta de roles por request (el layout y las páginas de
+// /lf-admin lo llaman varias veces en el mismo render).
+export const getAdminSession = cache(async () => {
   const session = await auth();
   if (!session?.user?.id) return null;
 
@@ -28,7 +31,7 @@ export async function getAdminSession() {
   const roles = userRoles.map((r) => r.role.key);
   const isAdmin = roles.some((k) => k === 'superadmin' || k === 'admin');
   return isAdmin ? { session, roles } : null;
-}
+});
 
 /** Exige sesión de admin; si no, redirige. Uso en layout/páginas de /lf-admin. */
 export async function requireAdmin() {

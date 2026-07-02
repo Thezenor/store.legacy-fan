@@ -401,6 +401,7 @@ model Payment {
 
   @@index([userId])
   @@index([providerRef])
+  @@index([reservationId])
 }
 
 // Suscripción recurrente para la renovación anual de la membresía (doc usuario).
@@ -572,6 +573,9 @@ model OrderItem {
   product       Product?        @relation(fields: [productId], references: [id])
   certificate   Certificate?
   shipmentItems ShipmentItem[]
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Shipment {
@@ -708,6 +712,8 @@ model EmailLog {
   error     String?
   createdAt DateTime @default(now())
   job       EmailJob? @relation(fields: [jobId], references: [id])
+
+  @@index([createdAt])
 }
 
 // Ajustes globales clave/valor (precios base, fechas, fiscal, pasarelas, flags)
@@ -788,4 +794,5 @@ model AuditLog {
   createdAt  DateTime @default(now())
 
   @@index([entity, entityId])
+  @@index([createdAt])
 }

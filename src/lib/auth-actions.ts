@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import { AuthError } from 'next-auth';
 import { prisma } from './prisma';
 import { signIn, signOut } from './auth';
-import { RL } from './rate-limit';
+import { RL, clientIpFromHeaders } from './rate-limit';
 import { registerSchema, loginSchema, forgotSchema, resetSchema } from './validation/auth';
 import { emailVerification, passwordReset } from './tokens';
 import { sendVerificationEmail, sendPasswordResetEmail } from './email/auth-emails';
@@ -17,9 +17,7 @@ export type ActionResult =
   | { ok: false; code: string; fieldErrors?: Record<string, string> };
 
 async function clientIp(): Promise<string> {
-  const h = await headers();
-  const fwd = h.get('x-forwarded-for');
-  return fwd?.split(',')[0]?.trim() || h.get('x-real-ip') || 'unknown';
+  return clientIpFromHeaders(await headers());
 }
 
 function flattenZod(error: { issues: { path: (string | number)[]; message: string }[] }) {
@@ -103,6 +101,7 @@ export async function registerAction(formData: FormData): Promise<ActionResult> 
 }
 
 export async function verifyEmailAction(email: string, token: string): Promise<ActionResult> {
+  if (!RL.tokenConsume(await clientIp()).success) return { ok: false, code: 'rate_limited' };
   const valid = await emailVerification.consume(email, token);
   if (!valid) return { ok: false, code: 'token_invalid' };
 
@@ -144,6 +143,7 @@ export async function forgotPasswordAction(formData: FormData): Promise<ActionRe
 }
 
 export async function resetPasswordAction(formData: FormData): Promise<ActionResult> {
+  if (!RL.tokenConsume(await clientIp()).success) return { ok: false, code: 'rate_limited' };
   const parsed = resetSchema.safeParse({
     token: formData.get('token'),
     password: formData.get('password'),

@@ -32,12 +32,15 @@ export default async function PrestigePage({
   const { locale } = await params;
   setRequestLocale(locale);
   if (!(await isClubActive('PRESTIGE'))) notFound();
-  const t = await getTranslations({ locale, namespace: 'prestige' });
-  const pricingT = await getTranslations({ locale, namespace: 'pricing' });
-  const faqT = await getTranslations({ locale, namespace: 'faq' });
-  const currency = await getDisplayCurrency();
+  // En paralelo (antes 6 awaits en serie).
+  const [t, pricingT, faqT, currency, plan] = await Promise.all([
+    getTranslations({ locale, namespace: 'prestige' }),
+    getTranslations({ locale, namespace: 'pricing' }),
+    getTranslations({ locale, namespace: 'faq' }),
+    getDisplayCurrency(),
+    getPlan('PRESTIGE'),
+  ]);
   const pricing = await getClubPricing('PRESTIGE', currency, locale);
-  const plan = await getPlan('PRESTIGE');
   // Contenido editable desde el superadmin (respaldo: textos i18n).
   const body = plan?.body || t('body');
   const slogan = plan?.slogan || t('slogan');

@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import { AuthError } from 'next-auth';
 import { auth, signIn } from '../auth';
 import { prisma } from '../prisma';
-import { RL } from '../rate-limit';
+import { RL, clientIpFromHeaders } from '../rate-limit';
 import { getDisplayCurrency } from '../commerce/currency';
 import { getPlan } from '../commerce';
 import { getSetting } from '../commerce/settings';
@@ -106,8 +106,7 @@ export type CheckoutSubmitResult =
   | { ok: false; code: string; fieldErrors?: Record<string, string> };
 
 async function clientIp(): Promise<string> {
-  const h = await headers();
-  return h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'unknown';
+  return clientIpFromHeaders(await headers());
 }
 
 function flattenZod(error: { issues: { path: (string | number)[]; message: string }[] }) {

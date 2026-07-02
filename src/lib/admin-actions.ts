@@ -117,6 +117,9 @@ export async function updateSettingAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const key = String(formData.get('key'));
   const raw = String(formData.get('value') ?? '');
+  const isSecret = formData.get('secret') === '1';
+  // Secreto con campo vacío = conservar el valor guardado (el panel no lo muestra).
+  if (isSecret && raw.trim() === '') return;
   let value: unknown;
   try {
     value = JSON.parse(raw);
@@ -125,7 +128,16 @@ export async function updateSettingAction(formData: FormData): Promise<void> {
   }
   const before = await prisma.systemSetting.findUnique({ where: { key } });
   await prisma.systemSetting.update({ where: { key }, data: { value: value as object } });
-  await audit(admin.id, admin.email, 'setting.update', 'SystemSetting', key, before?.value, value);
+  // Nunca escribir valores secretos en el log de auditoría.
+  await audit(
+    admin.id,
+    admin.email,
+    'setting.update',
+    'SystemSetting',
+    key,
+    isSecret ? '[secreto]' : before?.value,
+    isSecret ? '[secreto]' : value,
+  );
   revalidatePath('/lf-admin/ajustes');
 }
 
@@ -220,6 +232,7 @@ export async function uploadProductImageAction(formData: FormData): Promise<void
   const productId = String(formData.get('productId'));
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return;
+  if (file.size > 15 * 1024 * 1024) throw new Error('La imagen supera 15 MB.');
   const [url, urlMobile] = await Promise.all([
     optimizeImageToDataUri(file, 1200),
     optimizeImageToDataUri(file, 640),
@@ -671,6 +684,7 @@ export async function uploadCollectionImageAction(formData: FormData): Promise<v
   const id = String(formData.get('collectionId'));
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return;
+  if (file.size > 15 * 1024 * 1024) throw new Error('La imagen supera 15 MB.');
   // Data URI en BD (no depende del Volume; misma solución que las monedas):
   // variante escritorio (1000px) + móvil (640px).
   const [url, urlMobile] = await Promise.all([

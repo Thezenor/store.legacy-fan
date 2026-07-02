@@ -72,11 +72,11 @@ export default async function ColeccionesPage({
                 <CoinShowcase className="w-[clamp(11rem,30vw,16rem)]">
                   {col.imageUrl ? (
                     <div className={`overflow-hidden rounded-full border border-gold/20 bg-surface shadow-[0_20px_44px_-16px_rgba(0,0,0,0.8)] ${soon ? 'opacity-40 blur-[1px]' : ''}`}>
+                      {/* Una sola variante: con data URIs el srcSet duplicaba el HTML.
+                          La móvil (640px) cubre 2x el tamaño mostrado (≤16rem). */}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={col.imageUrl}
-                        srcSet={col.imageUrlMobile ? `${col.imageUrlMobile} 640w, ${col.imageUrl} 1200w` : undefined}
-                        sizes="(min-width: 1024px) 16rem, (min-width: 640px) 30vw, 11rem"
+                        src={col.imageUrlMobile ?? col.imageUrl}
                         alt={col.name}
                         className="aspect-square h-full w-full object-cover"
                         loading="lazy"
