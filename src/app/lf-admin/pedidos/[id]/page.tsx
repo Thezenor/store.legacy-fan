@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { updateOrderItemStatusAction, createShipmentAction } from '@/lib/admin-actions';
+import { updateOrderItemStatusAction, createShipmentAction, issueCertificateAction } from '@/lib/admin-actions';
 
 const ITEM_STATUSES = [
   'PENDIENTE_DE_LANZAMIENTO', 'PENDIENTE_DE_PRODUCCION', 'PENDIENTE_DE_RECEPCION',
@@ -15,7 +15,7 @@ export default async function PedidoDetalle({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const o = await prisma.order.findUnique({
     where: { id },
-    include: { items: true, shipments: { include: { items: true } }, user: { include: { profile: true, membership: true } } },
+    include: { items: { include: { certificate: true } }, shipments: { include: { items: true } }, user: { include: { profile: true, membership: true } } },
   });
   if (!o) notFound();
   const p = o.user.profile;
@@ -50,14 +50,28 @@ export default async function PedidoDetalle({ params }: { params: Promise<{ id: 
         <h2 className="font-display text-lg text-gold-light">Artículos</h2>
         <div className="mt-3 space-y-2">
           {o.items.map((it) => (
-            <form key={it.id} action={updateOrderItemStatusAction} className="flex flex-wrap items-center gap-2">
-              <input type="hidden" name="itemId" value={it.id} />
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground">{it.name}</span>
-              <select name="status" defaultValue={it.status} className={`text-xs ${inp}`}>
-                {ITEM_STATUSES.map((s) => <option key={s} value={s}>{s.replaceAll('_', ' ').toLowerCase()}</option>)}
-              </select>
-              <button className="border border-gold/40 px-2 py-1 text-[11px] uppercase tracking-wider text-gold-light hover:bg-surface-elevated">OK</button>
-            </form>
+            <div key={it.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border/50 pb-2">
+              <form action={updateOrderItemStatusAction} className="flex flex-1 flex-wrap items-center gap-2">
+                <input type="hidden" name="itemId" value={it.id} />
+                <span className="min-w-0 flex-1 truncate text-sm text-foreground">{it.name}</span>
+                <select name="status" defaultValue={it.status} className={`text-xs ${inp}`}>
+                  {ITEM_STATUSES.map((s) => <option key={s} value={s}>{s.replaceAll('_', ' ').toLowerCase()}</option>)}
+                </select>
+                <button className="border border-gold/40 px-2 py-1 text-[11px] uppercase tracking-wider text-gold-light hover:bg-surface-elevated">OK</button>
+              </form>
+              {/* Certificado de autenticidad */}
+              {it.certificate ? (
+                <span className="serial w-full text-[11px] text-silver">
+                  ✦ Certificado {it.certificate.serial}
+                  {it.certificate.nominalName ? ` · ${it.certificate.nominalName}` : ''} · QR {it.certificate.qrCode.slice(0, 10)}…
+                </span>
+              ) : (
+                <form action={issueCertificateAction} className="w-full">
+                  <input type="hidden" name="itemId" value={it.id} />
+                  <button className="text-[11px] text-gold-light hover:underline">Emitir certificado</button>
+                </form>
+              )}
+            </div>
           ))}
         </div>
       </section>

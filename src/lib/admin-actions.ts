@@ -15,6 +15,7 @@ import { getAdminSession } from './admin';
 import { ensureReferralCode } from './referrals/code';
 import { sendTemplatedEmail, emailShell } from './email/templates';
 import { getEmailProvider } from './email';
+import { randomBytes } from 'node:crypto';
 import { saveUpload, optimizeImageToDataUri } from './storage';
 import { getSubscriptionProviderForAdmin, testGatewayConnection } from './payments';
 import { getClubPricing, getPlan } from './commerce';
@@ -528,6 +529,30 @@ export async function refundDepositAction(formData: FormData): Promise<void> {
   });
   await audit(admin.id, admin.email, 'reservation.refund_deposit', 'Reservation', id, { status: r.status }, { status: 'REEMBOLSADO' });
   revalidatePath('/lf-admin/pagos');
+}
+
+/** Emite el certificado de autenticidad de un artículo del pedido (serial + QR
+ * únicos; certificación nominal con el nombre del socio para Prestige).
+ * Idempotente (un certificado por artículo). */
+export async function issueCertificateAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const itemId = String(formData.get('itemId'));
+  const item = await prisma.orderItem.findUnique({
+    where: { id: itemId },
+    include: {
+      certificate: true,
+      order: { include: { user: { include: { profile: true } } } },
+    },
+  });
+  if (!item || item.certificate) return; // idempotente
+  const year = new Date().getFullYear();
+  const serial = `LF-${year}-${randomBytes(4).toString('hex').toUpperCase()}`;
+  const qrCode = randomBytes(16).toString('hex');
+  const prof = item.order?.user?.profile;
+  const nominalName = prof ? `${prof.firstName} ${prof.lastName}`.trim() : null;
+  await prisma.certificate.create({ data: { orderItemId: itemId, serial, qrCode, nominalName } });
+  await audit(admin.id, admin.email, 'certificate.issue', 'Certificate', itemId, null, { serial });
+  revalidatePath(`/lf-admin/pedidos/${item.orderId}`);
 }
 
 // ───────────────── Roles ─────────────────
