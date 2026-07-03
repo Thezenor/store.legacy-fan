@@ -8,7 +8,8 @@ import { DigitalMemberCard } from '@/components/brand/member-card';
 import { issueMemberToken } from '@/lib/members/pass-token';
 import { appUrl } from '@/lib/app-url';
 import QRCode from 'qrcode';
-import { FullPaymentButton } from '@/components/checkout/full-payment-button';
+import { ResumePaymentButton } from '@/components/checkout/resume-payment-button';
+import { getPendingCheckoutInfo } from '@/lib/checkout/reservation';
 import { CancelSubscriptionFlow } from '@/components/account/cancel-subscription-flow';
 import { AccountTabs, type AccountTab } from '@/components/account/account-tabs';
 import { ChangePasswordForm } from '@/components/account/change-password-form';
@@ -55,12 +56,6 @@ export default async function AccountPage({
   const a = await getTranslations({ locale, namespace: 'account' });
   const co = await getTranslations({ locale, namespace: 'checkout' });
   const common = await getTranslations({ locale, namespace: 'common' });
-  const checkoutErrors = {
-    unauthenticated: co('errors.unauthenticated'),
-    unverified: co('errors.unverified'),
-    already_member: co('errors.already_member'),
-    error: co('errors.error'),
-  };
 
   const [profile, reservation, membership, orders, payments, points, referral, subscription] = await Promise.all([
     prisma.userProfile.findUnique({ where: { userId } }),
@@ -92,17 +87,21 @@ export default async function AccountPage({
               ? { kind: 'ok' as const, msg: a('bannerDowngraded') }
               : sp.saved === 'cancelled'
                 ? { kind: 'warn' as const, msg: a('bannerCancelled') }
-                : sp.pending
-                  ? { kind: 'warn' as const, msg: a('bannerPending') }
-                  : sp.error
-                    ? { kind: 'err' as const, msg: a('bannerError') }
-                    : null;
+                : sp.saved === 'attempt_cancelled'
+                  ? { kind: 'warn' as const, msg: a('bannerAttemptCancelled') }
+                  : sp.pending
+                    ? { kind: 'warn' as const, msg: a('bannerPending') }
+                    : sp.error === 'paid_cannot_cancel'
+                      ? { kind: 'err' as const, msg: a('bannerPaidCannotCancel') }
+                      : sp.error
+                        ? { kind: 'err' as const, msg: a('bannerError') }
+                        : null;
 
   const verified = isEmailVerified(session);
-  // Pago sin finalizar (reserva o pago completo iniciado y no completado):
-  // se ofrece reanudarlo en un cuadro destacado al principio del panel.
-  const pendingPayment =
-    reservation && reservation.status !== 'PAGO_COMPLETO' ? reservation : null;
+  // Pago sin finalizar: importe EXACTO a cobrar (⚠ depósito vs total según el
+  // tipo de proceso) y si se puede cancelar (solo si no se ha pagado nada).
+  // getPendingCheckoutInfo ya devuelve null si el usuario ya es socio activo.
+  const pendingInfo = await getPendingCheckoutInfo(userId);
   const fullName = profile ? `${profile.firstName} ${profile.lastName}` : (session.user.email ?? '');
   const currency = profile?.preferredCurrency ?? 'EUR';
   const isMember = membership?.status === 'SOCIO_ACTIVO' && !!membership.memberNumber;
@@ -240,13 +239,9 @@ export default async function AccountPage({
           </div>
           <p className="mt-3 text-xs text-muted">{a('noMemberNumberYet')}</p>
           <div className="mt-4">
-            {reservation.club ? (
-              <FullPaymentButton
-                club={reservation.club}
-                label={co('payFull')}
-                pendingLabel={co('processing')}
-                errors={checkoutErrors}
-              />
+            {/* Reanuda con el importe correcto (depósito o restante) */}
+            {pendingInfo ? (
+              <ResumePaymentButton label={co('payFull')} pendingLabel={co('processing')} />
             ) : (
               <Link href="/club" className="text-sm text-gold hover:underline">
                 {co('back')}
@@ -509,42 +504,34 @@ export default async function AccountPage({
       ) : null}
 
       {/* Cuadro destacado: reanudar un pago sin finalizar (primero en el panel) */}
-      {pendingPayment ? (
+      {pendingInfo ? (
         <div className="mt-6 rounded-card border border-gold/60 bg-gold/10 p-5 shadow-[0_10px_30px_-12px_rgba(212,175,55,0.35)]">
           <div className="flex items-start gap-3">
             <span aria-hidden className="text-2xl leading-none">⏳</span>
             <div className="flex-1">
               <h2 className="font-display text-lg font-semibold text-foreground">{a('resumeTitle')}</h2>
               <p className="mt-1 text-sm text-muted">{a('resumeBody')}</p>
-              {pendingPayment.totalDueCents > 0 ? (
+              {pendingInfo.chargeCents > 0 ? (
                 <p className="mt-2 text-sm text-muted">
-                  {a('remaining')}:{' '}
+                  {(pendingInfo.kind === 'deposit' ? a('resumeAmountDeposit') : pendingInfo.kind === 'remainder' ? a('resumeAmountRemainder') : a('resumeAmountFull'))}:{' '}
                   <span className="font-display text-metal-gold">
-                    {formatMoney(
-                      Math.max(0, pendingPayment.totalDueCents - pendingPayment.amountPaidCents),
-                      pendingPayment.currency,
-                      locale,
-                    )}
+                    {formatMoney(pendingInfo.chargeCents, pendingInfo.currency, locale)}
                   </span>
                 </p>
               ) : null}
               <div className="mt-4">
-                {pendingPayment.club ? (
-                  <FullPaymentButton
-                    club={pendingPayment.club}
-                    label={a('resumeCta')}
-                    pendingLabel={co('processing')}
-                    errors={checkoutErrors}
-                  />
-                ) : (
-                  <Link
-                    href="/club"
-                    className="bevel inline-block bg-gold px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408] transition hover:bg-gold-light"
-                  >
-                    {a('resumeCta')}
-                  </Link>
-                )}
+                {/* Reanuda con el importe CORRECTO (depósito o total) vía /api/checkout/resume */}
+                <ResumePaymentButton label={a('resumeCta')} pendingLabel={co('processing')} />
               </div>
+              {/* Cancelar el intento (solo si no se ha pagado nada: kind !== 'remainder') */}
+              {pendingInfo.kind !== 'remainder' ? (
+                <form action="/api/checkout/cancel-pending" method="POST" className="mt-3">
+                  <input type="hidden" name="locale" value={locale} />
+                  <button type="submit" className="text-xs text-muted underline transition hover:text-red-400">
+                    {a('resumeCancel')}
+                  </button>
+                </form>
+              ) : null}
             </div>
           </div>
         </div>

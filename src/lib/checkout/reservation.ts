@@ -40,6 +40,61 @@ export async function getPendingReservation(userId: string) {
   });
 }
 
+export type PendingKind = 'deposit' | 'remainder' | 'full';
+export interface PendingCheckoutInfo {
+  reservationId: string;
+  currency: Currency;
+  chargeCents: number;
+  kind: PendingKind;
+  club: string | null;
+}
+
+/**
+ * Calcula QUÉ se cobraría al reanudar (⚠ importante: depósito vs total), sin
+ * crear nada. Fuente única de verdad para mostrar el importe y para cobrarlo:
+ *  - RESERVA_PENDIENTE (depósito ya pagado) → 'remainder' = total − pagado.
+ *  - PENDIENTE_DE_PAGO + type RESERVA        → 'deposit'   = depósito (50 €/$ + 2ª moneda).
+ *  - PENDIENTE_DE_PAGO + type PAGO_COMPLETO  → 'full'      = total − pagado.
+ * Devuelve null si no hay nada pendiente o el usuario ya es socio de pleno derecho.
+ */
+export async function getPendingCheckoutInfo(userId: string): Promise<PendingCheckoutInfo | null> {
+  const membership = await prisma.membership.findUnique({ where: { userId }, select: { status: true } });
+  if (membership?.status === 'SOCIO_ACTIVO') return null; // ya es socio: nada que reanudar
+
+  const reservation = await getPendingReservation(userId);
+  if (!reservation) return null;
+  const currency = reservation.currency;
+
+  if (reservation.status === 'RESERVA_PENDIENTE') {
+    // Depósito ya pagado: falta el RESTANTE hasta el total (pago completo).
+    return {
+      reservationId: reservation.id,
+      currency,
+      chargeCents: Math.max(0, reservation.totalDueCents - reservation.amountPaidCents),
+      kind: 'remainder',
+      club: reservation.club,
+    };
+  }
+
+  // PENDIENTE_DE_PAGO: se retoma EXACTAMENTE el mismo cobro que se intentó.
+  const isFull = reservation.type === 'PAGO_COMPLETO';
+  const lastPayment = await prisma.payment.findFirst({
+    where: { reservationId: reservation.id },
+    orderBy: { createdAt: 'desc' },
+    select: { amountCents: true },
+  });
+  let chargeCents = lastPayment?.amountCents ?? 0;
+  if (chargeCents <= 0) {
+    if (isFull) {
+      chargeCents = Math.max(0, reservation.totalDueCents - reservation.amountPaidCents);
+    } else {
+      const terms = await getReservationTerms(currency, undefined, reservation.club ?? undefined);
+      chargeCents = terms.amountCents + reservation.secondCoinCents;
+    }
+  }
+  return { reservationId: reservation.id, currency, chargeCents, kind: isFull ? 'full' : 'deposit', club: reservation.club };
+}
+
 /**
  * Si el usuario ya tiene un proceso de pago SIN completar, lo reanuda reutilizando
  * la MISMA reserva y devuelve una nueva URL de PayPal para continuar el pago (no se
@@ -52,6 +107,11 @@ export async function resumePendingCheckout(opts: {
   userId: string;
   locale: string;
 }): Promise<StartReservationResult | null> {
+  // Guard: si ya es socio de pleno derecho, no hay nada que reanudar (evita
+  // cobrar de nuevo por una reserva colgada).
+  const membership = await prisma.membership.findUnique({ where: { userId: opts.userId }, select: { status: true } });
+  if (membership?.status === 'SOCIO_ACTIVO') return null;
+
   const reservation = await getPendingReservation(opts.userId);
   if (!reservation) return null;
   const currency = reservation.currency;
