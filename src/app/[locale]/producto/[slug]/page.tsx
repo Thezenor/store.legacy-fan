@@ -69,12 +69,11 @@ export default async function ProductPage({
   const price = pickPrice(product, currency);
   const { name, description } = localized(product, locale);
 
-  // Imágenes servidas por /api/img (no se incrustan los data URIs). Se prefieren
-  // las data URI (robustas), pero si solo hay imágenes en el Volume (/api/media)
-  // también se muestran —igual que en el admin— sirviéndolas por /api/img. Solo
-  // si la pieza no tiene ninguna imagen se respalda con la de la colección.
-  const dataUris = product.images.filter((im) => im.url.startsWith('data:'));
-  const usable = dataUris.length > 0 ? dataUris : product.images;
+  // Imágenes servidas por /api/img (no se incrustan los data URIs). Solo se usan
+  // las data URI (robustas): las /api/media del Volume no persisten entre
+  // redeploys y mostrarlas produciría imágenes rotas. Si no hay ninguna usable,
+  // se respalda con la imagen de la colección.
+  const usable = product.images.filter((im) => im.url.startsWith('data:'));
   const images: GalleryImage[] =
     usable.length > 0
       ? usable.map((im) => ({ src: productImg(im.id), thumb: productImg(im.id, true), alt: im.alt }))

@@ -20,13 +20,12 @@ async function getFeaturedCoin() {
     orderBy: [{ isInauguralCoin: 'desc' }, { createdAt: 'asc' }],
   });
   if (!p) return null;
-  // Se sirve por /api/img (no se incrusta el data URI). Se prefiere una imagen
-  // de la pieza que sea data URI (robusta); si no la hay, se usa igualmente la
-  // primera imagen de la pieza (Volume/externa, servida por /api/img) para que
-  // coincida con el admin; solo si no hay ninguna se cae a la de la colección.
-  const preferred = p.images.find((im) => im.url.startsWith('data:')) ?? p.images[0];
-  const imgSrc = preferred
-    ? productImg(preferred.id, true)
+  // Se sirve la imagen por /api/img (no se incrusta el data URI). Solo se usa una
+  // imagen de la pieza que sea data URI (las /api/media del Volume no persisten);
+  // si no, la imagen de la colección.
+  const usable = p.images.find((im) => im.url.startsWith('data:'));
+  const imgSrc = usable
+    ? productImg(usable.id, true)
     : p.collection?.imageUrl
       ? collectionImg(p.collection.id, p.collection.updatedAt, true)
       : null;
