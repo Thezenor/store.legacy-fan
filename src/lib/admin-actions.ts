@@ -49,7 +49,30 @@ function productSpecFields(formData: FormData) {
     hasAuthenticityQr: formData.get('hasAuthenticityQr') === 'on',
     available: formData.get('available') === 'on',
     visible: formData.get('visible') === 'on',
+    // Atributos de moneda (complementos de la pieza)
+    productType: String(formData.get('productType') ?? '') || null,
+    purity: String(formData.get('purity') ?? '') || null,
+    limitedEdition: formData.get('limitedEdition') === 'on',
+    totalUnits: intOrNull(formData.get('totalUnits')),
+    specialLabel: String(formData.get('specialLabel') ?? '') || null,
+    ipLicense: String(formData.get('ipLicense') ?? '') || null,
+    features: linesToArray(formData.get('features')),
+    country: String(formData.get('country') ?? '') || null,
+    faceValue: String(formData.get('faceValue') ?? '') || null,
+    quality: String(formData.get('quality') ?? '') || null,
+    coa: String(formData.get('coa') ?? '') || null,
+    boxInfo: String(formData.get('boxInfo') ?? '') || null,
+    capsule: String(formData.get('capsule') ?? '') || null,
+    coinFeatures: formData.getAll('coinFeatures').map((v) => String(v)).filter(Boolean),
   };
+}
+
+/** Convierte un textarea (una línea = un ítem) en array, sin vacíos. */
+function linesToArray(v: FormDataEntryValue | null): string[] {
+  return String(v ?? '')
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function slugify(input: string): string {
@@ -243,6 +266,28 @@ export async function uploadProductImageAction(formData: FormData): Promise<void
     data: { productId, url, urlMobile, alt: String(formData.get('alt') ?? '') || null, sortOrder: count },
   });
   await audit(admin.id, admin.email, 'product.image_add', 'Product', productId, null, { bytes: file.size });
+  revalidatePath(`/lf-admin/productos/${productId}`);
+}
+
+/** Edita la traducción (nombre/descripción) de un producto por idioma. Nombre
+ * vacío = elimina la traducción (se usará el nombre base). */
+export async function updateProductTranslationAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const productId = String(formData.get('productId'));
+  const locale = String(formData.get('locale') ?? '') as Locale;
+  if (!['es', 'en', 'fr', 'it'].includes(locale)) return;
+  const name = String(formData.get('name') ?? '').trim();
+  const description = String(formData.get('description') ?? '').trim() || null;
+  if (!name) {
+    await prisma.productTranslation.deleteMany({ where: { productId, locale } });
+  } else {
+    await prisma.productTranslation.upsert({
+      where: { productId_locale: { productId, locale } },
+      update: { name, description },
+      create: { productId, locale, name, description },
+    });
+  }
+  await audit(admin.id, admin.email, 'product.translation', 'Product', `${productId}/${locale}`, null, { name });
   revalidatePath(`/lf-admin/productos/${productId}`);
 }
 

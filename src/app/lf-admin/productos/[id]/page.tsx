@@ -7,8 +7,35 @@ import {
   uploadProductImageAction,
   deleteProductImageAction,
   uploadProductVideoAction,
+  updateProductTranslationAction,
 } from '@/lib/admin-actions';
 import { ConfirmButton } from '@/components/admin/confirm-button';
+import { productImg } from '@/lib/img';
+
+const LOCALES = [
+  { code: 'es', label: 'Español' },
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+  { code: 'it', label: 'Italiano' },
+] as const;
+
+// Opciones de atributos de moneda (ref. plugin Legacy Woo Tools).
+const PRODUCT_TYPES = [
+  ['coin', 'Moneda'], ['ingot', 'Lingote'], ['blind_box', 'Blind Box'], ['pack', 'Pack'], ['other', 'Otro'],
+];
+const QUALITIES = [
+  ['proof', 'Proof (Fondo Espejo)'], ['reverse_proof', 'Reverse Proof'], ['matte', 'Matte (Mate)'],
+  ['antique', 'Antique (Acabado Antiguo)'], ['black_proof', 'Black Proof'],
+];
+const COIN_FEATURES = [
+  ['high_relief', 'High Relief'], ['uhr', 'Ultra High Relief'], ['digital_printing', 'Color Digital'],
+  ['selective_gilding', 'Baño de Oro Selectivo'], ['rhodium_ruthenium', 'Rhodium / Ruthenium'], ['glow_dark', 'Glow in the Dark'],
+  ['color_changing', 'Termocrómico'], ['hologram', 'Holograma'], ['latent_image', 'Imagen Latente'],
+  ['laser_frosting', 'Satinado Láser'], ['gemstone_inlay', 'Gemas / Cristales'], ['meteorite_insert', 'Meteorito / Artefacto'],
+  ['shape_coin', 'Moneda con Forma'], ['bimetal', 'Bimetálica'], ['filigree', 'Filigrana'], ['incuse', 'Relieve Incuso'],
+  ['edge_lettering', 'Grabado en el Canto'], ['microtext', 'Microtexto'], ['moving_elements', 'Elementos Móviles'],
+  ['enamel_inlay', 'Esmalte'],
+];
 
 const inp = 'mt-1 w-full rounded border border-border bg-background px-2 py-1.5 text-foreground';
 const money = (c: number) => (c / 100).toFixed(2);
@@ -16,7 +43,7 @@ const money = (c: number) => (c / 100).toFixed(2);
 export default async function ProductoDetalle({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [product, collections] = await Promise.all([
-    prisma.product.findUnique({ where: { id }, include: { images: { orderBy: { sortOrder: 'asc' } } } }),
+    prisma.product.findUnique({ where: { id }, include: { images: { orderBy: { sortOrder: 'asc' } }, translations: true } }),
     prisma.collection.findMany({ orderBy: { name: 'asc' } }),
   ]);
   if (!product) notFound();
@@ -47,7 +74,7 @@ export default async function ProductoDetalle({ params }: { params: Promise<{ id
             {p.images.map((img) => (
               <div key={img.id} className="relative">
                 <span className="block h-24 w-24 overflow-hidden rounded border border-border">
-                  <img src={img.url} alt={img.alt ?? ''} className="h-full w-full object-cover" />
+                  <img src={productImg(img.id, true)} alt={img.alt ?? ''} className="h-full w-full object-cover" />
                 </span>
                 <form action={deleteProductImageAction}>
                   <input type="hidden" name="imageId" value={img.id} />
@@ -84,6 +111,29 @@ export default async function ProductoDetalle({ params }: { params: Promise<{ id
         </form>
       </section>
 
+      {/* Traducciones (nombre y descripción por idioma) */}
+      <section className="mt-4 rounded-card border border-border bg-surface p-5">
+        <h2 className="font-display text-lg text-gold-light">Traducciones</h2>
+        <p className="mt-1 text-[11px] text-faint">Nombre y descripción por idioma. Vacío = se usa el nombre base «{p.name}».</p>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          {LOCALES.map((loc) => {
+            const tr = p.translations.find((t) => t.locale === loc.code);
+            return (
+              <form key={loc.code} action={updateProductTranslationAction} className="rounded border border-border p-3">
+                <input type="hidden" name="productId" value={p.id} />
+                <input type="hidden" name="locale" value={loc.code} />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-wider text-faint">{loc.label}</span>
+                  <button className="rounded border border-gold/40 px-2 py-1 text-[11px] uppercase tracking-wider text-gold-light hover:bg-surface-elevated">Guardar</button>
+                </div>
+                <input name="name" defaultValue={tr?.name ?? ''} placeholder="Nombre" className={inp} />
+                <textarea name="description" defaultValue={tr?.description ?? ''} rows={2} placeholder="Descripción" className={`${inp} mt-2`} />
+              </form>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Ficha completa */}
       <form action={updateProductAction} className="mt-4 space-y-4">
         <input type="hidden" name="id" value={p.id} />
@@ -111,6 +161,44 @@ export default async function ProductoDetalle({ params }: { params: Promise<{ id
             <label className="block"><span className="text-xs text-muted">Diámetro</span><input name="diameter" defaultValue={p.diameter ?? ''} placeholder="50 mm" className={inp} /></label>
             <label className="block"><span className="text-xs text-muted">Tirada</span><input name="editionSize" type="number" defaultValue={p.editionSize ?? ''} className={inp} /></label>
             <label className="block"><span className="text-xs text-muted">Año</span><input name="mintYear" type="number" defaultValue={p.mintYear ?? ''} className={inp} /></label>
+          </div>
+        </section>
+
+        <section className="rounded-card border border-border bg-surface p-5">
+          <h2 className="font-display text-lg text-gold-light">Atributos de moneda</h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <label className="block"><span className="text-xs text-muted">Tipo</span>
+              <select name="productType" defaultValue={p.productType ?? ''} className={inp}>
+                <option value="">—</option>
+                {PRODUCT_TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select></label>
+            <label className="block"><span className="text-xs text-muted">Pureza</span><input name="purity" defaultValue={p.purity ?? ''} placeholder=".999" className={inp} /></label>
+            <label className="block"><span className="text-xs text-muted">Unidades totales</span><input name="totalUnits" type="number" defaultValue={p.totalUnits ?? ''} className={inp} /></label>
+            <label className="block"><span className="text-xs text-muted">Calidad</span>
+              <select name="quality" defaultValue={p.quality ?? ''} className={inp}>
+                <option value="">—</option>
+                {QUALITIES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select></label>
+            <label className="block"><span className="text-xs text-muted">País</span><input name="country" defaultValue={p.country ?? ''} placeholder="España" className={inp} /></label>
+            <label className="block"><span className="text-xs text-muted">Valor facial</span><input name="faceValue" defaultValue={p.faceValue ?? ''} placeholder="100 EUR" className={inp} /></label>
+            <label className="block"><span className="text-xs text-muted">Etiqueta especial</span><input name="specialLabel" defaultValue={p.specialLabel ?? ''} placeholder="Exclusiva" className={inp} /></label>
+            <label className="block"><span className="text-xs text-muted">IP / Licencia</span><input name="ipLicense" defaultValue={p.ipLicense ?? ''} placeholder="Real Madrid" className={inp} /></label>
+            <label className="flex items-center gap-2 pt-5 text-sm text-muted"><input type="checkbox" name="limitedEdition" defaultChecked={p.limitedEdition} /> Edición limitada</label>
+            <label className="block"><span className="text-xs text-muted">Certificado (CoA)</span><input name="coa" defaultValue={p.coa ?? ''} placeholder="Certificado numerado" className={inp} /></label>
+            <label className="block"><span className="text-xs text-muted">Caja</span><input name="boxInfo" defaultValue={p.boxInfo ?? ''} placeholder="Caja exclusiva" className={inp} /></label>
+            <label className="block"><span className="text-xs text-muted">Cápsula</span><input name="capsule" defaultValue={p.capsule ?? ''} placeholder="Cápsula premium" className={inp} /></label>
+          </div>
+          <label className="mt-3 block"><span className="text-xs text-muted">Incluye / Beneficios (uno por línea)</span>
+            <textarea name="features" defaultValue={(p.features ?? []).join('\n')} rows={3} className={inp} /></label>
+          <div className="mt-4">
+            <span className="text-xs text-muted">Acabados técnicos</span>
+            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3">
+              {COIN_FEATURES.map(([v, l]) => (
+                <label key={v} className="flex items-center gap-2 text-[13px] text-muted">
+                  <input type="checkbox" name="coinFeatures" value={v} defaultChecked={(p.coinFeatures ?? []).includes(v)} /> {l}
+                </label>
+              ))}
+            </div>
           </div>
         </section>
 

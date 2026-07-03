@@ -19,25 +19,36 @@ const getProduct = cache(async (slug: string) => {
     include: {
       images: { orderBy: { sortOrder: 'asc' } },
       collection: { select: { id: true, name: true, slug: true, imageUrl: true, updatedAt: true } },
+      translations: true,
     },
   });
 });
+
+/** Nombre/descripción en el idioma pedido (fallback al base). */
+function localized(
+  product: { name: string; description: string | null; translations: { locale: string; name: string; description: string | null }[] },
+  locale: string,
+) {
+  const tr = product.translations.find((t) => t.locale === locale);
+  return { name: tr?.name || product.name, description: tr?.description ?? product.description };
+}
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const product = await getProduct(slug);
   if (!product) return { title: 'Legacy Fan' };
+  const { name, description } = localized(product, locale);
   // og:image solo si es una URL real: los scrapers ignoran data URIs y solo
   // inflarían el <head> (~100 KB).
   const cover = product.images[0]?.url ?? product.collection?.imageUrl ?? undefined;
   const ogImage = cover && !cover.startsWith('data:') ? cover : undefined;
   return {
-    title: product.name,
-    description: product.description ?? undefined,
+    title: name,
+    description: description ?? undefined,
     openGraph: ogImage ? { images: [{ url: ogImage }] } : undefined,
   };
 }
@@ -56,6 +67,7 @@ export default async function ProductPage({
 
   const currency = await getDisplayCurrency();
   const price = pickPrice(product, currency);
+  const { name, description } = localized(product, locale);
 
   // Imágenes servidas por /api/img (no se incrustan los data URIs). Se ignoran
   // las /api/media (Volume, pueden no persistir); si no hay ninguna usable, se
@@ -69,18 +81,38 @@ export default async function ProductPage({
             {
               src: collectionImg(product.collection.id, product.collection.updatedAt),
               thumb: collectionImg(product.collection.id, product.collection.updatedAt, true),
-              alt: product.name,
+              alt: name,
             },
           ]
         : [];
 
+  const L = (es: string, en: string) => (locale === 'es' ? es : en);
+  const QUALITY_LABEL: Record<string, string> = {
+    proof: 'Proof', reverse_proof: 'Reverse Proof', matte: 'Matte', antique: 'Antique', black_proof: 'Black Proof',
+  };
+  const FEATURE_LABEL: Record<string, string> = {
+    high_relief: 'High Relief', uhr: 'Ultra High Relief', digital_printing: 'Digital Color', selective_gilding: 'Selective Gilding',
+    rhodium_ruthenium: 'Rhodium / Ruthenium', glow_dark: 'Glow in the Dark', color_changing: 'Color Changing', hologram: 'Hologram',
+    latent_image: 'Latent Image', laser_frosting: 'Laser Frosting', gemstone_inlay: 'Gemstone Inlay', meteorite_insert: 'Meteorite Insert',
+    shape_coin: 'Shape Coin', bimetal: 'Bi-Metal', filigree: 'Filigree', incuse: 'Incuse', edge_lettering: 'Edge Lettering',
+    microtext: 'Microtext', moving_elements: 'Moving Elements', enamel_inlay: 'Enamel Inlay',
+  };
+
   const specs: { label: string; value: string | number }[] = [];
   if (product.metal) specs.push({ label: t('prodMetal'), value: product.metal });
+  if (product.purity) specs.push({ label: L('Pureza', 'Purity'), value: product.purity });
   if (product.weightLabel) specs.push({ label: t('prodWeight'), value: product.weightLabel });
   if (product.finish) specs.push({ label: t('prodFinish'), value: product.finish });
+  if (product.quality) specs.push({ label: L('Calidad', 'Quality'), value: QUALITY_LABEL[product.quality] ?? product.quality });
   if (product.diameter) specs.push({ label: t('prodDiameter'), value: product.diameter });
   if (product.editionSize) specs.push({ label: t('prodEdition'), value: product.editionSize.toLocaleString(locale) });
+  if (product.totalUnits) specs.push({ label: L('Unidades', 'Units'), value: product.totalUnits.toLocaleString(locale) });
   if (product.mintYear) specs.push({ label: t('prodYear'), value: product.mintYear });
+  if (product.faceValue) specs.push({ label: L('Valor facial', 'Face value'), value: product.faceValue });
+  if (product.country) specs.push({ label: L('País', 'Country'), value: product.country });
+  if (product.coa) specs.push({ label: L('Certificado', 'Certificate'), value: product.coa });
+  if (product.boxInfo) specs.push({ label: L('Caja', 'Box'), value: product.boxInfo });
+  if (product.capsule) specs.push({ label: L('Cápsula', 'Capsule'), value: product.capsule });
 
   return (
     <section className="animate-fade-in">
@@ -91,7 +123,7 @@ export default async function ProductPage({
       <div className="mt-6 grid gap-10 md:grid-cols-2 md:items-start lg:gap-16">
         {/* Galería con efecto de moneda */}
         {images.length > 0 ? (
-          <ProductGallery images={images} name={product.name} />
+          <ProductGallery images={images} name={name} />
         ) : (
           <div className="flex h-72 items-center justify-center rounded-2xl border border-border bg-surface text-faint">
             —
@@ -102,7 +134,7 @@ export default async function ProductPage({
         <div>
           {product.collection ? <p className="eyebrow">{product.collection.name}</p> : null}
           <h1 className="mt-2 font-display text-3xl uppercase leading-tight tracking-wide text-foreground sm:text-4xl lg:text-5xl">
-            {product.name}
+            {name}
           </h1>
 
           {/* Insignias */}
@@ -116,10 +148,42 @@ export default async function ProductPage({
             {product.certificateRequired || product.hasAuthenticityQr ? (
               <span className="rounded-full border border-border px-3 py-1 text-muted">✦ {t('prodCertificate')}</span>
             ) : null}
+            {product.limitedEdition ? (
+              <span className="rounded-full border border-gold/40 bg-gold/5 px-3 py-1 text-gold-light">{L('Edición limitada', 'Limited edition')}</span>
+            ) : null}
+            {product.specialLabel ? (
+              <span className="rounded-full border border-gold/40 bg-gold/5 px-3 py-1 text-gold-light">{product.specialLabel}</span>
+            ) : null}
+            {product.ipLicense ? (
+              <span className="rounded-full border border-border px-3 py-1 text-muted">{product.ipLicense}</span>
+            ) : null}
           </div>
 
-          {product.description ? (
-            <p className="mt-6 text-[15px] leading-relaxed text-muted">{product.description}</p>
+          {description ? (
+            <p className="mt-6 text-[15px] leading-relaxed text-muted">{description}</p>
+          ) : null}
+
+          {/* Incluye / beneficios */}
+          {product.features.length > 0 ? (
+            <div className="mt-6">
+              <h2 className="font-display text-sm uppercase tracking-wide text-foreground">{L('Incluye', 'Includes')}</h2>
+              <ul className="mt-2 space-y-1 text-sm text-muted">
+                {product.features.map((f) => (
+                  <li key={f} className="flex gap-2"><span className="text-gold-light">✦</span><span>{f}</span></li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {/* Acabados técnicos */}
+          {product.coinFeatures.length > 0 ? (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {product.coinFeatures.map((k) => (
+                <span key={k} className="rounded-full border border-border px-3 py-1 text-[11px] uppercase tracking-wider text-muted">
+                  {FEATURE_LABEL[k] ?? k}
+                </span>
+              ))}
+            </div>
           ) : null}
 
           {/* Precio + compra */}

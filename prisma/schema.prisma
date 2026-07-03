@@ -496,9 +496,24 @@ model Product {
   weightLabel     String? // p.ej. "2 oz"
   finish          String? // p.ej. "Antiqued · Ultra High Relief"
   diameter        String? // p.ej. "50 mm"
-  editionSize     Int? // tirada
-  mintYear        Int? // año de acuñación
+  editionSize     Int? // tirada / mintage
+  mintYear        Int? // año de emisión
   history         String? // historia / lore de la pieza
+  // Atributos de moneda (ref. plugin Legacy Woo Tools) — complementos de la pieza
+  productType     String? // coin | ingot | blind_box | pack | other
+  purity          String? // pureza, p.ej. ".999" o "92.5%"
+  limitedEdition  Boolean @default(false)
+  totalUnits      Int? // unidades totales
+  specialLabel    String? // etiqueta especial (ej. "Exclusiva")
+  ipLicense       String? // IP / Licencia (ej. "Real Madrid")
+  features        String[] // incluye / beneficios (uno por línea)
+  country         String? // país de emisión
+  faceValue       String? // valor facial (ej. "100 EUR")
+  quality         String? // proof | reverse_proof | matte | antique | black_proof
+  coa             String? // certificado de autenticidad (texto)
+  boxInfo         String? // caja
+  capsule         String? // cápsula
+  coinFeatures    String[] // acabados técnicos (claves; ver ref.)
   videoUrl        String? // vídeo de la pieza (alojado en nuestro servidor)
   launchDate      DateTime?
   available       Boolean  @default(true)
