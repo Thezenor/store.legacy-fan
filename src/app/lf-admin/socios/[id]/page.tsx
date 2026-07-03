@@ -36,8 +36,15 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-export default async function SocioDetalle({ params }: { params: Promise<{ id: string }> }) {
+export default async function SocioDetalle({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ paid?: string; payerror?: string }>;
+}) {
   const { id } = await params;
+  const sp = await searchParams;
   const m = await prisma.membership.findUnique({
     where: { id },
     include: {
@@ -77,6 +84,17 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
           </button>
         </form>
       </div>
+
+      {sp.paid ? (
+        <p className="mt-3 rounded border border-green-500/40 bg-green-500/10 px-4 py-2 text-sm text-green-300">
+          ✓ Pago manual registrado (ref. {sp.paid}).
+        </p>
+      ) : null}
+      {sp.payerror ? (
+        <p className="mt-3 rounded border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm text-red-300">
+          No se pudo registrar el pago: {sp.payerror === 'datos' ? 'datos inválidos' : sp.payerror === 'nouser' ? 'usuario no encontrado' : sp.payerror}
+        </p>
+      ) : null}
 
       {/* Datos personales / envío (editables) */}
       <Card title="Datos del cliente">
@@ -159,6 +177,7 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
           </p>
           <form action={addManualPaymentAction} className="mt-2 flex flex-wrap items-end gap-3">
             <input type="hidden" name="userId" value={u.id} />
+            <input type="hidden" name="membershipId" value={m.id} />
             <label className="block"><span className="text-xs text-muted">Tipo</span>
               <select name="kind" className={`mt-1 ${inp}`}>
                 <option value="reserve">Reserva (no activa)</option>

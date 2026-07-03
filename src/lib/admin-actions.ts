@@ -385,68 +385,78 @@ export async function createManualMemberAction(
 export async function addManualPaymentAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const userId = String(formData.get('userId') ?? '');
+  const membershipId = String(formData.get('membershipId') ?? '');
   const kind = String(formData.get('kind') ?? 'reserve') === 'full' ? 'full' : 'reserve';
   const club = (String(formData.get('club') ?? 'PRIME') || 'PRIME') as ClubType;
   const currency = (String(formData.get('currency') ?? 'EUR') === 'USD' ? 'USD' : 'EUR') as Currency;
   const reason = String(formData.get('reason') ?? '').trim() || null;
   const amountCents = Math.round(parseFloat(String(formData.get('amount') ?? '0').replace(',', '.')) * 100);
-  if (!userId || !Number.isFinite(amountCents) || amountCents <= 0) return;
+  const back = membershipId ? `/lf-admin/socios/${membershipId}` : '/lf-admin/socios';
+  if (!userId || !Number.isFinite(amountCents) || amountCents <= 0) redirect(`${back}?payerror=datos`);
 
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
-  if (!user) return;
+  if (!user) redirect(`${back}?payerror=nouser`);
 
-  // Identificador propio del cobro manual (visible como "ID PayPal"/referencia).
+  // Identificador propio del cobro manual (visible como referencia).
   const manualRef = `MP-${new Date().getFullYear()}-${randomBytes(4).toString('hex').toUpperCase()}`;
   const rawPayload = { manual: true, adminId: admin.id, adminEmail: admin.email, reason, kind } as const;
   const launchDate = await getClubLaunchDate(club);
 
-  await prisma.$transaction(async (tx) => {
-    if (kind === 'full') {
-      const reservation = await tx.reservation.create({
-        data: {
-          userId, type: 'PAGO_COMPLETO', club, status: 'PAGO_COMPLETO',
-          currency, amountPaidCents: amountCents, totalDueCents: amountCents,
-        },
-      });
-      const payment = await tx.payment.create({
-        data: {
-          userId, reservationId: reservation.id, provider: 'MANUAL', mode: 'LIVE',
-          status: 'PAGO_COMPLETO', currency, amountCents, providerRef: manualRef, rawPayload: rawPayload as object,
-        },
-      });
-      // Activa: club definitivo + número de socio.
-      await activateMembershipTx(tx, userId, club, launchDate);
-      // Pedido con productos incluidos + factura.
-      await createIncludedOrder(tx, { userId, club, currency, reservationId: reservation.id });
-      await createInvoice(tx, { paymentId: payment.id, totalCents: amountCents, currency, year: new Date().getFullYear() });
-    } else {
-      const reservation = await tx.reservation.create({
-        data: {
-          userId, type: 'RESERVA', club, status: 'RESERVA_PENDIENTE',
-          currency, amountPaidCents: amountCents, totalDueCents: amountCents,
-        },
-      });
-      await tx.payment.create({
-        data: {
-          userId, reservationId: reservation.id, provider: 'MANUAL', mode: 'LIVE',
-          status: 'PAGO_COMPLETO', currency, amountCents, providerRef: manualRef, rawPayload: rawPayload as object,
-        },
-      });
-      // Reserva: asigna número, membresía en RESERVA_PENDIENTE (NO activa).
-      await reserveMembershipTx(tx, userId, club);
-    }
+  let okRef: string | null = null;
+  let errMsg = '';
+  try {
+    await prisma.$transaction(
+      async (tx) => {
+        // Reserva ÚNICA por usuario (restricción en BD): se reutiliza o se crea.
+        const existing = await tx.reservation.findFirst({ where: { userId } });
+        const resData =
+          kind === 'full'
+            ? { type: 'PAGO_COMPLETO' as const, club, status: 'PAGO_COMPLETO' as const, currency, amountPaidCents: amountCents, totalDueCents: amountCents }
+            : { type: 'RESERVA' as const, club, status: 'RESERVA_PENDIENTE' as const, currency, amountPaidCents: amountCents, totalDueCents: amountCents };
+        const reservation = existing
+          ? await tx.reservation.update({ where: { id: existing.id }, data: resData })
+          : await tx.reservation.create({ data: { userId, ...resData } });
 
-    await tx.auditLog.create({
-      data: {
-        actorId: admin.id, actorEmail: admin.email,
-        action: 'payment.manual_add', entity: 'Payment', entityId: manualRef,
-        newValue: { userId, kind, club, currency, amountCents, ref: manualRef },
-        reason,
+        const payment = await tx.payment.create({
+          data: {
+            userId, reservationId: reservation.id, provider: 'MANUAL', mode: 'LIVE',
+            status: 'PAGO_COMPLETO', currency, amountCents, providerRef: manualRef, rawPayload: rawPayload as object,
+          },
+        });
+
+        if (kind === 'full') {
+          // Activa: club definitivo + número de socio.
+          await activateMembershipTx(tx, userId, club, launchDate);
+          // Pedido con productos incluidos (Order.reservationId es único: evitar duplicado).
+          const hasOrder = await tx.order.findUnique({ where: { reservationId: reservation.id }, select: { id: true } });
+          if (!hasOrder) await createIncludedOrder(tx, { userId, club, currency, reservationId: reservation.id });
+          await createInvoice(tx, { paymentId: payment.id, totalCents: amountCents, currency, year: new Date().getFullYear() });
+        } else {
+          // Reserva: asigna número, membresía en RESERVA_PENDIENTE (NO activa).
+          await reserveMembershipTx(tx, userId, club);
+        }
+
+        await tx.auditLog.create({
+          data: {
+            actorId: admin.id, actorEmail: admin.email,
+            action: 'payment.manual_add', entity: 'Payment', entityId: manualRef,
+            newValue: { userId, kind, club, currency, amountCents, ref: manualRef },
+            reason,
+          },
+        });
       },
-    });
-  });
+      { maxWait: 15000, timeout: 30000 },
+    );
+    okRef = manualRef;
+  } catch (e) {
+    errMsg = e instanceof Error ? e.message : 'error';
+    console.error('[payment.manual_add] error:', errMsg);
+  }
 
   revalidatePath('/lf-admin/socios');
+  if (membershipId) revalidatePath(`/lf-admin/socios/${membershipId}`);
+  if (okRef) redirect(`${back}?paid=${okRef}`);
+  redirect(`${back}?payerror=${encodeURIComponent(errMsg).slice(0, 140)}`);
 }
 
 /** Edita una traducción de plantilla de email + estado activo del template. */
