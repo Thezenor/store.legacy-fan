@@ -11,6 +11,21 @@ function resolveEmbed(url: string): { type: 'youtube' | 'vimeo' | 'file'; src: s
   return { type: 'file', src: url };
 }
 
+function CloseButton({ onClose }: { onClose: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      aria-label="Cerrar"
+      className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full border border-white/20 bg-black/60 text-white transition hover:bg-black/80"
+    >
+      <svg viewBox="0 0 24 24" className="h-5 w-5 stroke-current" fill="none" strokeWidth="2" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+      </svg>
+    </button>
+  );
+}
+
 /**
  * Botón circular de reproducción superpuesto sobre la moneda (abajo-derecha),
  * al estilo de la portada. Al pulsarlo abre un modal con el vídeo.
@@ -54,24 +69,28 @@ export function CollectionPlayButton({ url, title }: { url: string; title: strin
           onClick={() => setOpen(false)}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in"
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative aspect-video w-full max-w-4xl overflow-hidden rounded-2xl border border-gold/30 bg-black shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
-          >
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Cerrar"
-              className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full border border-white/20 bg-black/60 text-white transition hover:bg-black/80"
+          {embed.type === 'file' ? (
+            // Fichero mp4/webm: el <video> conserva su relación de aspecto real
+            // (vertical u horizontal); el contenedor se ajusta a su tamaño.
+            <div onClick={(e) => e.stopPropagation()} className="relative">
+              <CloseButton onClose={() => setOpen(false)} />
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+              <video
+                src={embed.src}
+                controls
+                autoPlay
+                playsInline
+                preload="metadata"
+                className="max-h-[86vh] max-w-[92vw] rounded-2xl border border-gold/30 bg-black shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
+              />
+            </div>
+          ) : (
+            // Embed (YouTube/Vimeo): caja responsive 16:9.
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative aspect-video w-full max-w-4xl overflow-hidden rounded-2xl border border-gold/30 bg-black shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 stroke-current" fill="none" strokeWidth="2" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-              </svg>
-            </button>
-            {embed.type === 'file' ? (
-              // eslint-disable-next-line jsx-a11y/media-has-caption
-              <video src={embed.src} controls autoPlay playsInline className="h-full w-full bg-black" />
-            ) : (
+              <CloseButton onClose={() => setOpen(false)} />
               <iframe
                 src={embed.src}
                 title={`Vídeo de ${title}`}
@@ -79,8 +98,8 @@ export function CollectionPlayButton({ url, title }: { url: string; title: strin
                 allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                 allowFullScreen
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       ) : null}
     </>
