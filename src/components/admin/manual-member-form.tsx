@@ -23,8 +23,9 @@ export function ManualMemberForm() {
         </select>
       </label>
       <label className="block">
-        <span className="text-xs text-muted">Nº reservado (1–100)</span>
-        <input name="number" type="number" min={1} max={100} required className="mt-1 w-28 rounded border border-border bg-background px-2 py-1.5 text-foreground" />
+        <span className="text-xs text-muted">Fecha de alta</span>
+        <input name="startsAt" type="date" className="mt-1 w-40 rounded border border-border bg-background px-2 py-1.5 text-foreground" />
+        <span className="mt-0.5 block text-[10px] text-faint">Vacío = hoy</span>
       </label>
       <label className="block flex-1">
         <span className="text-xs text-muted">Observaciones</span>
@@ -33,6 +34,9 @@ export function ManualMemberForm() {
       <button type="submit" disabled={pending} className="rounded bg-gold-grad px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#160f02] disabled:opacity-60">
         {pending ? '…' : 'Crear socio'}
       </button>
+      <p className="w-full text-[11px] text-faint">
+        El número de socio se asigna automáticamente: siguiente correlativo libre desde LF-000051.
+      </p>
       {state ? (
         <span className={`text-sm ${state.ok ? 'text-state-green' : 'text-red-400'}`}>
           {state.ok ? `Socio creado: ${state.number}` : state.error}
