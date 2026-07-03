@@ -27,6 +27,14 @@ async function resolveValue(kind: string, id: string, mobile: boolean): Promise<
     if (!row) return null;
     return (mobile ? row.imageUrlMobile : row.imageUrl) || row.imageUrl;
   }
+  if (kind === 'm') {
+    const row = await prisma.collectionMedia.findUnique({
+      where: { id },
+      select: { url: true, urlMobile: true },
+    });
+    if (!row) return null;
+    return (mobile ? row.urlMobile : row.url) || row.url;
+  }
   if (kind === 's') {
     const row = await prisma.systemSetting.findUnique({ where: { key: id }, select: { value: true } });
     return row?.value == null ? null : String(row.value);

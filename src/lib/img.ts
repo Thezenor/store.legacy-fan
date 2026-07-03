@@ -15,6 +15,11 @@ export function collectionImg(id: string, updatedAt?: Date | null, mobile = fals
   return `/api/img/c/${id}${v}${v ? (mobile ? '&m=1' : '') : mobile ? '?m=1' : ''}`;
 }
 
+/** Imagen de galería de colección (CollectionMedia). Id inmutable. */
+export function collectionMediaImg(id: string, mobile = false): string {
+  return `/api/img/m/${id}${mobile ? '?m=1' : ''}`;
+}
+
 /** Imagen guardada en un SystemSetting (p. ej. upsell.coin.a.image). */
 export function settingImg(key: string, updatedAt?: Date | null): string {
   return `/api/img/s/${encodeURIComponent(key)}${ver(updatedAt)}`;

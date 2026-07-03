@@ -853,16 +853,56 @@ export async function uploadCollectionImageAction(formData: FormData): Promise<v
   revalidateCollections();
 }
 
-/** Sube un vídeo de colección al Volume y guarda su URL. */
-export async function uploadCollectionVideoAction(formData: FormData): Promise<void> {
+/** Añade una o varias imágenes a la galería de una colección (data URI en BD). */
+export async function addCollectionImagesAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const id = String(formData.get('collectionId'));
+  const files = formData.getAll('files').filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length === 0) return;
+  let order = await prisma.collectionMedia.count({ where: { collectionId: id, kind: 'IMAGE' } });
+  for (const file of files) {
+    if (file.size > 15 * 1024 * 1024) continue; // salta las que superen 15 MB
+    const [url, urlMobile] = await Promise.all([
+      optimizeImageToDataUri(file, 1000),
+      optimizeImageToDataUri(file, 640),
+    ]);
+    await prisma.collectionMedia.create({
+      data: { collectionId: id, kind: 'IMAGE', url, urlMobile, sortOrder: order++ },
+    });
+  }
+  await audit(admin.id, admin.email, 'collection.media_add', 'Collection', id, null, { images: files.length });
+  revalidateCollections();
+}
+
+/** Añade un vídeo a una colección: por URL (YouTube/Vimeo/.mp4) o subiendo archivo. */
+export async function addCollectionVideoAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('collectionId'));
+  const pastedUrl = String(formData.get('url') ?? '').trim();
   const file = formData.get('file');
-  if (!(file instanceof File) || file.size === 0) return;
-  if (file.size > 200 * 1024 * 1024) throw new Error('El vídeo supera 200 MB.');
-  const { url } = await saveUpload(file);
-  await prisma.collection.update({ where: { id }, data: { videoUrl: url } });
-  await audit(admin.id, admin.email, 'collection.video', 'Collection', id, null, { url, bytes: file.size });
+
+  let url = pastedUrl;
+  if (!url && file instanceof File && file.size > 0) {
+    url = (await saveUpload(file)).url; // sube al Volume, límite 60 MB (saveUpload)
+  }
+  if (!url) return;
+
+  const order = await prisma.collectionMedia.count({ where: { collectionId: id, kind: 'VIDEO' } });
+  await prisma.collectionMedia.create({
+    data: { collectionId: id, kind: 'VIDEO', url, sortOrder: order },
+  });
+  await audit(admin.id, admin.email, 'collection.video_add', 'Collection', id, null, { url });
+  revalidateCollections();
+}
+
+/** Elimina un elemento (imagen o vídeo) de la galería de una colección. */
+export async function deleteCollectionMediaAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const mediaId = String(formData.get('mediaId'));
+  const m = await prisma.collectionMedia.findUnique({ where: { id: mediaId }, select: { collectionId: true, kind: true } });
+  if (!m) return;
+  await prisma.collectionMedia.delete({ where: { id: mediaId } }).catch(() => {});
+  await audit(admin.id, admin.email, 'collection.media_delete', 'CollectionMedia', mediaId, { kind: m.kind }, null);
   revalidateCollections();
 }
 

@@ -4,8 +4,8 @@ import type { CollectionStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { Coin } from '@/components/brand/coin';
 import { CoinShowcase } from '@/components/brand/coin-showcase';
-import { CollectionPlayButton } from '@/components/commerce/collection-player';
-import { collectionImg } from '@/lib/img';
+import { collectionImg, collectionMediaImg } from '@/lib/img';
+import { CollectionMediaViewer, type MediaItem } from '@/components/commerce/collection-player';
 import { Link } from '@/i18n/navigation';
 
 export async function generateMetadata({
@@ -52,6 +52,9 @@ export default async function ColeccionesPage({
         status: true,
         updatedAt: true,
         videoUrl: true,
+        // Solo id+kind: las imágenes son data URIs y se sirven por /api/img; el
+        // url del vídeo (ligero) se trae aparte para no arrastrar los data URIs.
+        media: { select: { id: true, kind: true }, orderBy: { sortOrder: 'asc' } },
         products: {
           where: { visible: true },
           select: { id: true, slug: true },
@@ -65,6 +68,12 @@ export default async function ColeccionesPage({
     }),
   ]);
   const hasImage = new Set(withImage.map((c) => c.id));
+  // URLs de los vídeos (ligeras: /api/media o externas) por id de media.
+  const videoRows = await prisma.collectionMedia.findMany({
+    where: { kind: 'VIDEO', collection: { status: { in: ['ACTIVA', 'PROXIMA', 'AGOTADA'] } } },
+    select: { id: true, url: true },
+  });
+  const videoUrlById = new Map(videoRows.map((v) => [v.id, v.url]));
 
   return (
     <section className="animate-fade-in">
@@ -84,6 +93,22 @@ export default async function ColeccionesPage({
             const label = statusLabel(col.status, t);
             const soon = col.status === 'PROXIMA';
             const href = col.products[0] ? `/producto/${col.products[0].slug}` : null;
+            // Media de la galería: portada + fotos + vídeos (varios). El botón/visor
+            // solo aparece si hay algo además de la portada (fotos o vídeos).
+            const galleryImages = col.media.filter((m) => m.kind === 'IMAGE');
+            const galleryVideos = col.media.filter((m) => m.kind === 'VIDEO');
+            const videoSrcs = galleryVideos.map((m) => videoUrlById.get(m.id)).filter((u): u is string => !!u);
+            const hasLegacyVideo = !!col.videoUrl && !videoSrcs.includes(col.videoUrl);
+            const mediaItems: MediaItem[] = [];
+            if (hasImage.has(col.id)) {
+              mediaItems.push({ kind: 'image', src: collectionImg(col.id, col.updatedAt), thumb: collectionImg(col.id, col.updatedAt, true) });
+            }
+            for (const m of galleryImages) {
+              mediaItems.push({ kind: 'image', src: collectionMediaImg(m.id), thumb: collectionMediaImg(m.id, true) });
+            }
+            for (const src of videoSrcs) mediaItems.push({ kind: 'video', src });
+            if (hasLegacyVideo) mediaItems.push({ kind: 'video', src: col.videoUrl! });
+            const showViewer = galleryImages.length > 0 || videoSrcs.length > 0 || hasLegacyVideo;
             const media = (
                 <CoinShowcase className="w-[clamp(11rem,30vw,16rem)]">
                   {hasImage.has(col.id) ? (
@@ -130,7 +155,7 @@ export default async function ColeccionesPage({
                   ) : (
                     media
                   )}
-                  {col.videoUrl ? <CollectionPlayButton url={col.videoUrl} title={col.name} /> : null}
+                  {showViewer ? <CollectionMediaViewer items={mediaItems} title={col.name} /> : null}
                 </div>
                 {href ? (
                   <Link href={href} className="flex flex-col items-center">{caption}</Link>
