@@ -4,6 +4,7 @@ import type { CollectionStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { Coin } from '@/components/brand/coin';
 import { CoinShowcase } from '@/components/brand/coin-showcase';
+import { CollectionPlayButton } from '@/components/commerce/collection-player';
 import { collectionImg } from '@/lib/img';
 import { Link } from '@/i18n/navigation';
 
@@ -120,30 +121,22 @@ export default async function ColeccionesPage({
                 ) : null}
               </>
             );
-            const videoLink = col.videoUrl ? (
-              <a
-                href={col.videoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-1 text-xs uppercase tracking-[0.18em] text-gold hover:text-gold-light"
-              >
-                ▶ {t('video')}
-              </a>
-            ) : null;
             return (
               <article key={col.id} className="flex flex-col items-center text-center">
+                {/* Media con botón de play superpuesto (sibling del enlace, sin anidar <a>) */}
+                <div className="relative w-[clamp(11rem,30vw,16rem)]">
+                  {href ? (
+                    <Link href={href} className="block">{media}</Link>
+                  ) : (
+                    media
+                  )}
+                  {col.videoUrl ? <CollectionPlayButton url={col.videoUrl} title={col.name} /> : null}
+                </div>
                 {href ? (
-                  <Link href={href} className="flex flex-col items-center">
-                    {media}
-                    {caption}
-                  </Link>
+                  <Link href={href} className="flex flex-col items-center">{caption}</Link>
                 ) : (
-                  <>
-                    {media}
-                    {caption}
-                  </>
+                  caption
                 )}
-                {videoLink}
               </article>
             );
           })}

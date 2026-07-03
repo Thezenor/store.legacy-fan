@@ -29,8 +29,12 @@ const nextConfig = {
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
+      "media-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self'",
+      // Reproductores de vídeo de colección (YouTube / Vimeo). El resto de
+      // iframes sigue bloqueado por default-src 'self'.
+      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self' https://www.paypal.com https://www.sandbox.paypal.com",
