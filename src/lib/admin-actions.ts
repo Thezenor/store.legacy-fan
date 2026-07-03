@@ -459,6 +459,28 @@ export async function addManualPaymentAction(formData: FormData): Promise<void> 
   redirect(`${back}?payerror=${encodeURIComponent(errMsg).slice(0, 140)}`);
 }
 
+/** Elimina una línea de pago (y su factura asociada, por cascada). Para corregir
+ *  errores de registro. No revierte activaciones de membresía: si hace falta, se
+ *  ajusta el estado del socio aparte. Auditado. */
+export async function deletePaymentAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const paymentId = String(formData.get('paymentId') ?? '');
+  const membershipId = String(formData.get('membershipId') ?? '');
+  const back = membershipId ? `/lf-admin/socios/${membershipId}` : '/lf-admin/socios';
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+    select: { id: true, provider: true, amountCents: true, currency: true, providerRef: true },
+  });
+  if (!payment) redirect(`${back}?payerror=nopago`);
+  await prisma.payment.delete({ where: { id: paymentId } }).catch(() => {});
+  await audit(admin.id, admin.email, 'payment.delete', 'Payment', paymentId, {
+    provider: payment.provider, amountCents: payment.amountCents, currency: payment.currency, ref: payment.providerRef,
+  }, null);
+  revalidatePath('/lf-admin/socios');
+  if (membershipId) revalidatePath(back);
+  redirect(`${back}?paydeleted=1`);
+}
+
 /** Edita una traducción de plantilla de email + estado activo del template. */
 export async function updateEmailTemplateAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();

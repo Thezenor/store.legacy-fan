@@ -9,7 +9,9 @@ import {
   toggleUserBlockAction,
   updateProfileAction,
   addManualPaymentAction,
+  deletePaymentAction,
 } from '@/lib/admin-actions';
+import { ConfirmButton } from '@/components/admin/confirm-button';
 import {
   memberStatusLabel,
   paymentStatusLabel,
@@ -41,7 +43,7 @@ export default async function SocioDetalle({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ paid?: string; payerror?: string }>;
+  searchParams: Promise<{ paid?: string; payerror?: string; paydeleted?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
@@ -88,6 +90,11 @@ export default async function SocioDetalle({
       {sp.paid ? (
         <p className="mt-3 rounded border border-green-500/40 bg-green-500/10 px-4 py-2 text-sm text-green-300">
           ✓ Pago manual registrado (ref. {sp.paid}).
+        </p>
+      ) : null}
+      {sp.paydeleted ? (
+        <p className="mt-3 rounded border border-green-500/40 bg-green-500/10 px-4 py-2 text-sm text-green-300">
+          ✓ Línea de pago eliminada.
         </p>
       ) : null}
       {sp.payerror ? (
@@ -151,7 +158,7 @@ export default async function SocioDetalle({
         {u.payments.length === 0 ? <p className="text-sm text-muted">Sin pagos.</p> : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-xs uppercase text-faint"><tr><th className="py-2">Fecha</th><th>Importe</th><th>Estado</th><th>Método</th><th>Referencia</th><th>Factura</th></tr></thead>
+              <thead className="text-xs uppercase text-faint"><tr><th className="py-2">Fecha</th><th>Importe</th><th>Estado</th><th>Método</th><th>Referencia</th><th>Factura</th><th></th></tr></thead>
               <tbody>
                 {u.payments.map((pay) => (
                   <tr key={pay.id} className="border-t border-border/60">
@@ -161,6 +168,18 @@ export default async function SocioDetalle({
                     <td className={pay.provider === 'MANUAL' ? 'text-gold-light' : 'text-muted'}>{paymentProviderLabel(pay.provider)}</td>
                     <td className="serial text-xs">{pay.providerRef ?? '—'}</td>
                     <td className="text-gold-light">{pay.invoice?.number ?? '—'}</td>
+                    <td className="text-right">
+                      <form>
+                        <input type="hidden" name="paymentId" value={pay.id} />
+                        <input type="hidden" name="membershipId" value={m.id} />
+                        <ConfirmButton
+                          action={deletePaymentAction}
+                          label="Borrar"
+                          confirmText={`¿Borrar esta línea de pago (${formatMoney(pay.amountCents, pay.currency, 'es')})? Se elimina también su factura si la tuviera. No revierte la activación del socio.`}
+                          className="text-[11px] text-red-400 hover:underline"
+                        />
+                      </form>
+                    </td>
                   </tr>
                 ))}
               </tbody>
