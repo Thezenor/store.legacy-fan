@@ -93,6 +93,7 @@ enum ReservationType {
 enum PaymentProvider {
   PAYPAL
   STRIPE
+  MANUAL
 }
 
 enum PaymentMode {

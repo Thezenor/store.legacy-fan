@@ -184,10 +184,12 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
         application_context: {
           brand_name: 'Legacy Fan',
           user_action: 'PAY_NOW',
-          // Aterriza directamente en el formulario de tarjeta (pago como invitado,
-          // sin necesidad de cuenta PayPal). Requiere además "PayPal Account
-          // Optional" activado en la cuenta de empresa y disponibilidad por país.
-          landing_page: 'GUEST_CHECKOUT',
+          // Aterriza en el formulario de tarjeta (pago como invitado, sin cuenta
+          // PayPal). En application_context (Orders v2) el valor válido es BILLING;
+          // 'GUEST_CHECKOUT' solo existe en experience_context y devuelve HTTP 400
+          // aquí (rompía todos los pagos). Requiere "PayPal Account Optional"
+          // activado en la cuenta de empresa y disponibilidad por país.
+          landing_page: 'BILLING',
           // Recoger la dirección de envío del comprador y devolverla en la captura.
           shipping_preference: 'GET_FROM_FILE',
           return_url: input.returnUrl,

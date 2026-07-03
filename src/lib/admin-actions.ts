@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import type {
   ClubType,
   CollectionStatus,
+  Currency,
   Locale,
   MemberStatus,
   OrderItemStatus,
@@ -22,6 +23,10 @@ import { getClubPricing, getPlan } from './commerce';
 import { emailVerification } from './tokens';
 import { generatePassSecret } from './members/pass-token';
 import { assignMemberNumber } from './members/numbering';
+import { activateMembershipTx, reserveMembershipTx } from './members/membership';
+import { createIncludedOrder } from './members/order';
+import { createInvoice } from './members/invoice';
+import { getClubLaunchDate } from './commerce/phases';
 import { sendVerificationEmail } from './email/auth-emails';
 
 // Lee campos opcionales de ficha técnica del producto desde un formulario.
@@ -367,6 +372,81 @@ export async function createManualMemberAction(
   } catch {
     return { ok: false, error: 'No se pudo crear el socio.' };
   }
+}
+
+/**
+ * Registra un PAGO MANUAL (cobro fuera de pasarela) sobre un socio/usuario:
+ *  - kind 'reserve' → cobra la reserva: asigna número y deja la membresía en
+ *    RESERVA_PENDIENTE (NO activa al socio).
+ *  - kind 'full'    → cobra el total: ACTIVA al socio (SOCIO_ACTIVO), número,
+ *    pedido con productos incluidos y factura.
+ * Queda marcado como MANUAL con un id propio (MP-...), quién lo hizo y el motivo.
+ */
+export async function addManualPaymentAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get('userId') ?? '');
+  const kind = String(formData.get('kind') ?? 'reserve') === 'full' ? 'full' : 'reserve';
+  const club = (String(formData.get('club') ?? 'PRIME') || 'PRIME') as ClubType;
+  const currency = (String(formData.get('currency') ?? 'EUR') === 'USD' ? 'USD' : 'EUR') as Currency;
+  const reason = String(formData.get('reason') ?? '').trim() || null;
+  const amountCents = Math.round(parseFloat(String(formData.get('amount') ?? '0').replace(',', '.')) * 100);
+  if (!userId || !Number.isFinite(amountCents) || amountCents <= 0) return;
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+  if (!user) return;
+
+  // Identificador propio del cobro manual (visible como "ID PayPal"/referencia).
+  const manualRef = `MP-${new Date().getFullYear()}-${randomBytes(4).toString('hex').toUpperCase()}`;
+  const rawPayload = { manual: true, adminId: admin.id, adminEmail: admin.email, reason, kind } as const;
+  const launchDate = await getClubLaunchDate(club);
+
+  await prisma.$transaction(async (tx) => {
+    if (kind === 'full') {
+      const reservation = await tx.reservation.create({
+        data: {
+          userId, type: 'PAGO_COMPLETO', club, status: 'PAGO_COMPLETO',
+          currency, amountPaidCents: amountCents, totalDueCents: amountCents,
+        },
+      });
+      const payment = await tx.payment.create({
+        data: {
+          userId, reservationId: reservation.id, provider: 'MANUAL', mode: 'LIVE',
+          status: 'PAGO_COMPLETO', currency, amountCents, providerRef: manualRef, rawPayload: rawPayload as object,
+        },
+      });
+      // Activa: club definitivo + número de socio.
+      await activateMembershipTx(tx, userId, club, launchDate);
+      // Pedido con productos incluidos + factura.
+      await createIncludedOrder(tx, { userId, club, currency, reservationId: reservation.id });
+      await createInvoice(tx, { paymentId: payment.id, totalCents: amountCents, currency, year: new Date().getFullYear() });
+    } else {
+      const reservation = await tx.reservation.create({
+        data: {
+          userId, type: 'RESERVA', club, status: 'RESERVA_PENDIENTE',
+          currency, amountPaidCents: amountCents, totalDueCents: amountCents,
+        },
+      });
+      await tx.payment.create({
+        data: {
+          userId, reservationId: reservation.id, provider: 'MANUAL', mode: 'LIVE',
+          status: 'PAGO_COMPLETO', currency, amountCents, providerRef: manualRef, rawPayload: rawPayload as object,
+        },
+      });
+      // Reserva: asigna número, membresía en RESERVA_PENDIENTE (NO activa).
+      await reserveMembershipTx(tx, userId, club);
+    }
+
+    await tx.auditLog.create({
+      data: {
+        actorId: admin.id, actorEmail: admin.email,
+        action: 'payment.manual_add', entity: 'Payment', entityId: manualRef,
+        newValue: { userId, kind, club, currency, amountCents, ref: manualRef },
+        reason,
+      },
+    });
+  });
+
+  revalidatePath('/lf-admin/socios');
 }
 
 /** Edita una traducción de plantilla de email + estado activo del template. */

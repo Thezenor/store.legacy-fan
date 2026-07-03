@@ -163,7 +163,7 @@ export async function reconcileSubscriptionActivated(providerSubscriptionId: str
   // Fin de periodo según la pasarela (si se puede consultar).
   let periodEnd: Date | undefined;
   try {
-    const info = await getSubscriptionProviderForAdmin(sub.provider).getSubscription(providerSubscriptionId);
+    const info = await getSubscriptionProviderForAdmin(sub.provider as 'PAYPAL' | 'STRIPE').getSubscription(providerSubscriptionId);
     periodEnd = info.currentPeriodEnd;
   } catch {
     /* si no se puede consultar, seguimos sin fecha remota */
@@ -203,7 +203,7 @@ export async function reconcileSubscriptionRenewed(
   let end = periodEnd;
   if (!end) {
     try {
-      const info = await getSubscriptionProviderForAdmin(sub.provider).getSubscription(providerSubscriptionId);
+      const info = await getSubscriptionProviderForAdmin(sub.provider as 'PAYPAL' | 'STRIPE').getSubscription(providerSubscriptionId);
       end = info.currentPeriodEnd;
     } catch {
       /* sin fecha remota: renewMembershipTx sumará un año */
@@ -245,7 +245,7 @@ export async function reconcileSubscriptionSuspended(providerSubscriptionId: str
 export async function cancelSubscription(userId: string, reason?: string): Promise<void> {
   const sub = await prisma.subscription.findUnique({ where: { userId } });
   if (!sub?.providerSubscriptionId) return;
-  await getSubscriptionProviderForAdmin(sub.provider).cancelSubscription(sub.providerSubscriptionId, reason);
+  await getSubscriptionProviderForAdmin(sub.provider as 'PAYPAL' | 'STRIPE').cancelSubscription(sub.providerSubscriptionId, reason);
   await prisma.subscription.update({
     where: { userId },
     data: { status: 'CANCELADA', cancelAtPeriodEnd: true },

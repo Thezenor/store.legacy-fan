@@ -8,7 +8,16 @@ import {
   resetUserPasswordAction,
   toggleUserBlockAction,
   updateProfileAction,
+  addManualPaymentAction,
 } from '@/lib/admin-actions';
+import {
+  memberStatusLabel,
+  paymentStatusLabel,
+  subscriptionStatusLabel,
+  orderItemStatusLabel,
+  shipmentStatusLabel,
+  paymentProviderLabel,
+} from '@/lib/admin/labels';
 
 const STATUSES = [
   'CUENTA_CREADA', 'RESERVA_PENDIENTE', 'SOCIO_ACTIVO', 'SOCIO_CADUCADO',
@@ -95,7 +104,7 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
           <label className="block"><span className="text-xs text-muted">Club</span>
             <select name="club" defaultValue={m.club} className={`mt-1 ${inp}`}><option value="PRIME">PRIME</option><option value="PRESTIGE">PRESTIGE</option></select></label>
           <label className="block"><span className="text-xs text-muted">Estado</span>
-            <select name="status" defaultValue={m.status} className={`mt-1 ${inp}`}>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select></label>
+            <select name="status" defaultValue={m.status} className={`mt-1 ${inp}`}>{STATUSES.map((s) => <option key={s} value={s}>{memberStatusLabel(s)}</option>)}</select></label>
           <label className="block flex-1"><span className="text-xs text-muted">Observaciones (se registran con tu usuario)</span>
             <input name="observations" placeholder="Motivo del cambio…" className={`mt-1 w-full ${inp}`} /></label>
           <span className="text-xs text-muted">Alta: {fmtDate(m.startsAt)} · Fin: {fmtDate(m.endsAt)}</span>
@@ -107,7 +116,7 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
       <Card title="Suscripción">
         {u.subscription ? (
           <div className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-            <div className="flex justify-between gap-2"><span className="text-muted">Estado</span><span className="text-foreground">{u.subscription.status.replaceAll('_', ' ').toLowerCase()}</span></div>
+            <div className="flex justify-between gap-2"><span className="text-muted">Estado</span><span className="text-foreground">{subscriptionStatusLabel(u.subscription.status)}</span></div>
             <div className="flex justify-between gap-2"><span className="text-muted">Club</span><span className="text-foreground">{u.subscription.club}</span></div>
             <div className="flex justify-between gap-2"><span className="text-muted">Importe/año</span><span className="text-foreground">{formatMoney(u.subscription.amountCents, u.subscription.currency, 'es')}</span></div>
             <div className="flex justify-between gap-2"><span className="text-muted">Próxima renovación</span><span className="text-foreground">{fmtDate(u.subscription.currentPeriodEnd)}</span></div>
@@ -119,18 +128,19 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
         )}
       </Card>
 
-      {/* Pagos (con ID PayPal) */}
+      {/* Pagos */}
       <Card title={`Pagos (${u.payments.length})`}>
         {u.payments.length === 0 ? <p className="text-sm text-muted">Sin pagos.</p> : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-xs uppercase text-faint"><tr><th className="py-2">Fecha</th><th>Importe</th><th>Estado</th><th>ID PayPal</th><th>Factura</th></tr></thead>
+              <thead className="text-xs uppercase text-faint"><tr><th className="py-2">Fecha</th><th>Importe</th><th>Estado</th><th>Método</th><th>Referencia</th><th>Factura</th></tr></thead>
               <tbody>
                 {u.payments.map((pay) => (
                   <tr key={pay.id} className="border-t border-border/60">
                     <td className="py-2 text-muted">{fmtDate(pay.createdAt)}</td>
                     <td className="text-foreground">{formatMoney(pay.amountCents, pay.currency, 'es')}</td>
-                    <td className="text-muted">{pay.status.replaceAll('_', ' ').toLowerCase()}</td>
+                    <td className="text-muted">{paymentStatusLabel(pay.status)}</td>
+                    <td className={pay.provider === 'MANUAL' ? 'text-gold-light' : 'text-muted'}>{paymentProviderLabel(pay.provider)}</td>
                     <td className="serial text-xs">{pay.providerRef ?? '—'}</td>
                     <td className="text-gold-light">{pay.invoice?.number ?? '—'}</td>
                   </tr>
@@ -139,6 +149,36 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
             </table>
           </div>
         )}
+
+        {/* Registrar un pago MANUAL (cobro fuera de pasarela) */}
+        <div className="mt-4 rounded border border-gold/30 bg-surface-elevated/40 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gold-light">Registrar pago manual</p>
+          <p className="mt-1 text-[11px] text-muted">
+            Cobro a mano. «Reserva» asigna número y deja pendiente; «Pago total» activa al socio. Se guarda como
+            manual, con tu usuario y el motivo.
+          </p>
+          <form action={addManualPaymentAction} className="mt-2 flex flex-wrap items-end gap-3">
+            <input type="hidden" name="userId" value={u.id} />
+            <label className="block"><span className="text-xs text-muted">Tipo</span>
+              <select name="kind" className={`mt-1 ${inp}`}>
+                <option value="reserve">Reserva (no activa)</option>
+                <option value="full">Pago total (activa socio)</option>
+              </select></label>
+            <label className="block"><span className="text-xs text-muted">Club</span>
+              <select name="club" defaultValue={m.club} className={`mt-1 ${inp}`}>
+                <option value="PRIME">PRIME</option><option value="PRESTIGE">PRESTIGE</option>
+              </select></label>
+            <label className="block"><span className="text-xs text-muted">Importe</span>
+              <input name="amount" type="number" step="0.01" min="0" required className={`mt-1 w-28 ${inp}`} /></label>
+            <label className="block"><span className="text-xs text-muted">Divisa</span>
+              <select name="currency" defaultValue={u.subscription?.currency ?? p?.preferredCurrency ?? 'EUR'} className={`mt-1 ${inp}`}>
+                <option value="EUR">EUR (€)</option><option value="USD">USD ($)</option>
+              </select></label>
+            <label className="block flex-1 min-w-[180px]"><span className="text-xs text-muted">Motivo</span>
+              <input name="reason" placeholder="Motivo del cobro manual…" className={`mt-1 w-full ${inp}`} /></label>
+            <button className="bevel bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408]">Registrar</button>
+          </form>
+        </div>
       </Card>
 
       {/* Reservas */}
@@ -148,7 +188,7 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
             {u.reservations.map((r) => (
               <li key={r.id} className="flex flex-wrap justify-between gap-2 border-b border-border/60 pb-1">
                 <span className="text-muted">{fmtDate(r.createdAt)} · {r.type} · {r.club ?? '—'}</span>
-                <span className="text-foreground">{r.status.replaceAll('_', ' ').toLowerCase()} · pagado {formatMoney(r.amountPaidCents, r.currency, 'es')}</span>
+                <span className="text-foreground">{paymentStatusLabel(r.status)} · pagado {formatMoney(r.amountPaidCents, r.currency, 'es')}</span>
               </li>
             ))}
           </ul>
@@ -162,11 +202,11 @@ export default async function SocioDetalle({ params }: { params: Promise<{ id: s
             <p className="text-xs text-faint">Pedido <span className="serial">#{o.id.slice(-8)}</span> · {fmtDate(o.createdAt)}</p>
             <ul className="mt-1 space-y-0.5 text-sm">
               {o.items.map((it) => (
-                <li key={it.id} className="flex justify-between gap-3"><span className="min-w-0 truncate text-foreground">{it.name}</span><span className="shrink-0 text-xs text-muted">{it.status.replaceAll('_', ' ').toLowerCase()}</span></li>
+                <li key={it.id} className="flex justify-between gap-3"><span className="min-w-0 truncate text-foreground">{it.name}</span><span className="shrink-0 text-xs text-muted">{orderItemStatusLabel(it.status)}</span></li>
               ))}
             </ul>
             {o.shipments.map((s) => (
-              <p key={s.id} className="mt-1 text-xs text-silver">Envío {s.carrier ?? ''} {s.trackingCode ? `· ${s.trackingCode}` : ''} ({s.status.toLowerCase()})</p>
+              <p key={s.id} className="mt-1 text-xs text-silver">Envío {s.carrier ?? ''} {s.trackingCode ? `· ${s.trackingCode}` : ''} ({shipmentStatusLabel(s.status)})</p>
             ))}
           </div>
         ))}

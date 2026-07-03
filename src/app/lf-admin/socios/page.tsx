@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { toggleUserBlockAction } from '@/lib/admin-actions';
 import { ManualMemberForm } from '@/components/admin/manual-member-form';
+import { memberStatusLabel } from '@/lib/admin/labels';
 
 export default async function AdminSocios() {
   const memberships = await prisma.membership.findMany({
@@ -49,7 +50,7 @@ export default async function AdminSocios() {
                   </td>
                   <td className="px-4 py-3 text-muted">{m.user.email}</td>
                   <td className="px-4 py-3">{m.club}</td>
-                  <td className="px-4 py-3 text-muted">{m.status.replaceAll('_', ' ').toLowerCase()}</td>
+                  <td className="px-4 py-3 text-muted">{memberStatusLabel(m.status)}</td>
                   <td className="px-4 py-3">
                     <form action={toggleUserBlockAction}>
                       <input type="hidden" name="userId" value={m.user.id} />
