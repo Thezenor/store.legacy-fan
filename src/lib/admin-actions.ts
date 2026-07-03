@@ -206,8 +206,15 @@ export async function updateCollectionAction(formData: FormData): Promise<void> 
   const admin = await ensureAdmin();
   const id = String(formData.get('id'));
   const status = String(formData.get('status')) as CollectionStatus;
-  await prisma.collection.update({ where: { id }, data: { status } });
-  await audit(admin.id, admin.email, 'collection.update', 'Collection', id, null, { status });
+  // videoUrl es opcional: cadena vacía => se limpia (null).
+  const raw = formData.get('videoUrl');
+  const data: { status: CollectionStatus; videoUrl?: string | null } = { status };
+  if (raw !== null) {
+    const v = String(raw).trim();
+    data.videoUrl = v || null;
+  }
+  await prisma.collection.update({ where: { id }, data });
+  await audit(admin.id, admin.email, 'collection.update', 'Collection', id, null, { status, videoUrl: data.videoUrl ?? undefined });
   revalidateCollections();
 }
 
@@ -619,6 +626,59 @@ export async function assignRoleAction(formData: FormData): Promise<void> {
   revalidatePath('/lf-admin/roles');
 }
 
+/** Alta directa de un usuario con rol: email + contraseña + rol, en un paso.
+ *  Si el usuario ya existe, solo se le asigna el rol (no se toca su contraseña). */
+export async function createUserWithRoleAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  const roleKey = String(formData.get('roleKey') ?? '');
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    redirect('/lf-admin/roles?error=email');
+  }
+  const role = await prisma.role.findUnique({ where: { key: roleKey } });
+  if (!role) redirect('/lf-admin/roles?error=rol');
+
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    if (password.length < 8) redirect('/lf-admin/roles?error=pass');
+    const passwordHash = await bcrypt.hash(password, 12);
+    const localPart = email.split('@')[0];
+    user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        emailVerified: new Date(), // alta manual del admin: cuenta verificada
+        profile: {
+          create: {
+            firstName: localPart,
+            lastName: '',
+            country: 'ES',
+            preferredLocale: 'es',
+            preferredCurrency: 'EUR',
+            termsAcceptedAt: new Date(),
+          },
+        },
+      },
+    });
+    await audit(admin.id, admin.email, 'user.create_with_role', 'User', user.id, null, { email, roleKey });
+  } else if (password.length >= 8) {
+    // Usuario existente: si se indicó contraseña válida, se actualiza.
+    const passwordHash = await bcrypt.hash(password, 12);
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  }
+
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: user.id, roleId: role.id } },
+    update: {},
+    create: { userId: user.id, roleId: role.id },
+  });
+  await audit(admin.id, admin.email, 'role.assign', 'UserRole', `${user.id}/${role.id}`, null, { email, roleKey });
+  revalidatePath('/lf-admin/roles');
+  revalidatePath('/lf-admin/registros');
+  redirect('/lf-admin/roles?created=1');
+}
+
 export async function removeRoleAction(formData: FormData): Promise<void> {
   const admin = await ensureAdmin();
   const userId = String(formData.get('userId'));
@@ -790,6 +850,19 @@ export async function uploadCollectionImageAction(formData: FormData): Promise<v
   ]);
   await prisma.collection.update({ where: { id }, data: { imageUrl: url, imageUrlMobile: urlMobile } });
   await audit(admin.id, admin.email, 'collection.image', 'Collection', id, null, { bytes: file.size });
+  revalidateCollections();
+}
+
+/** Sube un vídeo de colección al Volume y guarda su URL. */
+export async function uploadCollectionVideoAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('collectionId'));
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return;
+  if (file.size > 200 * 1024 * 1024) throw new Error('El vídeo supera 200 MB.');
+  const { url } = await saveUpload(file);
+  await prisma.collection.update({ where: { id }, data: { videoUrl: url } });
+  await audit(admin.id, admin.email, 'collection.video', 'Collection', id, null, { url, bytes: file.size });
   revalidateCollections();
 }
 

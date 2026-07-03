@@ -3,6 +3,7 @@ import {
   updateCollectionAction,
   deleteCollectionAction,
   uploadCollectionImageAction,
+  uploadCollectionVideoAction,
   assignProductCollectionAction,
 } from '@/lib/admin-actions';
 import { ConfirmButton } from '@/components/admin/confirm-button';
@@ -29,6 +30,7 @@ export default async function AdminColecciones() {
         sortOrder: true,
         updatedAt: true,
         imageUrl: true,
+        videoUrl: true,
         products: { select: { id: true, name: true } },
         _count: { select: { products: true } },
       },
@@ -75,9 +77,18 @@ export default async function AdminColecciones() {
                   <span className="font-display text-lg text-foreground">{c.name}</span>
                   <span className="font-mono text-[11px] text-faint">/{c.slug} · {c._count.products} piezas</span>
                 </div>
-                <form action={updateCollectionAction} className="mt-2 flex items-center gap-2">
+                <form action={updateCollectionAction} className="mt-2 flex flex-wrap items-center gap-2">
                   <input type="hidden" name="id" value={c.id} />
                   <select name="status" defaultValue={c.status} className={`text-sm ${inp}`}>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
+                  <label className="block flex-1 min-w-[220px]">
+                    <input
+                      name="videoUrl"
+                      type="url"
+                      defaultValue={c.videoUrl ?? ''}
+                      placeholder="URL de vídeo (YouTube, Vimeo o .mp4)"
+                      className={`w-full text-sm ${inp}`}
+                    />
+                  </label>
                   <button className="border border-gold/40 px-3 py-1.5 text-xs uppercase tracking-wider text-gold-light hover:bg-surface-elevated">Guardar</button>
                   {c._count.products === 0 ? (
                     <ConfirmButton
@@ -87,6 +98,14 @@ export default async function AdminColecciones() {
                       className="border border-red-500/40 px-3 py-1.5 text-xs uppercase tracking-wider text-red-400 hover:bg-red-500/10"
                     />
                   ) : null}
+                </form>
+
+                {/* Vídeo: subir archivo (Volume) como alternativa a la URL */}
+                <form action={uploadCollectionVideoAction} className="mt-2 flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="collectionId" value={c.id} />
+                  <input type="file" name="file" accept="video/*" className="text-[11px] text-muted" />
+                  <button className="border border-gold/40 px-2 py-1 text-[10px] uppercase text-gold-light">Subir vídeo</button>
+                  {c.videoUrl ? <span className="text-[11px] text-green-300">✓ vídeo cargado</span> : null}
                 </form>
 
                 {/* Productos asignados */}

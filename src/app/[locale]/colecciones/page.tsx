@@ -50,6 +50,7 @@ export default async function ColeccionesPage({
         name: true,
         status: true,
         updatedAt: true,
+        videoUrl: true,
         products: {
           where: { visible: true },
           select: { id: true, slug: true },
@@ -119,6 +120,16 @@ export default async function ColeccionesPage({
                 ) : null}
               </>
             );
+            const videoLink = col.videoUrl ? (
+              <a
+                href={col.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1 text-xs uppercase tracking-[0.18em] text-gold hover:text-gold-light"
+              >
+                ▶ {t('video')}
+              </a>
+            ) : null;
             return (
               <article key={col.id} className="flex flex-col items-center text-center">
                 {href ? (
@@ -132,6 +143,7 @@ export default async function ColeccionesPage({
                     {caption}
                   </>
                 )}
+                {videoLink}
               </article>
             );
           })}

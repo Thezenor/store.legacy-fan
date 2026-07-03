@@ -473,6 +473,7 @@ model Collection {
   description String?
   imageUrl  String?
   imageUrlMobile String?
+  videoUrl  String?
   status    CollectionStatus @default(BORRADOR)
   sortOrder Int              @default(0)
   products  Product[]
