@@ -16,8 +16,18 @@ import { startSubscription } from '../subscriptions';
 import { checkoutRegisterSchema, loginSchema } from '../validation/auth';
 import { emailVerification } from '../tokens';
 import { sendVerificationEmail } from '../email/auth-emails';
-import { startReservation, hasActiveReservationOrMembership } from './reservation';
+import { startReservation, resumePendingCheckout } from './reservation';
 import { startFullPayment } from './full-payment';
+
+/** Solo bloquea si el usuario YA es socio de pleno derecho (pago completado). Un
+ *  proceso meramente pendiente no bloquea: se reanuda. */
+async function isFullyActiveMember(userId: string): Promise<boolean> {
+  const [membership, completed] = await Promise.all([
+    prisma.membership.findUnique({ where: { userId }, select: { status: true } }),
+    prisma.reservation.findFirst({ where: { userId, status: 'PAGO_COMPLETO' }, select: { id: true } }),
+  ]);
+  return membership?.status === 'SOCIO_ACTIVO' || !!completed;
+}
 
 export type StartReservationActionResult =
   | { ok: true; approveUrl: string }
@@ -34,19 +44,17 @@ export async function startReservationAction(
   const session = await auth();
   if (!session?.user?.id) return { ok: false, code: 'unauthenticated' };
   if (!session.user.emailVerified) return { ok: false, code: 'unverified' };
+  const userId = session.user.id;
 
-  if (await hasActiveReservationOrMembership(session.user.id)) {
-    return { ok: false, code: 'already_active' };
-  }
+  // Solo se bloquea si ya es socio de pleno derecho. Si hay un proceso pendiente,
+  // se REANUDA con la misma reserva (no se muestra "ya tienes uno en proceso").
+  if (await isFullyActiveMember(userId)) return { ok: false, code: 'already_active' };
 
   try {
     const currency = await getDisplayCurrency();
-    const { approveUrl } = await startReservation({
-      userId: session.user.id,
-      club,
-      currency,
-      locale,
-    });
+    const resumed = await resumePendingCheckout({ userId, locale });
+    if (resumed) return { ok: true, approveUrl: resumed.approveUrl };
+    const { approveUrl } = await startReservation({ userId, club, currency, locale });
     return { ok: true, approveUrl };
   } catch {
     return { ok: false, code: 'error' };
@@ -252,10 +260,14 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
 
   // 2) Iniciar el pago elegido.
   try {
+    // Si el usuario ya tiene un proceso SIN completar (por el motivo que sea),
+    // se reanuda con la misma reserva y se le lleva directo a pagar; solo se
+    // bloquea si ya es socio de pleno derecho.
+    if (await isFullyActiveMember(userId)) return { ok: false, code: 'already_active' };
+    const resumed = await resumePendingCheckout({ userId, locale });
+    if (resumed) return { ok: true, approveUrl: resumed.approveUrl };
+
     if (type === 'reserve') {
-      if (await hasActiveReservationOrMembership(userId)) {
-        return { ok: false, code: 'already_active' };
-      }
       const { approveUrl } = await startReservation({ userId, club, currency, locale, ...coinOpts });
       return { ok: true, approveUrl };
     }

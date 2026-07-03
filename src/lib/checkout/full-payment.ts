@@ -43,9 +43,11 @@ export async function startFullPayment(opts: {
   const secondCoinCents = opts.secondCoin ? opts.secondCoinCents ?? 0 : 0;
   const fullCents = pricing.priceCents + secondCoinCents;
 
-  // ¿Reserva con depósito pagado? Se reutiliza y se descuenta.
+  // ¿Reserva pendiente? Se reutiliza (evita duplicados al reintentar). Si tiene
+  // depósito pagado (RESERVA_PENDIENTE) se descuenta; si es un intento abandonado
+  // (PENDIENTE_DE_PAGO) se reaprovecha la misma fila.
   const reservation = await prisma.reservation.findFirst({
-    where: { userId: opts.userId, status: 'RESERVA_PENDIENTE' },
+    where: { userId: opts.userId, status: { in: ['RESERVA_PENDIENTE', 'PENDIENTE_DE_PAGO'] } },
     orderBy: { createdAt: 'desc' },
   });
 

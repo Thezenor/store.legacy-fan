@@ -6,6 +6,7 @@ import { getClubPricing, getReservationTerms } from '../commerce';
 import { getSetting } from '../commerce/settings';
 import { saveShippingToProfile } from '../members/shipping';
 import { reserveMembershipTx } from '../members/membership';
+import { startFullPayment } from './full-payment';
 
 import { appUrl } from '../app-url';
 
@@ -29,6 +30,92 @@ export async function hasActiveReservationOrMembership(userId: string): Promise<
 export interface StartReservationResult {
   approveUrl: string;
   reservationId: string;
+}
+
+/** Devuelve la reserva pendiente (no completada) más reciente del usuario, si la hay. */
+export async function getPendingReservation(userId: string) {
+  return prisma.reservation.findFirst({
+    where: { userId, status: { in: ['RESERVA_PENDIENTE', 'PENDIENTE_DE_PAGO'] } },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+/**
+ * Si el usuario ya tiene un proceso de pago SIN completar, lo reanuda reutilizando
+ * la MISMA reserva y devuelve una nueva URL de PayPal para continuar el pago (no se
+ * crea una reserva nueva ni se bloquea con "ya tienes uno en proceso").
+ *  - Depósito ya pagado (RESERVA_PENDIENTE) → continúa con el pago completo del restante.
+ *  - Orden abandonada sin pagar (PENDIENTE_DE_PAGO) → relanza el MISMO cobro.
+ * Devuelve null si no hay nada pendiente que reanudar.
+ */
+export async function resumePendingCheckout(opts: {
+  userId: string;
+  locale: string;
+}): Promise<StartReservationResult | null> {
+  const reservation = await getPendingReservation(opts.userId);
+  if (!reservation) return null;
+  const currency = reservation.currency;
+
+  // Caso A: depósito ya pagado → completar el pago del restante (reutiliza la reserva).
+  if (reservation.status === 'RESERVA_PENDIENTE') {
+    if (!reservation.club) return null; // sin club definitivo no se puede completar aquí
+    return startFullPayment({
+      userId: opts.userId,
+      club: reservation.club,
+      currency,
+      locale: opts.locale,
+      includedCoin: (reservation.includedCoin as 'a' | 'b' | null) ?? null,
+      secondCoin: reservation.secondCoin,
+      secondCoinCents: reservation.secondCoinCents,
+      secondCoinChoice: reservation.secondCoinChoice ?? undefined,
+    });
+  }
+
+  // Caso B: orden abandonada sin pagar → relanza el mismo cobro reutilizando la reserva.
+  if (!(await isGatewayEnabled('PAYPAL'))) throw new Error('gateway_disabled');
+  const isFull = reservation.type === 'PAGO_COMPLETO';
+  const lastPayment = await prisma.payment.findFirst({
+    where: { reservationId: reservation.id },
+    orderBy: { createdAt: 'desc' },
+    select: { amountCents: true },
+  });
+  let chargeCents = lastPayment?.amountCents ?? 0;
+  if (chargeCents <= 0) {
+    if (isFull) {
+      chargeCents = Math.max(0, reservation.totalDueCents - reservation.amountPaidCents);
+    } else {
+      const terms = await getReservationTerms(currency, undefined, reservation.club ?? undefined);
+      chargeCents = terms.amountCents + reservation.secondCoinCents;
+    }
+  }
+
+  const provider = getPaymentProviderUnchecked('PAYPAL');
+  const order = await provider.createPayment({
+    amountCents: chargeCents,
+    currency,
+    description: isFull
+      ? `Legacy Fan ${reservation.club ?? ''} — Pago completo`
+      : reservation.secondCoinCents > 0
+        ? 'Legacy Fan Club — Reserva + 2ª moneda'
+        : 'Legacy Fan Club — Reserva',
+    referenceId: reservation.id,
+    returnUrl: `${appUrl()}/api/checkout/paypal/return?locale=${opts.locale}${isFull ? '&intent=full' : ''}`,
+    cancelUrl: `${appUrl()}/api/checkout/paypal/cancel?locale=${opts.locale}`,
+  });
+  await prisma.payment.create({
+    data: {
+      userId: opts.userId,
+      reservationId: reservation.id,
+      provider: 'PAYPAL',
+      mode: await paymentMode(),
+      status: 'PENDIENTE_DE_PAGO',
+      currency,
+      amountCents: chargeCents,
+      providerRef: order.providerRef,
+    },
+  });
+  if (!order.approveUrl) throw new Error('PayPal no devolvió URL de aprobación.');
+  return { approveUrl: order.approveUrl, reservationId: reservation.id };
 }
 
 /**
