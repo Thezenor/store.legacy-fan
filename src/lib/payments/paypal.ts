@@ -181,19 +181,23 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
             },
           },
         ],
-        application_context: {
-          brand_name: 'Legacy Fan',
-          user_action: 'PAY_NOW',
-          // Aterriza en el formulario de tarjeta (pago como invitado, sin cuenta
-          // PayPal). En application_context (Orders v2) el valor válido es BILLING;
-          // 'GUEST_CHECKOUT' solo existe en experience_context y devuelve HTTP 400
-          // aquí (rompía todos los pagos). Requiere "PayPal Account Optional"
-          // activado en la cuenta de empresa y disponibilidad por país.
-          landing_page: 'BILLING',
-          // Recoger la dirección de envío del comprador y devolverla en la captura.
-          shipping_preference: 'GET_FROM_FILE',
-          return_url: input.returnUrl,
-          cancel_url: input.cancelUrl,
+        // Estructura moderna de Orders v2 (recomendada por PayPal). En
+        // experience_context, landing_page 'GUEST_CHECKOUT' aterriza en el
+        // formulario de tarjeta (pagar como INVITADO, sin cuenta PayPal), y sigue
+        // ofreciendo iniciar sesión. Requiere además "PayPal Account Optional"
+        // activado en la cuenta de empresa (y disponibilidad por país; en móvil
+        // PayPal puede limitarlo). Devuelve un enlace rel 'payer-action'.
+        payment_source: {
+          paypal: {
+            experience_context: {
+              brand_name: 'Legacy Fan',
+              user_action: 'PAY_NOW',
+              landing_page: 'GUEST_CHECKOUT',
+              shipping_preference: 'GET_FROM_FILE',
+              return_url: input.returnUrl,
+              cancel_url: input.cancelUrl,
+            },
+          },
         },
       }),
     });
@@ -202,7 +206,9 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
       id: string;
       links: { rel: string; href: string }[];
     };
-    const approveUrl = data.links.find((l) => l.rel === 'approve')?.href;
+    // Con experience_context el enlace de aprobación es 'payer-action'; se acepta
+    // también 'approve' por compatibilidad.
+    const approveUrl = data.links.find((l) => l.rel === 'payer-action' || l.rel === 'approve')?.href;
     return { providerRef: data.id, approveUrl };
   }
 
