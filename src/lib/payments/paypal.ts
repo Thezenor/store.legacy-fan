@@ -181,23 +181,19 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
             },
           },
         ],
-        // Estructura moderna de Orders v2 (recomendada por PayPal). En
-        // experience_context, landing_page 'GUEST_CHECKOUT' aterriza en el
-        // formulario de tarjeta (pagar como INVITADO, sin cuenta PayPal), y sigue
-        // ofreciendo iniciar sesión. Requiere además "PayPal Account Optional"
-        // activado en la cuenta de empresa (y disponibilidad por país; en móvil
-        // PayPal puede limitarlo). Devuelve un enlace rel 'payer-action'.
-        payment_source: {
-          paypal: {
-            experience_context: {
-              brand_name: 'Legacy Fan',
-              user_action: 'PAY_NOW',
-              landing_page: 'GUEST_CHECKOUT',
-              shipping_preference: 'GET_FROM_FILE',
-              return_url: input.returnUrl,
-              cancel_url: input.cancelUrl,
-            },
-          },
+        // IMPORTANTE: NO declarar `payment_source.paypal` — hacerlo le dice a
+        // PayPal "pago con cuenta PayPal" y fuerza el login (isForceLogin=true),
+        // matando el pago como invitado. Con application_context + landing_page
+        // 'BILLING' se aterriza en el formulario de tarjeta (invitado, sin cuenta)
+        // conservando el inicio de sesión. Requiere "PayPal Account Optional"
+        // activado en la cuenta de empresa.
+        application_context: {
+          brand_name: 'Legacy Fan',
+          user_action: 'PAY_NOW',
+          landing_page: 'BILLING',
+          shipping_preference: 'GET_FROM_FILE',
+          return_url: input.returnUrl,
+          cancel_url: input.cancelUrl,
         },
       }),
     });
@@ -206,9 +202,7 @@ export class PayPalProvider implements PaymentProvider, SubscriptionProvider {
       id: string;
       links: { rel: string; href: string }[];
     };
-    // Con experience_context el enlace de aprobación es 'payer-action'; se acepta
-    // también 'approve' por compatibilidad.
-    const approveUrl = data.links.find((l) => l.rel === 'payer-action' || l.rel === 'approve')?.href;
+    const approveUrl = data.links.find((l) => l.rel === 'approve' || l.rel === 'payer-action')?.href;
     return { providerRef: data.id, approveUrl };
   }
 
