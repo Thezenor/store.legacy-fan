@@ -124,6 +124,7 @@ export function SecondCoinUpsell({ data }: { data: UpsellData }) {
           </div>
 
           {data.offerSecond ? <p className="mt-2 text-[11px] text-faint">{tc('secondDiscountNote')}</p> : null}
+          <p className="mt-1 text-[11px] text-faint">{tc('photosReferenceNote')}</p>
         </div>
       ) : null}
     </div>
