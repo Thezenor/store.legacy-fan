@@ -158,6 +158,9 @@
   },
   "account": {
     "reservationTitle": "Tu reserva",
+    "resumeTitle": "Tienes un pago sin finalizar",
+    "resumeBody": "Continúa donde lo dejaste: retomamos tu proceso sin repetir pasos.",
+    "resumeCta": "Reintentar el pago",
     "statusReservaPendiente": "Reserva pendiente de pago completo",
     "paid": "Pagado",
     "remaining": "Restante",

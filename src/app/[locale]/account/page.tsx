@@ -65,7 +65,9 @@ export default async function AccountPage({
   const [profile, reservation, membership, orders, payments, points, referral, subscription] = await Promise.all([
     prisma.userProfile.findUnique({ where: { userId } }),
     prisma.reservation.findFirst({
-      where: { userId, status: { in: ['RESERVA_PENDIENTE', 'PAGO_COMPLETO'] } },
+      // Incluye PENDIENTE_DE_PAGO (pago completo iniciado y abandonado en PayPal)
+      // para poder ofrecer reanudarlo desde el panel.
+      where: { userId, status: { in: ['RESERVA_PENDIENTE', 'PENDIENTE_DE_PAGO', 'PAGO_COMPLETO'] } },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.membership.findUnique({ where: { userId }, include: { memberNumber: true } }),
@@ -97,6 +99,10 @@ export default async function AccountPage({
                     : null;
 
   const verified = isEmailVerified(session);
+  // Pago sin finalizar (reserva o pago completo iniciado y no completado):
+  // se ofrece reanudarlo en un cuadro destacado al principio del panel.
+  const pendingPayment =
+    reservation && reservation.status !== 'PAGO_COMPLETO' ? reservation : null;
   const fullName = profile ? `${profile.firstName} ${profile.lastName}` : (session.user.email ?? '');
   const currency = profile?.preferredCurrency ?? 'EUR';
   const isMember = membership?.status === 'SOCIO_ACTIVO' && !!membership.memberNumber;
@@ -500,6 +506,48 @@ export default async function AccountPage({
         >
           {banner.msg}
         </p>
+      ) : null}
+
+      {/* Cuadro destacado: reanudar un pago sin finalizar (primero en el panel) */}
+      {pendingPayment ? (
+        <div className="mt-6 rounded-card border border-gold/60 bg-gold/10 p-5 shadow-[0_10px_30px_-12px_rgba(212,175,55,0.35)]">
+          <div className="flex items-start gap-3">
+            <span aria-hidden className="text-2xl leading-none">⏳</span>
+            <div className="flex-1">
+              <h2 className="font-display text-lg font-semibold text-foreground">{a('resumeTitle')}</h2>
+              <p className="mt-1 text-sm text-muted">{a('resumeBody')}</p>
+              {pendingPayment.totalDueCents > 0 ? (
+                <p className="mt-2 text-sm text-muted">
+                  {a('remaining')}:{' '}
+                  <span className="font-display text-metal-gold">
+                    {formatMoney(
+                      Math.max(0, pendingPayment.totalDueCents - pendingPayment.amountPaidCents),
+                      pendingPayment.currency,
+                      locale,
+                    )}
+                  </span>
+                </p>
+              ) : null}
+              <div className="mt-4">
+                {pendingPayment.club ? (
+                  <FullPaymentButton
+                    club={pendingPayment.club}
+                    label={a('resumeCta')}
+                    pendingLabel={co('processing')}
+                    errors={checkoutErrors}
+                  />
+                ) : (
+                  <Link
+                    href="/club"
+                    className="bevel inline-block bg-gold px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#1a1408] transition hover:bg-gold-light"
+                  >
+                    {a('resumeCta')}
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {!verified ? (

@@ -158,6 +158,9 @@
   },
   "account": {
     "reservationTitle": "Votre réservation",
+    "resumeTitle": "Vous avez un paiement inachevé",
+    "resumeBody": "Reprenez là où vous vous êtes arrêté : nous poursuivons votre processus sans répéter d'étapes.",
+    "resumeCta": "Réessayer le paiement",
     "statusReservaPendiente": "Réservation en attente du paiement complet",
     "paid": "Payé",
     "remaining": "Restant",

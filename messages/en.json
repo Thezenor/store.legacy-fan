@@ -158,6 +158,9 @@
   },
   "account": {
     "reservationTitle": "Your reservation",
+    "resumeTitle": "You have an unfinished payment",
+    "resumeBody": "Pick up where you left off — we resume your process without repeating any steps.",
+    "resumeCta": "Retry payment",
     "statusReservaPendiente": "Reservation pending full payment",
     "paid": "Paid",
     "remaining": "Remaining",

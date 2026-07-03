@@ -158,6 +158,9 @@
   },
   "account": {
     "reservationTitle": "La tua prenotazione",
+    "resumeTitle": "Hai un pagamento non completato",
+    "resumeBody": "Riprendi da dove eri rimasto: continuiamo il processo senza ripetere passaggi.",
+    "resumeCta": "Riprova il pagamento",
     "statusReservaPendiente": "Prenotazione in attesa del pagamento completo",
     "paid": "Pagato",
     "remaining": "Restante",
