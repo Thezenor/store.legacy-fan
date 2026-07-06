@@ -10,10 +10,10 @@
 :root {
   /* Tipografía como la web principal: Antic Didone SOLO en el H1; Inter en todo
      lo demás (cuerpo, UI, h2/h3 y las utilidades .font-display). */
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Antic Didone', Georgia, 'Times New Roman', serif;
-  --font-mono: 'Inter', ui-monospace, 'Courier New', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Antic Didone', serif;
+  --font-mono: 'Inter', system-ui, sans-serif;
 
   /* Canal RGB para usar con <alpha-value> de Tailwind */
   --lf-background: 8 8 10; /* #08080a */

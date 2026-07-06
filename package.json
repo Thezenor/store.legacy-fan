@@ -22,11 +22,9 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@fontsource/antic-didone": "^5.2.8",
-    "@fontsource/cinzel": "^5.2.8",
     "@fontsource/cormorant-garamond": "^5.2.11",
     "@fontsource/hanken-grotesk": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
-    "@fontsource/spectral": "^5.2.8",
     "@prisma/client": "^6.2.1",
     "bcryptjs": "^2.4.3",
     "next": "^15.5.19",
