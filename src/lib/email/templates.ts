@@ -36,18 +36,25 @@ function interpolate(text: string, vars: Record<string, string>): string {
   });
 }
 
+// Fuentes de email (como la web): Inter en todo, con fallbacks seguros de correo
+// (Arial/Helvetica), porque los clientes de correo rara vez cargan fuentes web.
+// El único elemento en serif es el wordmark de cabecera (equivalente al H1),
+// con Antic Didone y fallback a serif.
+export const EMAIL_SANS = "'Inter',Arial,Helvetica,sans-serif";
+export const EMAIL_HEADING = "'Antic Didone',Georgia,'Times New Roman',serif";
+
 /** Botón dorado (CTA) para emails, con estilos en línea (email-safe). */
 export function emailButton(href: string, label: string): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0"><tr><td style="border-radius:8px;background:#c8a24b">
-    <a href="${href}" style="display:inline-block;padding:13px 26px;font-family:Georgia,serif;font-size:14px;font-weight:bold;letter-spacing:0.04em;color:#1a1408;text-decoration:none">${label}</a>
+    <a href="${href}" style="display:inline-block;padding:13px 26px;font-family:${EMAIL_SANS};font-size:14px;font-weight:bold;letter-spacing:0.04em;color:#1a1408;text-decoration:none">${label}</a>
   </td></tr></table>`;
 }
 
 /** Bloque destacado (dato clave: número de socio, importe, fecha…). */
 export function emailHighlight(label: string, value: string): string {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0;border:1px solid #eadfbf;border-radius:10px;background:#faf6ea"><tr><td style="padding:14px 18px">
-    <div style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9a8038">${label}</div>
-    <div style="font-family:Georgia,serif;font-size:20px;color:#1a1408;margin-top:3px">${value}</div>
+    <div style="font-family:${EMAIL_SANS};font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9a8038">${label}</div>
+    <div style="font-family:${EMAIL_SANS};font-size:20px;color:#1a1408;margin-top:3px">${value}</div>
   </td></tr></table>`;
 }
 
@@ -62,7 +69,7 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
   const prefix = locale === 'es' ? '' : `/${locale}`;
   const link = (path: string, label: string) =>
     `<a href="${base}${prefix}${path}" style="color:#9C7E1C;text-decoration:none">${label}</a>`;
-  const serif = "Georgia,'Times New Roman',serif";
+  const sans = EMAIL_SANS;
   return `<!doctype html>
 <html lang="${locale}">
 <head>
@@ -71,7 +78,7 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>Legacy Fan</title>
 </head>
-<body style="margin:0;padding:0;background:#e9e6df;font-family:${serif}">
+<body style="margin:0;padding:0;background:#e9e6df;font-family:${sans}">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9e6df">
     <tr><td align="center" style="padding:30px 12px">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:#ffffff;border:1px solid #e4dcc4;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.08)">
@@ -79,12 +86,12 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
         <!-- Cabecera / logo Art Deco -->
         <tr><td style="background:#0b0b0d;padding:32px 24px 26px;text-align:center;border-bottom:2px solid #c8a24b">
           <div style="font-size:11px;letter-spacing:5px;color:#8a7433;margin-bottom:12px">&#10022;&nbsp;&nbsp;MMXXVI&nbsp;&nbsp;&#10022;</div>
-          <div style="font-size:27px;letter-spacing:9px;color:#c8a24b;font-weight:bold;font-family:${serif}">LEGACY&nbsp;FAN</div>
+          <div style="font-size:27px;letter-spacing:9px;color:#c8a24b;font-weight:bold;font-family:${EMAIL_HEADING}">LEGACY&nbsp;FAN</div>
           <div style="font-size:10px;letter-spacing:5px;color:#9a8038;margin-top:9px">PRECIOUS&nbsp;METALS</div>
         </td></tr>
 
         <!-- Cuerpo -->
-        <tr><td style="padding:34px 34px 8px;color:#1f1e1c;font-size:15px;line-height:1.7;font-family:${serif}">
+        <tr><td style="padding:34px 34px 8px;color:#1f1e1c;font-size:15px;line-height:1.7;font-family:${sans}">
           ${bodyHtml}
         </td></tr>
 
@@ -98,7 +105,7 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
         </td></tr>
 
         <!-- Pie -->
-        <tr><td style="background:#faf8f3;padding:24px 32px;color:#807d75;font-size:11px;line-height:1.65;font-family:${serif};border-top:1px solid #efeae0">
+        <tr><td style="background:#faf8f3;padding:24px 32px;color:#807d75;font-size:11px;line-height:1.65;font-family:${sans};border-top:1px solid #efeae0">
           <p style="margin:0">${f.disclaimer}</p>
           <p style="margin:10px 0 0">${f.data}</p>
           <p style="margin:14px 0 0;text-align:center">${link('/legal/privacy', f.privacy)} &nbsp;&#10022;&nbsp; ${link('/legal/terms', f.terms)} &nbsp;&#10022;&nbsp; ${link('/legal/cookies', f.cookies)}</p>
@@ -107,7 +114,7 @@ export function emailShell(bodyHtml: string, locale: Locale = 'es'): string {
 
       <!-- Datos de empresa bajo la tarjeta -->
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px">
-        <tr><td style="padding:16px 12px 0;text-align:center;color:#9c988e;font-size:10.5px;line-height:1.6;font-family:${serif}">
+        <tr><td style="padding:16px 12px 0;text-align:center;color:#9c988e;font-size:10.5px;line-height:1.6;font-family:${sans}">
           Legacy Fan LLC &nbsp;·&nbsp; 8 The Green STE R, Dover, DE 19901 (Delaware, USA) &nbsp;·&nbsp; info@legacy-fan.com<br/>
           © 2026 Legacy Fan LLC. ${f.rights}
         </td></tr>

@@ -1209,7 +1209,7 @@ export async function sendTestEmailConfigAction(formData: FormData): Promise<voi
     result = { success: false, provider: 'none', error: 'Falta el destinatario' };
   } else {
     const body = `
-      <h2 style="font-family:Georgia,serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">Configuración de correo verificada</h2>
+      <h2 style="font-family:'Inter',Arial,Helvetica,sans-serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">Configuración de correo verificada</h2>
       <p style="margin:0 0 12px">Este es un email de prueba de <strong>Legacy Fan</strong>. Si lo estás leyendo, el envío de correos del sistema funciona correctamente.</p>
       <p style="margin:0 0 12px">A partir de ahora recibirás por este medio las comunicaciones de tu cuenta: verificación, recibos de pago, avisos de pedidos y novedades del club.</p>
       <p style="margin:16px 0 0;font-size:13px;color:#666">Fecha de la prueba: ${new Date().toLocaleString('es-ES')}</p>`;

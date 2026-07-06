@@ -84,7 +84,7 @@ const linkNote = (href: string) =>
 
 function authBody(t: { heading: string; intro: string; cta: string; expiry: string; fallback: string }, href: string): string {
   return `
-    <h2 style="font-family:Georgia,serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
+    <h2 style="font-family:'Inter',Arial,Helvetica,sans-serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
     <p style="margin:0 0 4px">${t.intro}</p>
     ${emailButton(href, t.cta)}
     <p style="margin:0;font-size:13px;color:#666">${t.expiry}</p>

@@ -81,7 +81,7 @@ const F = {
 export async function sendReservationReceivedEmail(to: string, locale: Locale, amountFormatted: string) {
   const t = R[locale] ?? R.es;
   const body = `
-    <h2 style="font-family:Georgia,serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
+    <h2 style="font-family:'Inter',Arial,Helvetica,sans-serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
     <p style="margin:0 0 4px">${t.intro}</p>
     ${emailHighlight(t.hlLabel, amountFormatted)}
     <p style="margin:0 0 4px">${t.next}</p>
@@ -92,7 +92,7 @@ export async function sendReservationReceivedEmail(to: string, locale: Locale, a
 export async function sendFullPaymentEmail(to: string, locale: Locale, memberNumber: string) {
   const t = F[locale] ?? F.es;
   const body = `
-    <h2 style="font-family:Georgia,serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
+    <h2 style="font-family:'Inter',Arial,Helvetica,sans-serif;color:#9C7E1C;font-size:19px;margin:0 0 12px">${t.heading}</h2>
     <p style="margin:0 0 4px">${t.intro}</p>
     ${emailHighlight(t.hlLabel, memberNumber)}
     <p style="margin:0 0 4px">${t.next}</p>
