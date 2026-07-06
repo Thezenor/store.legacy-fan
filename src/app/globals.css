@@ -8,11 +8,12 @@
  * Modo OSCURO por defecto (:root); modo claro mediante .light.
  */
 :root {
-  /* Tipografía con carácter (acuñación/medallística): Cinzel (capitales grabadas)
-     para títulos cortos y Spectral (serif editorial) para texto. */
-  --font-sans: 'Spectral', Georgia, 'Times New Roman', serif;
-  --font-display: 'Cinzel', 'Spectral', Georgia, serif;
-  --font-mono: 'Spectral', ui-monospace, 'Courier New', monospace;
+  /* Tipografía como la web principal: Antic Didone SOLO en el H1; Inter en todo
+     lo demás (cuerpo, UI, h2/h3 y las utilidades .font-display). */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Antic Didone', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Inter', ui-monospace, 'Courier New', monospace;
 
   /* Canal RGB para usar con <alpha-value> de Tailwind */
   --lf-background: 8 8 10; /* #08080a */
@@ -54,8 +55,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, .font-display {
-  font-family: var(--font-display);
+/* Solo el H1 usa Antic Didone (como la web principal). El selector h1.font-display
+   tiene más especificidad que la utilidad .font-display, así que gana aunque el
+   H1 lleve esa clase. El resto (h2, h3, .font-display, cuerpo) usa Inter. */
+h1,
+h1.font-display {
+  font-family: var(--font-heading);
 }
 
 /* Oro SÓLIDO y sobrio (no gradiente): el oro es escaso y aparece en filetes,

@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import '../globals.css';
-import '@fontsource/spectral/400.css';
-import '@fontsource/spectral/600.css';
-import '@fontsource/cinzel/600.css';
-import '@fontsource/cinzel/700.css';
+import '@fontsource/antic-didone/400.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/600.css';
 
 export const metadata: Metadata = {
   title: 'Verificación de socio · Legacy Fan',

@@ -3,10 +3,11 @@ import { requireAdmin } from '@/lib/admin';
 import { AdminNav } from '@/components/admin/admin-nav';
 import { AdminBottomNav } from '@/components/admin/admin-bottom-nav';
 import '../globals.css';
-import '@fontsource/spectral/400.css';
-import '@fontsource/spectral/600.css';
-import '@fontsource/cinzel/600.css';
-import '@fontsource/cinzel/700.css';
+import '@fontsource/antic-didone/400.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
 
 export const metadata: Metadata = {
   title: 'Legacy Fan · Superadmin',

@@ -15,16 +15,12 @@ import { getBool } from '@/lib/commerce/settings';
 import { getAdminSession } from '@/lib/admin';
 import { appUrl } from '@/lib/app-url';
 import '../globals.css';
-// Fuentes de marca auto-alojadas: Cinzel (display, capitales grabadas) + Spectral (texto)
-import '@fontsource/spectral/400.css';
-import '@fontsource/spectral/500.css';
-import '@fontsource/spectral/600.css';
-import '@fontsource/cinzel/600.css';
-import '@fontsource/cinzel/700.css';
-// Inter para el menú superior (UI)
+// Fuentes como la web principal: Antic Didone (solo H1) + Inter (todo lo demás).
+import '@fontsource/antic-didone/400.css';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
 
 // Fuentes: stack del sistema vía variables CSS (definidas en globals.css).
 // TODO(Fase 1): auto-alojar Inter + Cormorant Garamond con next/font/local
