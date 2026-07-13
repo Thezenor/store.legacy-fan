@@ -174,6 +174,7 @@ model User {
   referralCode ReferralCode?
   referralsMade Referral[]  @relation("Referrer")
   referredAs    Referral?   @relation("Referred")
+  ambassador   Ambassador?
   sessions     Session[]
   accounts     Account[]
 
@@ -378,6 +379,7 @@ model Reservation {
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   payments Payment[]
   order    Order?
+  ambassadorSignup AmbassadorSignup?
 
   @@index([userId])
 }
@@ -834,4 +836,143 @@ model AuditLog {
 
   @@index([entity, entityId])
   @@index([createdAt])
+}
+
+// ───────────────────── Programa de Embajadores (Bloque 2) ─────────────────────
+// Diseño "desarrollo propio": las altas se alimentan solas desde los pedidos.
+// Parámetros (15/30, +20%, retención 20d, umbral 100, reactivación, fases) en
+// SystemSetting (grupo 'ambassador'); nunca hardcodeados.
+
+enum AmbassadorModel {
+  A // Comisión: 100% embajador / 0% cliente
+  B // Descuento: 0% / 100% (todo descuento al cliente en el pago final)
+  C // Mixto: 50% / 50%
+}
+
+enum AmbassadorStatus {
+  ACTIVO
+  SUSPENDIDO // investigación antifraude (no aplica en checkout)
+  CANCELADO // expulsión o baja
+}
+
+enum AmbassadorPayout {
+  PAYPAL
+  TRANSFERENCIA
+  CREDITO // crédito en tienda (+20% sobre lo de fase inicial)
+}
+
+enum SignupCodeType {
+  AMBASSADOR // código LEGACY…
+  MEMBER // referido de socio LF… (50/50)
+}
+
+enum SignupState {
+  RESERVADA // reserva de 50 pagada, código en el pedido; no devenga
+  PAGADA // pago total completado; empieza la retención
+  EN_RETENCION // dentro de los 20 días
+  VALIDADA // retención superada + antifraude ok; lista para liquidar
+  LIQUIDADA // pagada al embajador
+  REVERTIDA // devolución/impago/fraude
+  CANCELADA // reserva reembolsada antes del pago final
+  EN_REVISION // flag antifraude pendiente (congela recompensa)
+}
+
+enum SettlementState {
+  PENDIENTE
+  PAGADA
+}
+
+// Ficha del embajador. El modelo (A/B/C) y la divisa NO van en el código.
+model Ambassador {
+  id            String            @id @default(cuid())
+  code          String            @unique // LEGACY+NOMBRE normalizado, único
+  name          String
+  channelUrl    String?
+  segment       String?
+  locale        String? // idioma preferido (es/en/fr/it)
+  model         AmbassadorModel   @default(A)
+  payoutMethod  AmbassadorPayout?
+  // Datos fiscales (para autofactura; sin ellos no hay liquidación)
+  fiscalName    String?
+  fiscalId      String? // NIF/VAT/TIN
+  fiscalAddress String?
+  fiscalCountry String?
+  fiscalOk      Boolean           @default(false)
+  status        AmbassadorStatus  @default(ACTIVO)
+  // Reactivación: debe reactivar para SEGUIR devengando. Vencida => el código
+  // sigue funcionando pero el embajador no cobra hasta reactivar.
+  reactivatedAt DateTime          @default(now())
+  reactivateBy  DateTime?
+  notes         String?
+  userId        String?           @unique // cuenta de acceso al panel (opcional)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user        User?                  @relation(fields: [userId], references: [id])
+  signups     AmbassadorSignup[]
+  settlements AmbassadorSettlement[]
+
+  @@index([status])
+}
+
+// Un alta con código (atribución + ciclo de vida). Se crea desde el pedido real.
+model AmbassadorSignup {
+  id              String          @id @default(cuid())
+  reservationId   String          @unique // el pedido/alta
+  code            String // código aplicado (embajador o LF de socio)
+  codeType        SignupCodeType  @default(AMBASSADOR)
+  ambassadorId    String? // si es código de embajador
+  referrerUserId  String? // si es referido de socio (LF)
+  plan            String? // PRIME/PRESTIGE (definitivo al pago total)
+  currency        Currency
+  phase           String? // fase de precio del alta (1/2/3)
+  phasePriceCents Int             @default(0)
+  discountCents   Int             @default(0) // descuento al cliente (B/C)
+  rewardCents     Int             @default(0) // recompensa embajador/socio
+  model           AmbassadorModel?
+  state           SignupState     @default(RESERVADA)
+  reservePaidAt   DateTime?
+  fullPaidAt      DateTime?
+  retentionUntil  DateTime?
+  fromInitialPhase Boolean        @default(false) // fase inicial => +20% en crédito
+  selfPurchase    Boolean         @default(false)
+  valid           Boolean         @default(false)
+  // Antifraude (hashes; nunca datos en claro del medio de pago)
+  ipHash          String?
+  deviceHash      String?
+  emailNorm       String?
+  billingNorm     String?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  ambassador  Ambassador? @relation(fields: [ambassadorId], references: [id])
+
+  @@index([ambassadorId])
+  @@index([code])
+  @@index([state])
+}
+
+// Liquidación (día 1/15 o al cierre): una fila por embajador, divisa y periodo.
+model AmbassadorSettlement {
+  id               String           @id @default(cuid())
+  ambassadorId     String
+  period           String // p.ej. 2026-08-01
+  currency         Currency
+  amountCents      Int              @default(0) // total validado
+  method           AmbassadorPayout
+  fromInitial      Boolean          @default(false) // aplica +20% (crédito, fase inicial)
+  creditBonusCents Int              @default(0)
+  totalPayCents    Int              @default(0)
+  invoiceRef       String? // nº autofactura o factura del embajador (>1.000)
+  paidAt           DateTime?
+  state            SettlementState  @default(PENDIENTE)
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  ambassador Ambassador @relation(fields: [ambassadorId], references: [id], onDelete: Cascade)
+
+  @@index([ambassadorId])
 }
