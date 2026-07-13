@@ -4,6 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import type {
+  AmbassadorModel,
+  AmbassadorPayout,
+  AmbassadorStatus,
   ClubType,
   CollectionStatus,
   Currency,
@@ -24,6 +27,8 @@ import { emailVerification } from './tokens';
 import { generatePassSecret } from './members/pass-token';
 import { assignMemberNumber } from './members/numbering';
 import { activateMembershipTx, reserveMembershipTx } from './members/membership';
+import { ambassadorCodeFromName, normalizeCode } from './ambassador/codes';
+import { AMBASSADOR_DEFAULTS } from './ambassador/config';
 import { createIncludedOrder } from './members/order';
 import { createInvoice } from './members/invoice';
 import { getClubLaunchDate } from './commerce/phases';
@@ -794,6 +799,88 @@ export async function removeRoleAction(formData: FormData): Promise<void> {
   await prisma.userRole.delete({ where: { userId_roleId: { userId, roleId } } }).catch(() => {});
   await audit(admin.id, admin.email, 'role.remove', 'UserRole', `${userId}/${roleId}`, null, null);
   revalidatePath('/lf-admin/roles');
+}
+
+// ───────────────── Embajadores (Programa, Bloque 2) ─────────────────
+
+/** Alta de un embajador: genera el código (LEGACY+nombre) y fija reactivación. */
+export async function createAmbassadorAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const name = String(formData.get('name') ?? '').trim();
+  if (!name) redirect('/lf-admin/embajadores?error=name');
+
+  const typedCode = String(formData.get('code') ?? '').trim();
+  let code = typedCode ? normalizeCode(typedCode) : ambassadorCodeFromName(name);
+  if (!code.startsWith('LEGACY')) code = 'LEGACY' + code;
+  if (code.length < 12 || code.length > 26) redirect('/lf-admin/embajadores?error=codelen');
+  if (await prisma.ambassador.findUnique({ where: { code }, select: { id: true } })) {
+    redirect(`/lf-admin/embajadores?error=dup&code=${encodeURIComponent(code)}`);
+  }
+
+  const model = (['A', 'B', 'C'].includes(String(formData.get('model'))) ? String(formData.get('model')) : 'A') as AmbassadorModel;
+  const months = AMBASSADOR_DEFAULTS.reactivateMonths;
+  const reactivateBy = new Date();
+  reactivateBy.setMonth(reactivateBy.getMonth() + months);
+
+  const amb = await prisma.ambassador.create({
+    data: {
+      code,
+      name,
+      channelUrl: String(formData.get('channelUrl') ?? '').trim() || null,
+      segment: String(formData.get('segment') ?? '').trim() || null,
+      locale: String(formData.get('locale') ?? '').trim() || null,
+      model,
+      reactivateBy,
+    },
+  });
+  await audit(admin.id, admin.email, 'ambassador.create', 'Ambassador', amb.id, null, { code, name, model });
+  redirect(`/lf-admin/embajadores?created=${encodeURIComponent(code)}`);
+}
+
+/** Edita un embajador (estado, modelo, cobro, datos fiscales, caducidad, notas). */
+export async function updateAmbassadorAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id') ?? '');
+  const get = (k: string) => String(formData.get(k) ?? '').trim();
+  const model = (['A', 'B', 'C'].includes(get('model')) ? get('model') : 'A') as AmbassadorModel;
+  const status = (['ACTIVO', 'SUSPENDIDO', 'CANCELADO'].includes(get('status')) ? get('status') : 'ACTIVO') as AmbassadorStatus;
+  const payoutRaw = get('payoutMethod');
+  const payoutMethod = (['PAYPAL', 'TRANSFERENCIA', 'CREDITO'].includes(payoutRaw) ? payoutRaw : null) as AmbassadorPayout | null;
+  const reactivateByRaw = get('reactivateBy');
+
+  await prisma.ambassador.update({
+    where: { id },
+    data: {
+      name: get('name') || undefined,
+      channelUrl: get('channelUrl') || null,
+      segment: get('segment') || null,
+      locale: get('locale') || null,
+      model,
+      status,
+      payoutMethod,
+      fiscalName: get('fiscalName') || null,
+      fiscalId: get('fiscalId') || null,
+      fiscalAddress: get('fiscalAddress') || null,
+      fiscalCountry: get('fiscalCountry') || null,
+      fiscalOk: formData.get('fiscalOk') === 'on',
+      reactivateBy: reactivateByRaw ? new Date(`${reactivateByRaw}T12:00:00`) : null,
+      notes: get('notes') || null,
+    },
+  });
+  await audit(admin.id, admin.email, 'ambassador.update', 'Ambassador', id, null, { status, model });
+  redirect('/lf-admin/embajadores?saved=1');
+}
+
+/** Reactiva el código: reinicia la caducidad a hoy + N meses (config). */
+export async function reactivateAmbassadorAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id') ?? '');
+  const months = AMBASSADOR_DEFAULTS.reactivateMonths;
+  const reactivateBy = new Date();
+  reactivateBy.setMonth(reactivateBy.getMonth() + months);
+  await prisma.ambassador.update({ where: { id }, data: { reactivatedAt: new Date(), reactivateBy } });
+  await audit(admin.id, admin.email, 'ambassador.reactivate', 'Ambassador', id, null, { reactivateBy: reactivateBy.toISOString() });
+  redirect('/lf-admin/embajadores?saved=reactivated');
 }
 
 // ───────────────── FAQ ─────────────────

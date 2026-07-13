@@ -40,6 +40,12 @@ const NAV_GROUPS = [
     ],
   },
   {
+    title: 'Embajadores',
+    items: [
+      { href: '/lf-admin/embajadores', label: 'Embajadores' },
+    ],
+  },
+  {
     title: 'Catálogo',
     items: [
       { href: '/lf-admin/clubs', label: 'Clubs' },
