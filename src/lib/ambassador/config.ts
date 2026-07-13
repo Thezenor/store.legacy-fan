@@ -4,6 +4,8 @@
 // (grupo 'ambassador'). Los importes en CÉNTIMOS; el valor funciona igual en
 // EUR o USD (nunca se mezclan ni se convierten).
 
+import { getSettingString } from '../commerce/settings';
+
 export type ModelKey = 'A' | 'B' | 'C';
 
 /** Reparto del valor del alta [%\_embajador, %\_cliente] por modelo. */
@@ -34,6 +36,29 @@ export const AMBASSADOR_DEFAULTS = {
 
 /** Clave de SystemSetting para un parámetro del programa. */
 export const settingKey = (k: keyof typeof AMBASSADOR_DEFAULTS) => `ambassador.${k}`;
+
+/**
+ * ¿Está ACTIVO el programa? Por defecto NO: mientras se construye, ningún
+ * gancho del checkout hace nada. Se activa poniendo `ambassador.enabled=true`
+ * en SystemSetting desde el super admin.
+ */
+export async function isAmbassadorProgramEnabled(): Promise<boolean> {
+  const v = await getSettingString('ambassador.enabled');
+  return v === 'true' || v === '1';
+}
+
+/** Parámetros resueltos (override de BD sobre los defaults). Todos numéricos. */
+export async function getAmbassadorConfig(): Promise<typeof AMBASSADOR_DEFAULTS> {
+  const keys = Object.keys(AMBASSADOR_DEFAULTS) as (keyof typeof AMBASSADOR_DEFAULTS)[];
+  const entries = await Promise.all(
+    keys.map(async (k) => {
+      const raw = await getSettingString(settingKey(k));
+      const n = raw == null ? NaN : Number(raw);
+      return [k, Number.isFinite(n) ? n : AMBASSADOR_DEFAULTS[k]] as const;
+    }),
+  );
+  return Object.fromEntries(entries) as typeof AMBASSADOR_DEFAULTS;
+}
 
 /** Valor fijo del alta según plan (céntimos), antes de repartir por modelo. */
 export function rewardForPlan(plan: string, cfg = AMBASSADOR_DEFAULTS): number {
