@@ -29,7 +29,7 @@ import { assignMemberNumber } from './members/numbering';
 import { activateMembershipTx, reserveMembershipTx } from './members/membership';
 import { ambassadorCodeFromName, normalizeCode } from './ambassador/codes';
 import { AMBASSADOR_DEFAULTS } from './ambassador/config';
-import { onReversed, validateDueSignups as validateAmbassadorDue } from './ambassador/lifecycle';
+import { onReversed, validateDueSignups as validateAmbassadorDue, resolveReview as resolveAmbassadorReview } from './ambassador/lifecycle';
 import { createIncludedOrder } from './members/order';
 import { createInvoice } from './members/invoice';
 import { getClubLaunchDate } from './commerce/phases';
@@ -924,6 +924,16 @@ export async function validateAmbassadorSignupsAction(): Promise<void> {
   const n = await validateAmbassadorDue();
   await audit(admin.id, admin.email, 'ambassador.validate_due', 'AmbassadorSignup', 'batch', null, { validated: n });
   redirect(`/lf-admin/embajadores/altas?validated=${n}`);
+}
+
+/** Resuelve un alta marcada En revisión (aprobar → sigue el flujo; rechazar → Revertida). */
+export async function resolveAmbassadorReviewAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const signupId = String(formData.get('signupId') ?? '');
+  const approve = String(formData.get('decision') ?? '') === 'approve';
+  await resolveAmbassadorReview(signupId, approve);
+  await audit(admin.id, admin.email, 'ambassador.review_resolve', 'AmbassadorSignup', signupId, null, { approve });
+  redirect('/lf-admin/embajadores/altas?resolved=1');
 }
 
 /** Da acceso al panel a un embajador: crea o enlaza una cuenta (email+contraseña). */

@@ -34,6 +34,7 @@ export async function onFullPaid(reservationId: string, opts: { plan: string }):
     include: { ambassador: { select: { model: true, status: true, reactivateBy: true } } },
   });
   if (!s) return;
+  if (s.fullPaidAt) return; // ya procesado el pago total (idempotente)
   if ((DONE as readonly string[]).includes(s.state)) return;
 
   const cfg = await getAmbassadorConfig();
@@ -45,19 +46,21 @@ export async function onFullPaid(reservationId: string, opts: { plan: string }):
   const suspended = s.ambassador ? s.ambassador.status !== 'ACTIVO' : false;
   const earns = s.codeType === 'MEMBER' ? true : !lapsed && !suspended;
 
-  const retentionUntil = new Date(Date.now() + cfg.retentionDays * 86400000);
+  // Si el alta está EN_REVISION (flag antifraude), el pago se registra pero la
+  // recompensa queda CONGELADA hasta que el equipo la resuelva (no pasa a
+  // retención ni devenga). El descuento al cliente ya se aplicó igualmente.
+  const inReview = s.state === 'EN_REVISION';
+  const retentionUntil = inReview ? null : new Date(Date.now() + cfg.retentionDays * 86400000);
   await prisma.ambassadorSignup.update({
     where: { reservationId },
     data: {
       plan: opts.plan,
       model,
-      rewardCents: earns ? rewardCents : 0,
-      // El descuento al cliente (B/C) se mantiene aunque el código no devengue.
-      // Su APLICACIÓN al importe cobrado se hará en la fase 5b (order).
+      rewardCents: inReview ? 0 : earns ? rewardCents : 0,
       discountCents,
       fullPaidAt: new Date(),
       retentionUntil,
-      state: 'EN_RETENCION',
+      state: inReview ? 'EN_REVISION' : 'EN_RETENCION',
     },
   }).catch(() => {});
 }
@@ -68,6 +71,39 @@ export async function onReversed(reservationId: string): Promise<void> {
   if (!s) return;
   await prisma.ambassadorSignup
     .update({ where: { reservationId }, data: { state: 'REVERTIDA', valid: false, rewardCents: 0 } })
+    .catch(() => {});
+}
+
+/**
+ * Resuelve un alta EN_REVISION. `approve=false` → REVERTIDA. `approve=true` →
+ * si ya se pagó el total, pasa a EN_RETENCION y devenga (según modelo/estado del
+ * embajador); si aún no se ha pagado, vuelve a RESERVADA para seguir el flujo
+ * normal cuando pague.
+ */
+export async function resolveReview(signupId: string, approve: boolean): Promise<void> {
+  const s = await prisma.ambassadorSignup.findUnique({
+    where: { id: signupId },
+    include: { ambassador: { select: { model: true, status: true, reactivateBy: true } } },
+  });
+  if (!s || s.state !== 'EN_REVISION') return;
+
+  if (!approve) {
+    await prisma.ambassadorSignup.update({ where: { id: signupId }, data: { state: 'REVERTIDA', valid: false, rewardCents: 0 } }).catch(() => {});
+    return;
+  }
+  if (!s.fullPaidAt) {
+    await prisma.ambassadorSignup.update({ where: { id: signupId }, data: { state: 'RESERVADA' } }).catch(() => {});
+    return;
+  }
+  const cfg = await getAmbassadorConfig();
+  const model: ModelKey = s.codeType === 'MEMBER' ? 'C' : ((s.ambassador?.model ?? 'A') as ModelKey);
+  const { rewardCents } = splitReward(rewardForPlan(s.plan ?? 'PRIME', cfg), model);
+  const lapsed = s.ambassador?.reactivateBy ? new Date(s.ambassador.reactivateBy).getTime() < Date.now() : false;
+  const suspended = s.ambassador ? s.ambassador.status !== 'ACTIVO' : false;
+  const earns = s.codeType === 'MEMBER' ? true : !lapsed && !suspended;
+  const retentionUntil = new Date(s.fullPaidAt.getTime() + cfg.retentionDays * 86400000);
+  await prisma.ambassadorSignup
+    .update({ where: { id: signupId }, data: { state: 'EN_RETENCION', rewardCents: earns ? rewardCents : 0, retentionUntil } })
     .catch(() => {});
 }
 

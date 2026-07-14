@@ -16,6 +16,46 @@ function h(s?: string | null): string | null {
   return v ? createHash('sha256').update(v).digest('hex').slice(0, 40) : null;
 }
 
+const DISPOSABLE_DOMAINS = new Set([
+  'mailinator.com', 'yopmail.com', 'guerrillamail.com', 'sharklasers.com', '10minutemail.com',
+  'temp-mail.org', 'tempmail.com', 'trashmail.com', 'getnada.com', 'maildrop.cc', 'dispostable.com',
+  'throwawaymail.com', 'fakeinbox.com', 'moakt.com', 'mohmal.com',
+]);
+
+function isDisposableEmail(email?: string | null): boolean {
+  const dom = (email ?? '').split('@')[1]?.toLowerCase().trim();
+  return !!dom && DISPOSABLE_DOMAINS.has(dom);
+}
+
+/**
+ * Flags antifraude automáticos (Bloque 2 §7). Devuelve la lista de motivos; si
+ * hay alguno, el alta se marca EN_REVISION (congela recompensa, no bloquea el
+ * pedido del cliente). Se evalúa en la captura con lo disponible.
+ */
+async function computeFraudFlags(opts: {
+  code: string;
+  emailNorm?: string | null;
+  billingHash?: string | null;
+  isSelfPurchase: boolean;
+  hadSelfPurchaseBefore: boolean;
+}): Promise<string[]> {
+  const flags: string[] = [];
+  // Ráfaga: >3 altas del mismo código en la última hora.
+  const oneHourAgo = new Date(Date.now() - 3600_000);
+  const recent = await prisma.ambassadorSignup.count({ where: { code: opts.code, createdAt: { gte: oneHourAgo } } });
+  if (recent >= 3) flags.push('burst');
+  // Email desechable.
+  if (isDisposableEmail(opts.emailNorm)) flags.push('disposable_email');
+  // Misma facturación repetida en >2 altas del mismo código.
+  if (opts.billingHash) {
+    const same = await prisma.ambassadorSignup.count({ where: { code: opts.code, billingNorm: opts.billingHash } });
+    if (same >= 2) flags.push('same_billing');
+  }
+  // Segunda autocompra (la primera está permitida; la segunda a revisión).
+  if (opts.isSelfPurchase && opts.hadSelfPurchaseBefore) flags.push('self_purchase_repeat');
+  return flags;
+}
+
 /**
  * Registra la ATRIBUCIÓN de un alta al crear la reserva. Es un no-op salvo que:
  *  - el programa esté ACTIVO (ambassador.enabled),
@@ -51,7 +91,20 @@ export async function captureAmbassadorSignup(opts: {
   });
   if (existing) return; // ya bloqueado desde el alta
 
-  const selfPurchase = found.type === 'MEMBER' && found.referrerUserId === opts.userId;
+  const billingHash = h(opts.billing);
+  const emailNorm = (opts.emailNorm ?? '').trim().toLowerCase() || null;
+
+  // Autocompra: socio → coincide el referidor; embajador → compra con su propia
+  // cuenta enlazada.
+  let selfPurchase = found.type === 'MEMBER' && found.referrerUserId === opts.userId;
+  if (found.type === 'AMBASSADOR') {
+    const amb = await prisma.ambassador.findUnique({ where: { id: found.ambassadorId }, select: { userId: true } });
+    if (amb?.userId && amb.userId === opts.userId) selfPurchase = true;
+  }
+  const hadSelfPurchaseBefore =
+    selfPurchase && (await prisma.ambassadorSignup.count({ where: { code: found.code, selfPurchase: true } })) > 0;
+
+  const flags = await computeFraudFlags({ code: found.code, emailNorm, billingHash, isSelfPurchase: selfPurchase, hadSelfPurchaseBefore });
 
   await prisma.ambassadorSignup.create({
     data: {
@@ -62,12 +115,14 @@ export async function captureAmbassadorSignup(opts: {
       referrerUserId: found.type === 'MEMBER' ? found.referrerUserId : null,
       plan: opts.plan ?? null,
       currency: opts.currency,
-      // state por defecto RESERVADA; las transiciones (Pagada, En retención…) se
-      // fijan en la fase de ciclo de vida con los eventos de pago.
+      // Si hay flags antifraude → EN_REVISION (congela recompensa, no bloquea el
+      // pedido). Si no, queda en el estado por defecto RESERVADA.
+      state: flags.length ? 'EN_REVISION' : undefined,
+      notes: flags.length ? `flags: ${flags.join(', ')}` : null,
       selfPurchase,
       ipHash: h(opts.ip),
-      emailNorm: (opts.emailNorm ?? '').trim().toLowerCase() || null,
-      billingNorm: h(opts.billing),
+      emailNorm,
+      billingNorm: billingHash,
     },
   });
 }

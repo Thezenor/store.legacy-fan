@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { formatMoney } from '@/lib/commerce/money';
-import { validateAmbassadorSignupsAction } from '@/lib/admin-actions';
+import { validateAmbassadorSignupsAction, resolveAmbassadorReviewAction } from '@/lib/admin-actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +13,7 @@ const STATE_LABEL: Record<string, string> = {
 export default async function AmbassadorSignups({
   searchParams,
 }: {
-  searchParams: Promise<{ validated?: string }>;
+  searchParams: Promise<{ validated?: string; resolved?: string }>;
 }) {
   const sp = await searchParams;
   const signups = await prisma.ambassadorSignup.findMany({
@@ -37,6 +37,9 @@ export default async function AmbassadorSignups({
       {sp.validated ? (
         <p className="mt-3 rounded border border-green-500/40 bg-green-500/10 px-4 py-2 text-sm text-green-300">✓ {sp.validated} altas pasadas a Validada.</p>
       ) : null}
+      {sp.resolved ? (
+        <p className="mt-3 rounded border border-green-500/40 bg-green-500/10 px-4 py-2 text-sm text-green-300">✓ Revisión resuelta.</p>
+      ) : null}
 
       <div className="mt-4 overflow-x-auto rounded-card border border-border">
         <table className="w-full text-left text-sm">
@@ -45,12 +48,12 @@ export default async function AmbassadorSignups({
               <th className="px-3 py-3">Fecha</th><th className="px-3 py-3">Código</th><th className="px-3 py-3">Tipo</th>
               <th className="px-3 py-3">Plan</th><th className="px-3 py-3">Divisa</th><th className="px-3 py-3">Estado</th>
               <th className="px-3 py-3">Modelo</th><th className="px-3 py-3">Recompensa</th><th className="px-3 py-3">Descuento</th>
-              <th className="px-3 py-3">Fin retención</th><th className="px-3 py-3">Válida</th>
+              <th className="px-3 py-3">Fin retención</th><th className="px-3 py-3">Válida</th><th className="px-3 py-3"></th>
             </tr>
           </thead>
           <tbody>
             {signups.length === 0 ? (
-              <tr><td colSpan={11} className="px-3 py-6 text-center text-muted">Aún no hay altas con código.</td></tr>
+              <tr><td colSpan={12} className="px-3 py-6 text-center text-muted">Aún no hay altas con código.</td></tr>
             ) : signups.map((s) => (
               <tr key={s.id} className="border-t border-border/60">
                 <td className="px-3 py-2 text-muted">{fmtDate(s.createdAt)}</td>
@@ -64,6 +67,22 @@ export default async function AmbassadorSignups({
                 <td className="px-3 py-2 text-muted">{s.discountCents ? formatMoney(s.discountCents, s.currency, 'es') : '—'}</td>
                 <td className="px-3 py-2 text-muted">{fmtDate(s.retentionUntil)}</td>
                 <td className={`px-3 py-2 ${s.valid ? 'text-state-green' : 'text-faint'}`}>{s.valid ? 'sí' : 'no'}</td>
+                <td className="px-3 py-2">
+                  {s.state === 'EN_REVISION' ? (
+                    <div className="flex gap-2">
+                      <form action={resolveAmbassadorReviewAction}>
+                        <input type="hidden" name="signupId" value={s.id} />
+                        <input type="hidden" name="decision" value="approve" />
+                        <button className="text-[11px] text-state-green hover:underline">aprobar</button>
+                      </form>
+                      <form action={resolveAmbassadorReviewAction}>
+                        <input type="hidden" name="signupId" value={s.id} />
+                        <input type="hidden" name="decision" value="reject" />
+                        <button className="text-[11px] text-red-400 hover:underline">rechazar</button>
+                      </form>
+                    </div>
+                  ) : null}
+                </td>
               </tr>
             ))}
           </tbody>
