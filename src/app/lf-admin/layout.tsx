@@ -45,6 +45,7 @@ const NAV_GROUPS = [
       { href: '/lf-admin/embajadores/panel', label: 'Panel' },
       { href: '/lf-admin/embajadores', label: 'Embajadores' },
       { href: '/lf-admin/embajadores/altas', label: 'Altas' },
+      { href: '/lf-admin/embajadores/liquidaciones', label: 'Liquidaciones' },
       { href: '/lf-admin/embajadores/config', label: 'Configuración' },
     ],
   },

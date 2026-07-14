@@ -28,7 +28,7 @@ import { generatePassSecret } from './members/pass-token';
 import { assignMemberNumber } from './members/numbering';
 import { activateMembershipTx, reserveMembershipTx } from './members/membership';
 import { ambassadorCodeFromName, normalizeCode } from './ambassador/codes';
-import { AMBASSADOR_DEFAULTS } from './ambassador/config';
+import { AMBASSADOR_DEFAULTS, getAmbassadorConfig } from './ambassador/config';
 import { onReversed, validateDueSignups as validateAmbassadorDue, resolveReview as resolveAmbassadorReview } from './ambassador/lifecycle';
 import { createIncludedOrder } from './members/order';
 import { createInvoice } from './members/invoice';
@@ -924,6 +924,75 @@ export async function validateAmbassadorSignupsAction(): Promise<void> {
   const n = await validateAmbassadorDue();
   await audit(admin.id, admin.email, 'ambassador.validate_due', 'AmbassadorSignup', 'batch', null, { validated: n });
   redirect(`/lf-admin/embajadores/altas?validated=${n}`);
+}
+
+/** Genera liquidaciones: agrupa las altas VALIDADA por embajador y divisa, aplica
+ *  el +20% si el método es crédito, numera la autofactura (o exige factura propia
+ *  si supera el umbral) y marca las altas como Liquidada. */
+export async function generateAmbassadorSettlementsAction(): Promise<void> {
+  const admin = await ensureAdmin();
+  const cfg = await getAmbassadorConfig();
+  const period = new Date().toISOString().slice(0, 10);
+  const validated = await prisma.ambassadorSignup.findMany({
+    where: { state: 'VALIDADA', ambassadorId: { not: null } },
+    select: { id: true, ambassadorId: true, currency: true, rewardCents: true },
+  });
+
+  const groups = new Map<string, { ambassadorId: string; currency: 'EUR' | 'USD'; ids: string[]; amount: number }>();
+  for (const s of validated) {
+    if (!s.ambassadorId || s.rewardCents <= 0) continue;
+    const key = `${s.ambassadorId}|${s.currency}`;
+    const g = groups.get(key) ?? { ambassadorId: s.ambassadorId, currency: s.currency as 'EUR' | 'USD', ids: [], amount: 0 };
+    g.ids.push(s.id);
+    g.amount += s.rewardCents;
+    groups.set(key, g);
+  }
+
+  let created = 0;
+  for (const g of groups.values()) {
+    if (g.amount <= 0) continue;
+    const amb = await prisma.ambassador.findUnique({ where: { id: g.ambassadorId }, select: { payoutMethod: true } });
+    const method = (amb?.payoutMethod ?? 'TRANSFERENCIA') as AmbassadorPayout;
+    const fromInitial = method === 'CREDITO';
+    const creditBonus = fromInitial ? Math.round((g.amount * cfg.creditBonusPct) / 100) : 0;
+    const needsOwnInvoice = g.amount > cfg.ownInvoiceAboveCents;
+    const count = await prisma.ambassadorSettlement.count();
+    const invoiceRef = needsOwnInvoice ? null : `AF-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
+
+    await prisma.ambassadorSettlement.create({
+      data: {
+        ambassadorId: g.ambassadorId,
+        period,
+        currency: g.currency,
+        amountCents: g.amount,
+        method,
+        fromInitial,
+        creditBonusCents: creditBonus,
+        totalPayCents: g.amount + creditBonus,
+        invoiceRef,
+        state: 'PENDIENTE',
+        notes: needsOwnInvoice ? 'Requiere factura propia del embajador (>umbral)' : null,
+      },
+    });
+    await prisma.ambassadorSignup.updateMany({ where: { id: { in: g.ids } }, data: { state: 'LIQUIDADA' } });
+    created++;
+  }
+
+  await audit(admin.id, admin.email, 'ambassador.settlements_generate', 'AmbassadorSettlement', 'batch', null, { created });
+  redirect(`/lf-admin/embajadores/liquidaciones?generated=${created}`);
+}
+
+/** Marca una liquidación como pagada (ejecución real del pago: proceso del equipo). */
+export async function markAmbassadorSettlementPaidAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id') ?? '');
+  const invoiceRef = String(formData.get('invoiceRef') ?? '').trim() || undefined;
+  await prisma.ambassadorSettlement.update({
+    where: { id },
+    data: { state: 'PAGADA', paidAt: new Date(), ...(invoiceRef ? { invoiceRef } : {}) },
+  });
+  await audit(admin.id, admin.email, 'ambassador.settlement_paid', 'AmbassadorSettlement', id, null, null);
+  redirect('/lf-admin/embajadores/liquidaciones?paid=1');
 }
 
 /** Resuelve un alta marcada En revisión (aprobar → sigue el flujo; rechazar → Revertida). */
