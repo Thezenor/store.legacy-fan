@@ -84,6 +84,9 @@ export async function captureAmbassadorSignup(opts: {
 
   const found = await lookupCode(raw);
   if (!found || !found.active) return;
+  // Los códigos de referido de socio (LF…) los gestiona el sistema de referidos
+  // (crédito 50% al socio + descuento 50% al amigo), no el pipeline de embajadores.
+  if (found.type === 'MEMBER') return;
 
   const existing = await prisma.ambassadorSignup.findUnique({
     where: { reservationId: opts.reservationId },
@@ -94,13 +97,11 @@ export async function captureAmbassadorSignup(opts: {
   const billingHash = h(opts.billing);
   const emailNorm = (opts.emailNorm ?? '').trim().toLowerCase() || null;
 
-  // Autocompra: socio → coincide el referidor; embajador → compra con su propia
-  // cuenta enlazada.
-  let selfPurchase = found.type === 'MEMBER' && found.referrerUserId === opts.userId;
-  if (found.type === 'AMBASSADOR') {
-    const amb = await prisma.ambassador.findUnique({ where: { id: found.ambassadorId }, select: { userId: true } });
-    if (amb?.userId && amb.userId === opts.userId) selfPurchase = true;
-  }
+  // Aquí found.type es siempre AMBASSADOR (los MEMBER se gestionan en referidos).
+  // Autocompra del embajador: compra con su propia cuenta enlazada.
+  let selfPurchase = false;
+  const amb = await prisma.ambassador.findUnique({ where: { id: found.ambassadorId }, select: { userId: true } });
+  if (amb?.userId && amb.userId === opts.userId) selfPurchase = true;
   const hadSelfPurchaseBefore =
     selfPurchase && (await prisma.ambassadorSignup.count({ where: { code: found.code, selfPurchase: true } })) > 0;
 
@@ -110,9 +111,8 @@ export async function captureAmbassadorSignup(opts: {
     data: {
       reservationId: opts.reservationId,
       code: found.code,
-      codeType: found.type,
-      ambassadorId: found.type === 'AMBASSADOR' ? found.ambassadorId : null,
-      referrerUserId: found.type === 'MEMBER' ? found.referrerUserId : null,
+      codeType: 'AMBASSADOR',
+      ambassadorId: found.ambassadorId,
       plan: opts.plan ?? null,
       currency: opts.currency,
       // Si hay flags antifraude → EN_REVISION (congela recompensa, no bloquea el

@@ -8,10 +8,11 @@ import { activateMembershipTx } from '../members/membership';
 import { createIncludedOrder } from '../members/order';
 import { createInvoice } from '../members/invoice';
 import { earnPointsOnPurchase } from '../points/earn';
-import { activateReferralReward } from '../referrals/activate';
+import { activateReferralReward, referralDiscountForFullPayment } from '../referrals/activate';
 import { saveShippingToProfile } from '../members/shipping';
 import { onFullPaid } from '../ambassador/lifecycle';
 import { ambassadorDiscountForFullPayment } from '../ambassador/capture';
+import { getAmbassadorConfig, rewardForPlan } from '../ambassador/config';
 
 import { appUrl } from '../app-url';
 
@@ -98,7 +99,16 @@ export async function startFullPayment(opts: {
   } catch {
     ambassadorDiscount = 0; // la atribución nunca debe romper el cobro
   }
-  const remaining = Math.max(0, fullCents - alreadyPaid - ambassadorDiscount);
+  // Descuento del amigo referido por un socio (50% del valor, permanente,
+  // independiente del programa de embajadores). Excluyente con el de embajador
+  // (un solo código por alta).
+  let referralDiscount = 0;
+  try {
+    referralDiscount = await referralDiscountForFullPayment(opts.userId, opts.club);
+  } catch {
+    referralDiscount = 0;
+  }
+  const remaining = Math.max(0, fullCents - alreadyPaid - ambassadorDiscount - referralDiscount);
 
   try {
     const provider = getPaymentProviderUnchecked('PAYPAL');
@@ -201,8 +211,10 @@ async function activateFullPayment(opts: {
   // Base de PREMIUM para puntos/recompensa: excluye el importe de la 2ª moneda,
   // que incluye valor spot del metal (regla: puntos solo sobre premium).
   const premiumCents = Math.max(0, fullCents - payment.reservation.secondCoinCents);
-  // Recompensa de referido: 10% del premium (configurable en M8).
-  const referralRewardCents = Math.round(premiumCents * 0.1);
+  // Recompensa de referido de socio: valor FIJO del alta (15 Prime / 30 Prestige,
+  // Bases VER 5). activateReferralReward abona el 50% al socio como crédito; el
+  // otro 50% ya se descontó al amigo en el pago final.
+  const referralRewardCents = rewardForPlan(club, await getAmbassadorConfig());
 
   await prisma.$transaction(
     async (tx) => {
