@@ -926,6 +926,42 @@ export async function validateAmbassadorSignupsAction(): Promise<void> {
   redirect(`/lf-admin/embajadores/altas?validated=${n}`);
 }
 
+/** Da acceso al panel a un embajador: crea o enlaza una cuenta (email+contraseña). */
+export async function linkAmbassadorUserAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const id = String(formData.get('id') ?? '');
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  if (!id || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) redirect('/lf-admin/embajadores?error=email');
+
+  let user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  if (!user) {
+    if (password.length < 8) redirect('/lf-admin/embajadores?error=pass');
+    const passwordHash = await bcrypt.hash(password, 12);
+    user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        emailVerified: new Date(),
+        profile: {
+          create: { firstName: email.split('@')[0], lastName: '', country: 'ES', preferredLocale: 'es', preferredCurrency: 'EUR', termsAcceptedAt: new Date() },
+        },
+      },
+      select: { id: true },
+    });
+  } else if (password.length >= 8) {
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(password, 12) } });
+  }
+
+  try {
+    await prisma.ambassador.update({ where: { id }, data: { userId: user.id } });
+  } catch {
+    redirect('/lf-admin/embajadores?error=userlinked');
+  }
+  await audit(admin.id, admin.email, 'ambassador.link_user', 'Ambassador', id, null, { email });
+  redirect('/lf-admin/embajadores?saved=linked');
+}
+
 // ───────────────── FAQ ─────────────────
 
 export async function upsertFaqAction(formData: FormData): Promise<void> {

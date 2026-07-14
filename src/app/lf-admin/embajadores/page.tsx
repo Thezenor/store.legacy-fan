@@ -3,6 +3,7 @@ import {
   createAmbassadorAction,
   updateAmbassadorAction,
   reactivateAmbassadorAction,
+  linkAmbassadorUserAction,
 } from '@/lib/admin-actions';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +33,9 @@ export default async function AdminEmbajadores({
     name: 'Falta el nombre.',
     codelen: 'El código debe tener entre 12 y 26 caracteres.',
     dup: `Ya existe un embajador con el código ${sp.code ?? ''}. Añade un distintivo (p. ej. …UK).`,
+    email: 'Email de acceso inválido.',
+    pass: 'La contraseña debe tener al menos 8 caracteres (cuenta nueva).',
+    userlinked: 'Ese usuario ya está vinculado a otro embajador.',
   };
 
   return (
@@ -127,10 +131,20 @@ export default async function AdminEmbajadores({
                 </div>
               </form>
 
-              <form action={reactivateAmbassadorAction} className="mt-2">
-                <input type="hidden" name="id" value={a.id} />
-                <button className="text-[11px] text-gold hover:underline">Reactivar código (reinicia caducidad)</button>
-              </form>
+              <div className="mt-2 flex flex-wrap items-center gap-4">
+                <form action={reactivateAmbassadorAction}>
+                  <input type="hidden" name="id" value={a.id} />
+                  <button className="text-[11px] text-gold hover:underline">Reactivar código (reinicia caducidad)</button>
+                </form>
+                <form action={linkAmbassadorUserAction} className="flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="id" value={a.id} />
+                  <span className="text-[11px] text-muted">Acceso al panel:</span>
+                  <input name="email" type="email" placeholder="email" className={`text-[11px] ${inp}`} />
+                  <input name="password" type="text" placeholder="contraseña (si es nuevo)" className={`text-[11px] ${inp}`} />
+                  <button className="text-[11px] text-gold-light hover:underline">{a.userId ? 'Actualizar acceso' : 'Crear acceso'}</button>
+                  {a.userId ? <span className="text-[11px] text-green-300">✓ vinculado</span> : null}
+                </form>
+              </div>
             </div>
           );
         })}
