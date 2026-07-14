@@ -42,7 +42,10 @@ const NAV_GROUPS = [
   {
     title: 'Embajadores',
     items: [
+      { href: '/lf-admin/embajadores/panel', label: 'Panel' },
       { href: '/lf-admin/embajadores', label: 'Embajadores' },
+      { href: '/lf-admin/embajadores/altas', label: 'Altas' },
+      { href: '/lf-admin/embajadores/config', label: 'Configuración' },
     ],
   },
   {

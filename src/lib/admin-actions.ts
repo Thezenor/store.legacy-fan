@@ -29,7 +29,7 @@ import { assignMemberNumber } from './members/numbering';
 import { activateMembershipTx, reserveMembershipTx } from './members/membership';
 import { ambassadorCodeFromName, normalizeCode } from './ambassador/codes';
 import { AMBASSADOR_DEFAULTS } from './ambassador/config';
-import { onReversed } from './ambassador/lifecycle';
+import { onReversed, validateDueSignups as validateAmbassadorDue } from './ambassador/lifecycle';
 import { createIncludedOrder } from './members/order';
 import { createInvoice } from './members/invoice';
 import { getClubLaunchDate } from './commerce/phases';
@@ -884,6 +884,46 @@ export async function reactivateAmbassadorAction(formData: FormData): Promise<vo
   await prisma.ambassador.update({ where: { id }, data: { reactivatedAt: new Date(), reactivateBy } });
   await audit(admin.id, admin.email, 'ambassador.reactivate', 'Ambassador', id, null, { reactivateBy: reactivateBy.toISOString() });
   redirect('/lf-admin/embajadores?saved=reactivated');
+}
+
+/** Guarda los parámetros del programa (SystemSetting grupo 'ambassador'),
+ *  incluido el interruptor de activación. Dinero en €/$ → se guarda en céntimos. */
+export async function updateAmbassadorConfigAction(formData: FormData): Promise<void> {
+  const admin = await ensureAdmin();
+  const set = async (key: string, value: unknown) => {
+    await prisma.systemSetting.upsert({
+      where: { key: `ambassador.${key}` },
+      update: { value: value as object },
+      create: { key: `ambassador.${key}`, value: value as object, group: 'ambassador' },
+    });
+  };
+  const money = (k: string) => Math.round(parseFloat(String(formData.get(k) ?? '0').replace(',', '.')) * 100) || 0;
+  const int = (k: string) => Math.round(Number(formData.get(k) ?? 0)) || 0;
+
+  await set('enabled', formData.get('enabled') === 'on');
+  await set('rewardPrimeCents', money('rewardPrimeCents'));
+  await set('rewardPrestigeCents', money('rewardPrestigeCents'));
+  await set('payoutThresholdCents', money('payoutThresholdCents'));
+  await set('ownInvoiceAboveCents', money('ownInvoiceAboveCents'));
+  await set('creditBonusPct', int('creditBonusPct'));
+  await set('retentionDays', int('retentionDays'));
+  await set('reactivateMonths', int('reactivateMonths'));
+  await set('attributionCookieDays', int('attributionCookieDays'));
+  await set('numberHoldHours', int('numberHoldHours'));
+
+  await audit(admin.id, admin.email, 'ambassador.config', 'SystemSetting', 'ambassador', null, {
+    enabled: formData.get('enabled') === 'on',
+  });
+  revalidatePath('/lf-admin/embajadores/config');
+  redirect('/lf-admin/embajadores/config?saved=1');
+}
+
+/** Valida las altas cuya retención venció (En retención → Validada). */
+export async function validateAmbassadorSignupsAction(): Promise<void> {
+  const admin = await ensureAdmin();
+  const n = await validateAmbassadorDue();
+  await audit(admin.id, admin.email, 'ambassador.validate_due', 'AmbassadorSignup', 'batch', null, { validated: n });
+  redirect(`/lf-admin/embajadores/altas?validated=${n}`);
 }
 
 // ───────────────── FAQ ─────────────────
