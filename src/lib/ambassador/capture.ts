@@ -1,7 +1,13 @@
 import type { Currency } from '@prisma/client';
 import { createHash } from 'node:crypto';
 import { prisma } from '../prisma';
-import { isAmbassadorProgramEnabled } from './config';
+import {
+  isAmbassadorProgramEnabled,
+  getAmbassadorConfig,
+  rewardForPlan,
+  splitReward,
+  type ModelKey,
+} from './config';
 import { lookupCode, resolveEffectiveCode } from './codes';
 
 /** Hash corto (antifraude): nunca se guardan datos en claro sensibles. */
@@ -64,4 +70,55 @@ export async function captureAmbassadorSignup(opts: {
       billingNorm: h(opts.billing),
     },
   });
+}
+
+/**
+ * Descuento (céntimos) a RESTAR del pago final por un código de embajador/socio.
+ * Se llama al crear la orden de pago completo. Persiste el descuento/modelo/plan
+ * en el alta para dejar constancia. No-op (0) si el programa está OFF o no hay
+ * atribución. Si aún no existe alta pero llega un código (pago directo sin
+ * reserva previa), la crea antes de calcular.
+ *  - Modelo A → 0 · B → 15/30 · C → 7,50/15 · referido de socio → C (50/50).
+ */
+export async function ambassadorDiscountForFullPayment(opts: {
+  reservationId: string;
+  plan: string;
+  userId: string;
+  currency: Currency;
+  code?: string | null;
+  ip?: string | null;
+  emailNorm?: string | null;
+}): Promise<number> {
+  if (!(await isAmbassadorProgramEnabled())) return 0;
+
+  let signup = await prisma.ambassadorSignup.findUnique({
+    where: { reservationId: opts.reservationId },
+    include: { ambassador: { select: { model: true } } },
+  });
+
+  if (!signup && opts.code) {
+    await captureAmbassadorSignup({
+      reservationId: opts.reservationId,
+      userId: opts.userId,
+      currency: opts.currency,
+      plan: opts.plan,
+      typedCode: opts.code,
+      ip: opts.ip,
+      emailNorm: opts.emailNorm,
+    });
+    signup = await prisma.ambassadorSignup.findUnique({
+      where: { reservationId: opts.reservationId },
+      include: { ambassador: { select: { model: true } } },
+    });
+  }
+  if (!signup) return 0;
+
+  const cfg = await getAmbassadorConfig();
+  const model: ModelKey = signup.codeType === 'MEMBER' ? 'C' : ((signup.ambassador?.model ?? 'A') as ModelKey);
+  const { discountCents } = splitReward(rewardForPlan(opts.plan, cfg), model);
+
+  await prisma.ambassadorSignup
+    .update({ where: { reservationId: opts.reservationId }, data: { discountCents, model, plan: opts.plan } })
+    .catch(() => {});
+  return discountCents;
 }

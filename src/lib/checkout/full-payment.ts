@@ -11,6 +11,7 @@ import { earnPointsOnPurchase } from '../points/earn';
 import { activateReferralReward } from '../referrals/activate';
 import { saveShippingToProfile } from '../members/shipping';
 import { onFullPaid } from '../ambassador/lifecycle';
+import { ambassadorDiscountForFullPayment } from '../ambassador/capture';
 
 import { appUrl } from '../app-url';
 
@@ -32,6 +33,10 @@ export async function startFullPayment(opts: {
   secondCoin?: boolean;
   secondCoinCents?: number;
   secondCoinChoice?: string;
+  // Programa de embajadores (opcional; no-op si el programa está OFF).
+  ambassadorCode?: string | null;
+  ip?: string | null;
+  emailNorm?: string | null;
 }) {
   const membership = await prisma.membership.findUnique({ where: { userId: opts.userId } });
   if (membership?.status === 'SOCIO_ACTIVO') {
@@ -77,7 +82,23 @@ export async function startFullPayment(opts: {
         })
       ).id;
   const alreadyPaid = reservation ? reservation.amountPaidCents : 0;
-  const remaining = Math.max(0, fullCents - alreadyPaid);
+  // Descuento de embajador (modelos B/C) sobre el PAGO FINAL. No-op (0) si el
+  // programa está OFF o no hay atribución. Nunca toca el depósito ya pagado.
+  let ambassadorDiscount = 0;
+  try {
+    ambassadorDiscount = await ambassadorDiscountForFullPayment({
+      reservationId,
+      plan: opts.club,
+      userId: opts.userId,
+      currency: opts.currency,
+      code: opts.ambassadorCode,
+      ip: opts.ip,
+      emailNorm: opts.emailNorm,
+    });
+  } catch {
+    ambassadorDiscount = 0; // la atribución nunca debe romper el cobro
+  }
+  const remaining = Math.max(0, fullCents - alreadyPaid - ambassadorDiscount);
 
   try {
     const provider = getPaymentProviderUnchecked('PAYPAL');

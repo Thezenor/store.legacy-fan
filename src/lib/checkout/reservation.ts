@@ -8,6 +8,7 @@ import { saveShippingToProfile } from '../members/shipping';
 import { reserveMembershipTx } from '../members/membership';
 import { startFullPayment } from './full-payment';
 import { onReservePaid } from '../ambassador/lifecycle';
+import { captureAmbassadorSignup } from '../ambassador/capture';
 
 import { appUrl } from '../app-url';
 
@@ -193,6 +194,10 @@ export async function startReservation(opts: {
   secondCoin?: boolean;
   secondCoinCents?: number;
   secondCoinChoice?: string;
+  // Programa de embajadores (opcional; no-op si el programa está OFF).
+  ambassadorCode?: string | null;
+  ip?: string | null;
+  emailNorm?: string | null;
 }): Promise<StartReservationResult> {
   const terms = await getReservationTerms(opts.currency, undefined, opts.club ?? undefined);
   const fullPricing = opts.club ? await getClubPricing(opts.club, opts.currency) : null;
@@ -254,6 +259,17 @@ export async function startReservation(opts: {
     });
 
     if (!order.approveUrl) throw new Error('PayPal no devolvió URL de aprobación.');
+    // Atribución de embajador (no-op si el programa está OFF). La reserva se
+    // cobra íntegra: el código NO descuenta el depósito.
+    await captureAmbassadorSignup({
+      reservationId: reservation.id,
+      userId: opts.userId,
+      currency: opts.currency,
+      plan: opts.club,
+      typedCode: opts.ambassadorCode,
+      ip: opts.ip,
+      emailNorm: opts.emailNorm,
+    }).catch(() => {});
     return { approveUrl: order.approveUrl, reservationId: reservation.id };
   } catch (e) {
     await prisma.reservation.delete({ where: { id: reservation.id } }).catch(() => {});

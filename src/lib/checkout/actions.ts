@@ -18,7 +18,6 @@ import { emailVerification } from '../tokens';
 import { sendVerificationEmail } from '../email/auth-emails';
 import { startReservation, resumePendingCheckout } from './reservation';
 import { startFullPayment } from './full-payment';
-import { captureAmbassadorSignup } from '../ambassador/capture';
 
 /** Solo bloquea si el usuario YA es socio de pleno derecho (pago completado). Un
  *  proceso meramente pendiente no bloquea: se reanuda. */
@@ -268,25 +267,14 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
     const resumed = await resumePendingCheckout({ userId, locale });
     if (resumed) return { ok: true, approveUrl: resumed.approveUrl };
 
-    // Atribución de embajador (no-op si el programa está desactivado): código
-    // escrito a mano (prioritario) o del enlace/cookie ?ref.
-    const typedCode = String(formData.get('code') ?? '').trim() || null;
-    const refCode = String(formData.get('ref') ?? '').trim() || null;
-    const captureCode = async (reservationId: string) => {
-      await captureAmbassadorSignup({
-        reservationId,
-        userId,
-        currency,
-        plan: club,
-        typedCode,
-        linkOrCookieCode: refCode,
-        ip: await clientIp(),
-      }).catch(() => {}); // nunca romper el checkout por la atribución
-    };
+    // Atribución de embajador (no-op si el programa está OFF): código escrito a
+    // mano (prioritario) o del enlace/cookie ?ref. La captura y el descuento se
+    // hacen dentro de startReservation/startFullPayment.
+    const ambassadorCode = (String(formData.get('code') ?? '').trim() || String(formData.get('ref') ?? '').trim()) || null;
+    const ip = await clientIp();
 
     if (type === 'reserve') {
-      const { approveUrl, reservationId } = await startReservation({ userId, club, currency, locale, ...coinOpts });
-      await captureCode(reservationId);
+      const { approveUrl } = await startReservation({ userId, club, currency, locale, ...coinOpts, ambassadorCode, ip });
       return { ok: true, approveUrl };
     }
     // Pago completo: suscripción recurrente o pago único según billing.mode.
@@ -295,8 +283,7 @@ export async function checkoutSubmitAction(formData: FormData): Promise<Checkout
       const { approveUrl } = await startSubscription({ userId, club, currency, locale });
       return { ok: true, approveUrl };
     }
-    const { approveUrl, reservationId } = await startFullPayment({ userId, club, currency, locale, ...coinOpts });
-    await captureCode(reservationId);
+    const { approveUrl } = await startFullPayment({ userId, club, currency, locale, ...coinOpts, ambassadorCode, ip });
     return { ok: true, approveUrl };
   } catch (e) {
     if (e instanceof Error && e.message === 'already_member') {
