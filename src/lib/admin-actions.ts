@@ -29,6 +29,7 @@ import { assignMemberNumber } from './members/numbering';
 import { activateMembershipTx, reserveMembershipTx } from './members/membership';
 import { ambassadorCodeFromName, normalizeCode } from './ambassador/codes';
 import { AMBASSADOR_DEFAULTS } from './ambassador/config';
+import { onReversed } from './ambassador/lifecycle';
 import { createIncludedOrder } from './members/order';
 import { createInvoice } from './members/invoice';
 import { getClubLaunchDate } from './commerce/phases';
@@ -664,6 +665,7 @@ export async function refundPaymentAction(formData: FormData): Promise<void> {
   await prisma.payment.update({ where: { id }, data: { status: 'REEMBOLSADO' } });
   if (payment.reservationId) {
     await prisma.reservation.update({ where: { id: payment.reservationId }, data: { status: 'REEMBOLSADO' } });
+    await onReversed(payment.reservationId).catch(() => {}); // revierte atribución de embajador
   }
   await audit(admin.id, admin.email, 'payment.refund', 'Payment', id, { status: payment.status }, { status: 'REEMBOLSADO' });
   revalidatePath('/lf-admin/pagos');
@@ -692,6 +694,7 @@ export async function refundDepositAction(formData: FormData): Promise<void> {
     where: { reservationId: id, status: 'PAGO_COMPLETO' },
     data: { status: 'REEMBOLSADO' },
   });
+  await onReversed(id).catch(() => {}); // revierte atribución de embajador
   await audit(admin.id, admin.email, 'reservation.refund_deposit', 'Reservation', id, { status: r.status }, { status: 'REEMBOLSADO' });
   revalidatePath('/lf-admin/pagos');
 }

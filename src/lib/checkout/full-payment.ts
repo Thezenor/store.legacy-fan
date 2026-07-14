@@ -10,6 +10,7 @@ import { createInvoice } from '../members/invoice';
 import { earnPointsOnPurchase } from '../points/earn';
 import { activateReferralReward } from '../referrals/activate';
 import { saveShippingToProfile } from '../members/shipping';
+import { onFullPaid } from '../ambassador/lifecycle';
 
 import { appUrl } from '../app-url';
 
@@ -232,6 +233,9 @@ async function activateFullPayment(opts: {
     },
     { maxWait: 15000, timeout: 30000 },
   );
+
+  // Programa de embajadores: devengo del alta (no-op si no hay atribución).
+  await onFullPaid(payment.reservationId, { plan: club }).catch(() => {});
 
   return payment.reservationId;
 }

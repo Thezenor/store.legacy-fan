@@ -7,6 +7,7 @@ import { getSetting } from '../commerce/settings';
 import { saveShippingToProfile } from '../members/shipping';
 import { reserveMembershipTx } from '../members/membership';
 import { startFullPayment } from './full-payment';
+import { onReservePaid } from '../ambassador/lifecycle';
 
 import { appUrl } from '../app-url';
 
@@ -326,6 +327,8 @@ export async function captureReservationByOrder(orderId: string): Promise<string
 
   // Guarda la dirección de envío facilitada por PayPal en el perfil.
   await saveShippingToProfile(payment.userId, result.shipping);
+  // Programa de embajadores: marca el depósito pagado (no-op si no hay atribución).
+  await onReservePaid(payment.reservationId).catch(() => {});
 
   return payment.reservationId;
 }
