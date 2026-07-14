@@ -24,6 +24,7 @@ export function CheckoutForm({
   refCode,
   upsell = null,
   subscriptionMode = false,
+  codeEntry = false,
 }: {
   club: string;
   isLoggedIn: boolean;
@@ -33,6 +34,7 @@ export function CheckoutForm({
   refCode?: string;
   upsell?: UpsellData | null;
   subscriptionMode?: boolean;
+  codeEntry?: boolean;
 }) {
   const tc = useTranslations('checkout');
   const ta = useTranslations('auth');
@@ -169,6 +171,26 @@ export function CheckoutForm({
 
       {/* Upsell de 2ª moneda (solo Prestige): elegir incluida + añadir la segunda */}
       {upsell ? <SecondCoinUpsell data={upsell} /> : null}
+
+      {/* Código de embajador / referido (solo si el programa está activo). El
+          escrito a mano tiene prioridad sobre el del enlace ?ref. */}
+      {codeEntry ? (
+        <div className="rounded-card border border-border bg-surface p-5">
+          <label className="block">
+            <span className="text-sm text-foreground">{tc.has('codeLabel') ? tc('codeLabel') : 'Código de embajador o referido (opcional)'}</span>
+            <input
+              name="code"
+              defaultValue={refCode ?? ''}
+              placeholder="LEGACY… / LF…"
+              autoCapitalize="characters"
+              className={`${inputClass} mt-1 uppercase`}
+            />
+            <span className="mt-1 block text-xs text-faint">
+              {tc.has('codeHint') ? tc('codeHint') : 'Si tienes un código, aplícalo antes de pagar. El descuento se aplica sobre el pago final.'}
+            </span>
+          </label>
+        </div>
+      ) : null}
 
       {!isLoggedIn ? (
         <div className="rounded-card border border-border bg-surface p-5">

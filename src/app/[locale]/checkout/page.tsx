@@ -5,7 +5,9 @@ import { getClubPricing, getReservationTerms, getPlan } from '@/lib/commerce';
 import { getSecondCoinUpsell } from '@/lib/commerce/upsell';
 import { getDisplayCurrency } from '@/lib/commerce/currency';
 import { getSetting } from '@/lib/commerce/settings';
+import { cookies } from 'next/headers';
 import { getPendingReservation } from '@/lib/checkout/reservation';
+import { isAmbassadorProgramEnabled } from '@/lib/ambassador/config';
 import { prisma } from '@/lib/prisma';
 import { CheckoutForm } from '@/components/checkout/checkout-form';
 import { ResumePaymentButton } from '@/components/checkout/resume-payment-button';
@@ -39,6 +41,12 @@ export default async function CheckoutPage({
   const reservation = await getReservationTerms(currency, locale, club);
   const upsell = await getSecondCoinUpsell(club, currency, locale);
   const subscriptionMode = (await getSetting<string>('billing.mode')) === 'subscription';
+
+  // Atribución de embajador: código del enlace (?ref) o de la cookie last-click.
+  // El campo para teclear código solo se muestra si el programa está ACTIVO.
+  const cookieRef = (await cookies()).get('lf_ref')?.value;
+  const effectiveRef = ref || cookieRef;
+  const ambassadorEnabled = await isAmbassadorProgramEnabled();
 
   const session = await auth();
   const isLoggedIn = !!session?.user?.id;
@@ -89,7 +97,8 @@ export default async function CheckoutPage({
             fullFormatted={pricing.priceFormatted}
             listFormatted={pricing.listPriceFormatted}
             subscriptionMode={subscriptionMode}
-            refCode={ref}
+            refCode={effectiveRef}
+            codeEntry={ambassadorEnabled}
             upsell={
               upsell
                 ? {
